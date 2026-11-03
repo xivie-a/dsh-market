@@ -329,7 +329,7 @@ window.__ModuleLoader__.load({
 
       const versionsLabel = (entry) => {
         const count = entry.versions?.length ?? 0
-        return count > 1 ? h('span', null, `${count} ${t('versions')}`) : null
+        return count > 1 ? h('span', { className: 'dm-tag' }, `${count} ${t('versions')}`) : null
       }
 
       const statusOf = (entry) => {
