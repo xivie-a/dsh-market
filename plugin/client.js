@@ -16,6 +16,7 @@ window.__ModuleLoader__.load({
       subtitle: '社区插件索引，每条人工审核后收录',
       search: '搜索插件',
       all: '全部',
+      featured: '精选 · 下载最多',
       install: '安装',
       installed: '已安装',
       update: '可更新',
@@ -46,6 +47,7 @@ window.__ModuleLoader__.load({
       subtitle: 'A community plugin index, reviewed by hand',
       search: 'Search plugins',
       all: 'All',
+      featured: 'Featured · most downloaded',
       install: 'Install',
       installed: 'Installed',
       update: 'Update',
@@ -96,9 +98,27 @@ window.__ModuleLoader__.load({
 .dm-chip-count { margin-left: 6px; font-size: 10.5px; opacity: .5; }
 .dm-chip[aria-pressed="true"] .dm-chip-count { opacity: .8; }
 .dm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px; }
+.dm-section { display: flex; flex-direction: column; gap: 10px; }
+.dm-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; opacity: .45; }
+.dm-featured { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 12px; }
+.dm-hero-card { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 18px;
+  border: 1px solid var(--dm-line); background: linear-gradient(135deg, rgba(77,107,254,.10), rgba(127,127,127,.04));
+  overflow: hidden; transition: border-color .2s, box-shadow .2s, transform .2s; }
+.dm-hero-card::after { content: ''; position: absolute; top: -90px; right: -60px; width: 240px; height: 240px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(77,107,254,.22), transparent 65%); pointer-events: none; }
+.dm-hero-card:hover { border-color: var(--dm-accent); box-shadow: 0 14px 34px rgba(77,107,254,.18); transform: translateY(-2px); }
+.dm-hero-card .dm-thumb { width: 56px; height: 56px; border-radius: 16px; font-size: 22px; transition: transform .2s; }
+.dm-hero-card:hover .dm-thumb { transform: scale(1.06); }
+.dm-hero-title { margin: 0; font-size: 17px; font-weight: 650; }
+.dm-hero-desc { margin: 0; font-size: 13px; line-height: 1.6; opacity: .75;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.dm-hero-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; position: relative; }
+.dm-hero-card .dm-btn { padding: 9px 20px; font-size: 13px; border-radius: 10px; }
+.dm-appear { animation: dm-rise .34s cubic-bezier(.2,.7,.3,1) both; }
+@keyframes dm-rise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
 .dm-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 14px; border: 1px solid var(--dm-line);
-  transition: border-color .18s, box-shadow .18s; }
-.dm-card:hover { border-color: var(--dm-accent); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
+  transition: border-color .18s, box-shadow .18s, transform .18s; }
+.dm-card:hover { border-color: var(--dm-accent); box-shadow: 0 10px 26px rgba(0,0,0,.10); transform: translateY(-2px); }
 .dm-card-top { display: flex; gap: 11px; align-items: center; min-width: 0; }
 .dm-thumb { width: 42px; height: 42px; flex: none; border-radius: 12px; display: grid; place-items: center; overflow: hidden;
   background: linear-gradient(135deg, rgba(127,127,127,.16), rgba(127,127,127,.06)); border: 1px solid var(--dm-line);
@@ -116,10 +136,11 @@ window.__ModuleLoader__.load({
 .dm-installed { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 8px;
   background: rgba(127,127,127,.12); font-size: 12px; opacity: .7; white-space: nowrap; }
 .dm-btn { padding: 7px 16px; border-radius: 9px; font: inherit; font-size: 12.5px; font-weight: 550;
-  cursor: pointer; white-space: nowrap; border: 1px solid transparent; transition: filter .15s, box-shadow .15s, opacity .15s; }
+  cursor: pointer; white-space: nowrap; border: 1px solid transparent;
+  transition: filter .15s, box-shadow .15s, transform .1s, opacity .15s; }
 .dm-btn--primary { background: var(--dm-accent); color: #fff; }
-.dm-btn--primary:hover { filter: brightness(1.08); box-shadow: 0 2px 12px rgba(77,107,254,.32); }
-.dm-btn--ghost { background: transparent; border-color: var(--dm-line); color: inherit; opacity: .62; cursor: default; }
+.dm-btn--primary:hover { filter: brightness(1.08); box-shadow: 0 4px 16px rgba(77,107,254,.34); }
+.dm-btn:active:not(:disabled) { transform: translateY(1px) scale(.985); }
 .dm-btn:disabled { cursor: default; opacity: .55; box-shadow: none; filter: none; }
 .dm-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 48px 4px;
   font-size: 13px; opacity: .6; }
@@ -136,6 +157,10 @@ window.__ModuleLoader__.load({
 .dm-toast button { border: 0; background: transparent; color: inherit; opacity: .6; cursor: pointer; font-size: 15px; line-height: 1; }
 .dm-toast button:hover { opacity: 1; }
 @keyframes dm-in { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+@media (prefers-reduced-motion: reduce) {
+  .dm-appear, .dm-skel, .dm-toast { animation: none !important; }
+  .dm-card, .dm-hero-card, .dm-btn, .dm-thumb { transition: none !important; }
+}
 .dm-page { height: 100%; overflow: auto; }
 .dm-page .dm-root { height: auto; }
 `
@@ -416,6 +441,76 @@ window.__ModuleLoader__.load({
         }, pick(declaration?.title, id),
           h('span', { className: 'dm-chip-count' }, entries.filter((entry) => entry.metadata?.category === id).length))))
 
+      const cardOf = (entry, index, hero = false) => {
+        const status = statusOf(entry)
+        const settled = status === 'installed' || status === 'provided'
+        const downloads = sortKeyOf(entry, 'downloads')
+        const stars = sortKeyOf(entry, 'stars')
+        const version = entry.defaultVersion ?? entry.versions?.[0]?.version
+        const title = pick(entry.title, entry.name)
+        const label = busy === entry.name
+          ? t('installing')
+          : status === 'installed' ? t('installed')
+            : status === 'update' ? t('update')
+              : status === 'provided' ? t('provided')
+                : t('install')
+        const action = settled
+          ? h('span', { className: 'dm-installed' }, `✓ ${label}`)
+          : h('button', {
+            className: 'dm-btn dm-btn--primary',
+            type: 'button',
+            disabled: busy !== '',
+            onClick: () => void install(entry)
+          }, label)
+        const thumb = h('div', {
+          className: 'dm-thumb',
+          style: entry.icon ? undefined : { background: tintOf(entry.name), borderColor: 'transparent' }
+        }, entry.icon
+          ? h('img', {
+            src: entry.icon,
+            alt: '',
+            loading: 'lazy',
+            referrerPolicy: 'no-referrer',
+            onError: (event) => { event.currentTarget.style.display = 'none' }
+          })
+          : String(title).slice(0, 1).toUpperCase())
+        const meta = h('div', { className: 'dm-meta' },
+          version ? h('span', { className: 'dm-tag' }, `v${version}`) : null,
+          stars !== undefined ? h('span', { className: 'dm-tag' }, `★ ${formatCount(stars)}`) : null,
+          downloads !== undefined ? h('span', { className: 'dm-tag' }, `↓ ${formatCount(downloads)}`) : null)
+        const delay = { animationDelay: `${Math.min(index, 14) * 22}ms` }
+
+        if (hero) {
+          return h('article', { className: 'dm-hero-card dm-appear', key: entry.name, style: delay },
+            h('div', { className: 'dm-card-top' },
+              thumb,
+              h('div', { className: 'dm-titles' },
+                h('h3', { className: 'dm-hero-title', title }, title),
+                h('code', { className: 'dm-pkg', title: entry.name }, entry.name))),
+            h('p', { className: 'dm-hero-desc' }, pick(entry.description, '')),
+            h('div', { className: 'dm-hero-foot' }, meta, action))
+        }
+        return h('article', { className: 'dm-card dm-appear', key: entry.name, style: delay },
+          h('div', { className: 'dm-card-top' },
+            thumb,
+            h('div', { className: 'dm-titles' },
+              h('h3', { className: 'dm-title', title }, title),
+              h('code', { className: 'dm-pkg', title: entry.name }, entry.name))),
+          h('p', { className: 'dm-desc' }, pick(entry.description, '')),
+          h('div', { className: 'dm-foot' }, meta, action))
+      }
+
+      // 只有没筛选时才展示精选，否则会和下面结果重复
+      const featured = needle === '' && category === '' && entries.length > 0
+        ? entries
+          .filter((entry) => entry.icon !== undefined)
+          .slice()
+          .sort((left, right) => (sortKeyOf(right, 'downloads') ?? 0) - (sortKeyOf(left, 'downloads') ?? 0))
+          .slice(0, 2)
+        : []
+      const featuredNames = new Set(featured.map((entry) => entry.name))
+      const gridEntries = filtered.filter((entry) => !featuredNames.has(entry.name))
+
       let body
       if (catalog.status === 'loading' && entries.length === 0) {
         body = h('div', { className: 'dm-grid' },
@@ -427,52 +522,11 @@ window.__ModuleLoader__.load({
       } else if (filtered.length === 0) {
         body = h('div', { className: 'dm-state' }, t('empty'))
       } else {
-        body = h('div', { className: 'dm-grid' }, ...filtered.map((entry) => {
-          const status = statusOf(entry)
-          const settled = status === 'installed' || status === 'provided'
-          const downloads = sortKeyOf(entry, 'downloads')
-          const stars = sortKeyOf(entry, 'stars')
-          const version = entry.defaultVersion ?? entry.versions?.[0]?.version
-          const title = pick(entry.title, entry.name)
-          const label = busy === entry.name
-            ? t('installing')
-            : status === 'installed' ? t('installed')
-              : status === 'update' ? t('update')
-                : status === 'provided' ? t('provided')
-                  : t('install')
-          return h('article', { className: 'dm-card', key: entry.name },
-            h('div', { className: 'dm-card-top' },
-              h('div', {
-                className: 'dm-thumb',
-                style: entry.icon ? undefined : { background: tintOf(entry.name), borderColor: 'transparent' }
-              },
-                entry.icon
-                  ? h('img', {
-                    src: entry.icon,
-                    alt: '',
-                    loading: 'lazy',
-                    referrerPolicy: 'no-referrer',
-                    onError: (event) => { event.currentTarget.style.display = 'none' }
-                  })
-                  : String(title).slice(0, 1).toUpperCase()),
-              h('div', { className: 'dm-titles' },
-                h('h3', { className: 'dm-title', title }, title),
-                h('code', { className: 'dm-pkg', title: entry.name }, entry.name))),
-            h('p', { className: 'dm-desc' }, pick(entry.description, '')),
-            h('div', { className: 'dm-foot' },
-              h('div', { className: 'dm-meta' },
-                version ? h('span', { className: 'dm-tag' }, `v${version}`) : null,
-                stars !== undefined ? h('span', { className: 'dm-tag' }, `★ ${formatCount(stars)}`) : null,
-                downloads !== undefined ? h('span', { className: 'dm-tag' }, `↓ ${formatCount(downloads)}`) : null),
-              settled
-                ? h('span', { className: 'dm-installed' }, `✓ ${label}`)
-                : h('button', {
-                  className: 'dm-btn dm-btn--primary',
-                  type: 'button',
-                  disabled: busy !== '',
-                  onClick: () => void install(entry)
-                }, label)))
-        }))
+        body = h(React.Fragment, null,
+          featured.length === 0 ? null : h('section', { className: 'dm-section' },
+            h('span', { className: 'dm-eyebrow' }, t('featured')),
+            h('div', { className: 'dm-featured' }, ...featured.map((entry, index) => cardOf(entry, index, true)))),
+          h('div', { className: 'dm-grid' }, ...gridEntries.map((entry, index) => cardOf(entry, index + featured.length))))
       }
 
       return h('div', { className: 'dm-root' },
