@@ -13,6 +13,7 @@ on:
       - overrides.json
       - icons/**
       - scripts/**
+      - .github/workflows/market.yml
 
 permissions:
   contents: read
