@@ -74,7 +74,8 @@ window.__ModuleLoader__.load({
 
     const STYLES = `
 .dm-root { --dm-accent: var(--dsh-accent, #4d6bfe); --dm-line: var(--dsh-border, rgba(127,127,127,.22));
-  display: flex; flex-direction: column; gap: 18px; padding: 26px 28px 56px; height: 100%; overflow: auto; box-sizing: border-box; }
+  display: flex; flex-direction: column; gap: 16px; max-width: 1240px; margin: 0 auto;
+  padding: 26px 28px 56px; height: 100%; overflow: auto; box-sizing: border-box; }
 .dm-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .dm-hero h1 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
 .dm-pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: rgba(77,107,254,.14); color: var(--dm-accent); }
@@ -82,7 +83,7 @@ window.__ModuleLoader__.load({
 .dm-ghost { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 9px; border: 1px solid var(--dm-line);
   background: transparent; color: inherit; cursor: pointer; font: inherit; font-size: 12.5px; transition: border-color .15s, color .15s; }
 .dm-ghost:hover { border-color: var(--dm-accent); color: var(--dm-accent); }
-.dm-search-wrap { position: relative; display: flex; align-items: center; }
+.dm-search-wrap { position: relative; display: flex; align-items: center; max-width: 560px; }
 .dm-search-wrap svg { position: absolute; left: 12px; opacity: .4; pointer-events: none; }
 .dm-search { width: 100%; box-sizing: border-box; padding: 10px 12px 10px 36px; border-radius: 11px; border: 1px solid var(--dm-line);
   background: transparent; color: inherit; font: inherit; font-size: 13px; transition: border-color .15s, box-shadow .15s; }
@@ -92,10 +93,12 @@ window.__ModuleLoader__.load({
   cursor: pointer; font: inherit; font-size: 12px; transition: border-color .15s, color .15s, background .15s; }
 .dm-chip:hover { border-color: var(--dm-accent); color: var(--dm-accent); }
 .dm-chip[aria-pressed="true"] { background: var(--dm-accent); border-color: var(--dm-accent); color: #fff; box-shadow: 0 2px 10px rgba(77,107,254,.3); }
-.dm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
-.dm-card { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; border: 1px solid var(--dm-line);
-  transition: border-color .18s, box-shadow .18s, transform .18s; }
-.dm-card:hover { border-color: var(--dm-accent); box-shadow: 0 6px 22px rgba(0,0,0,.09); transform: translateY(-1px); }
+.dm-chip-count { margin-left: 6px; font-size: 10.5px; opacity: .5; }
+.dm-chip[aria-pressed="true"] .dm-chip-count { opacity: .8; }
+.dm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px; }
+.dm-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 14px; border: 1px solid var(--dm-line);
+  transition: border-color .18s, box-shadow .18s; }
+.dm-card:hover { border-color: var(--dm-accent); box-shadow: 0 8px 24px rgba(0,0,0,.1); }
 .dm-card-top { display: flex; gap: 11px; align-items: center; min-width: 0; }
 .dm-thumb { width: 42px; height: 42px; flex: none; border-radius: 12px; display: grid; place-items: center; overflow: hidden;
   background: linear-gradient(135deg, rgba(127,127,127,.16), rgba(127,127,127,.06)); border: 1px solid var(--dm-line);
@@ -105,11 +108,13 @@ window.__ModuleLoader__.load({
 .dm-title { font-size: 14.5px; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dm-pkg { font-size: 11px; opacity: .5; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dm-desc { margin: 0; font-size: 12.5px; line-height: 1.55; opacity: .72; min-height: 2.9em;
+.dm-desc { margin: 0; font-size: 12.5px; line-height: 1.55; opacity: .72;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.dm-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; }
-.dm-meta { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; }
+.dm-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 2px; }
+.dm-meta { display: flex; gap: 8px; align-items: center; font-size: 11px; min-width: 0; overflow: hidden; white-space: nowrap; }
 .dm-tag { padding: 2px 7px; border-radius: 6px; background: rgba(127,127,127,.1); opacity: .8; white-space: nowrap; }
+.dm-installed { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 8px;
+  background: rgba(127,127,127,.12); font-size: 12px; opacity: .7; white-space: nowrap; }
 .dm-btn { padding: 7px 16px; border-radius: 9px; font: inherit; font-size: 12.5px; font-weight: 550;
   cursor: pointer; white-space: nowrap; border: 1px solid transparent; transition: filter .15s, box-shadow .15s, opacity .15s; }
 .dm-btn--primary { background: var(--dm-accent); color: #fff; }
@@ -159,6 +164,13 @@ window.__ModuleLoader__.load({
       width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
       strokeWidth: 2, strokeLinecap: 'round', 'aria-hidden': true
     }, h('circle', { cx: 11, cy: 11, r: 7 }), h('path', { d: 'm20 20-3.5-3.5' }))
+
+    /** 没图标的插件用名字生成一个稳定的淡色底，比统一灰块有辨识度。 */
+    function tintOf(name) {
+      let hash = 0
+      for (const char of String(name)) hash = (hash * 31 + char.codePointAt(0)) % 360
+      return `hsl(${hash} 58% 52% / 0.18)`
+    }
 
     const LOG = '[my-market]'
     const messageOf = error => (error instanceof Error ? error.message : String(error))
@@ -327,11 +339,6 @@ window.__ModuleLoader__.load({
         return haystack.includes(needle)
       })
 
-      const versionsLabel = (entry) => {
-        const count = entry.versions?.length ?? 0
-        return count > 1 ? h('span', { className: 'dm-tag' }, `${count} ${t('versions')}`) : null
-      }
-
       const statusOf = (entry) => {
         const installed = bundles.get(entry.name)
         if (entry.installation?.status === 'installed' || installed?.installed) return 'installed'
@@ -399,14 +406,15 @@ window.__ModuleLoader__.load({
         h('button', {
           className: 'dm-chip', type: 'button', 'aria-pressed': category === '',
           onClick: () => setCategory('')
-        }, t('all')),
+        }, t('all'), h('span', { className: 'dm-chip-count' }, entries.length)),
         ...Object.entries(categories).map(([id, declaration]) => h('button', {
           key: id,
           className: 'dm-chip',
           type: 'button',
           'aria-pressed': category === id,
           onClick: () => setCategory(category === id ? '' : id)
-        }, pick(declaration?.title, id))))
+        }, pick(declaration?.title, id),
+          h('span', { className: 'dm-chip-count' }, entries.filter((entry) => entry.metadata?.category === id).length))))
 
       let body
       if (catalog.status === 'loading' && entries.length === 0) {
@@ -434,7 +442,10 @@ window.__ModuleLoader__.load({
                   : t('install')
           return h('article', { className: 'dm-card', key: entry.name },
             h('div', { className: 'dm-card-top' },
-              h('div', { className: 'dm-thumb' },
+              h('div', {
+                className: 'dm-thumb',
+                style: entry.icon ? undefined : { background: tintOf(entry.name), borderColor: 'transparent' }
+              },
                 entry.icon
                   ? h('img', {
                     src: entry.icon,
@@ -451,16 +462,16 @@ window.__ModuleLoader__.load({
             h('div', { className: 'dm-foot' },
               h('div', { className: 'dm-meta' },
                 version ? h('span', { className: 'dm-tag' }, `v${version}`) : null,
-                entry.author ? h('span', { className: 'dm-tag' }, entry.author) : null,
                 stars !== undefined ? h('span', { className: 'dm-tag' }, `★ ${formatCount(stars)}`) : null,
-                downloads !== undefined ? h('span', { className: 'dm-tag' }, `↓ ${formatCount(downloads)}`) : null,
-                versionsLabel(entry)),
-              h('button', {
-                className: `dm-btn ${settled ? 'dm-btn--ghost' : 'dm-btn--primary'}`,
-                type: 'button',
-                disabled: settled || busy !== '',
-                onClick: () => void install(entry)
-              }, label)))
+                downloads !== undefined ? h('span', { className: 'dm-tag' }, `↓ ${formatCount(downloads)}`) : null),
+              settled
+                ? h('span', { className: 'dm-installed' }, `✓ ${label}`)
+                : h('button', {
+                  className: 'dm-btn dm-btn--primary',
+                  type: 'button',
+                  disabled: busy !== '',
+                  onClick: () => void install(entry)
+                }, label)))
         }))
       }
 
