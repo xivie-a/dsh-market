@@ -17,6 +17,7 @@ window.__ModuleLoader__.load({
       search: '搜索插件',
       all: '全部',
       featured: '精选 · 下载最多',
+      allPlugins: '全部插件',
       install: '安装',
       installed: '已安装',
       update: '可更新',
@@ -48,6 +49,7 @@ window.__ModuleLoader__.load({
       search: 'Search plugins',
       all: 'All',
       featured: 'Featured · most downloaded',
+      allPlugins: 'All plugins',
       install: 'Install',
       installed: 'Installed',
       update: 'Update',
@@ -76,8 +78,11 @@ window.__ModuleLoader__.load({
 
     const STYLES = `
 .dm-root { --dm-accent: var(--dsh-accent, #4d6bfe); --dm-line: var(--dsh-border, rgba(127,127,127,.22));
-  display: flex; flex-direction: column; gap: 16px; max-width: 1240px; margin: 0 auto;
-  padding: 26px 28px 56px; height: 100%; overflow: auto; box-sizing: border-box; }
+  display: flex; flex-direction: column; gap: 16px; max-width: 1320px; margin: 0 auto;
+  padding: 26px 28px 56px; height: 100%; overflow: auto; box-sizing: border-box;
+  background:
+    radial-gradient(1200px 320px at 12% -8%, rgba(77,107,254,.10), transparent 68%),
+    radial-gradient(900px 260px at 88% -6%, rgba(128,92,255,.08), transparent 70%); }
 .dm-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .dm-hero h1 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
 .dm-pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: rgba(77,107,254,.14); color: var(--dm-accent); }
@@ -97,8 +102,11 @@ window.__ModuleLoader__.load({
 .dm-chip[aria-pressed="true"] { background: var(--dm-accent); border-color: var(--dm-accent); color: #fff; box-shadow: 0 2px 10px rgba(77,107,254,.3); }
 .dm-chip-count { margin-left: 6px; font-size: 10.5px; opacity: .5; }
 .dm-chip[aria-pressed="true"] .dm-chip-count { opacity: .8; }
-.dm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px; }
+.dm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 12px; }
 .dm-section { display: flex; flex-direction: column; gap: 10px; }
+.dm-section-head { display: flex; align-items: center; gap: 8px; }
+.dm-section-head::before { content: ''; width: 3px; height: 13px; border-radius: 2px; background: var(--dm-accent); opacity: .85; }
+.dm-section-head span { font-size: 12px; font-weight: 600; letter-spacing: .02em; opacity: .65; }
 .dm-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; opacity: .45; }
 .dm-featured { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 12px; }
 .dm-hero-card { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 18px;
@@ -116,9 +124,11 @@ window.__ModuleLoader__.load({
 .dm-hero-card .dm-btn { padding: 9px 20px; font-size: 13px; border-radius: 10px; }
 .dm-appear { animation: dm-rise .34s cubic-bezier(.2,.7,.3,1) both; }
 @keyframes dm-rise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
-.dm-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 14px; border: 1px solid var(--dm-line);
-  transition: border-color .18s, box-shadow .18s, transform .18s; }
-.dm-card:hover { border-color: var(--dm-accent); box-shadow: 0 10px 26px rgba(0,0,0,.10); transform: translateY(-2px); }
+.dm-card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 14px;
+  border: 1px solid rgba(127,127,127,.16); background: rgba(127,127,127,.055);
+  transition: border-color .18s, box-shadow .18s, transform .18s, background .18s; }
+.dm-card:hover { border-color: var(--dm-accent); background: rgba(77,107,254,.07);
+  box-shadow: 0 10px 26px rgba(0,0,0,.10); transform: translateY(-2px); }
 .dm-card-top { display: flex; gap: 11px; align-items: center; min-width: 0; }
 .dm-thumb { width: 42px; height: 42px; flex: none; border-radius: 12px; display: grid; place-items: center; overflow: hidden;
   background: linear-gradient(135deg, rgba(127,127,127,.16), rgba(127,127,127,.06)); border: 1px solid var(--dm-line);
@@ -524,9 +534,12 @@ window.__ModuleLoader__.load({
       } else {
         body = h(React.Fragment, null,
           featured.length === 0 ? null : h('section', { className: 'dm-section' },
-            h('span', { className: 'dm-eyebrow' }, t('featured')),
+            h('div', { className: 'dm-section-head' }, h('span', null, t('featured'))),
             h('div', { className: 'dm-featured' }, ...featured.map((entry, index) => cardOf(entry, index, true)))),
-          h('div', { className: 'dm-grid' }, ...gridEntries.map((entry, index) => cardOf(entry, index + featured.length))))
+          h('section', { className: 'dm-section' },
+            h('div', { className: 'dm-section-head' },
+              h('span', null, `${t('allPlugins')} · ${gridEntries.length}`)),
+            h('div', { className: 'dm-grid' }, ...gridEntries.map((entry, index) => cardOf(entry, index + featured.length)))))
       }
 
       return h('div', { className: 'dm-root' },
