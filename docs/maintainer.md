@@ -58,11 +58,12 @@
 
 ## 重建
 
-- 自动：每 6 小时一次（`.github/workflows/market.yml` 的 cron）
+- 自动：每次推送到 `main`（改了 `plugins.txt`、`overrides.json`、`icons/`、`scripts/` 时）
+- 定时：每 6 小时一次（`.github/workflows/market.yml` 的 cron）
 - 手动：Actions → 构建插件市场索引 → Run workflow
 
-> 注意：用部署密钥（deploy key）推送到仓库**不会**触发 Actions，这是 GitHub 的行为。
-> 所以推完代码如果需要立即生效，去 Actions 页面手动跑一次。
+> 一个例外：**新增工作流文件的那次提交不会触发它自己**。仓库建好第一次推送时
+> Actions 可能没跑，之后每次都正常。遇到刚建仓库没跑的情况，手动 Run 一次即可。
 
 ## 如果构建失败
 
