@@ -27,6 +27,7 @@ const HELP = `用法: node scripts/build-index.mjs --input <plugins.txt> --outpu
   --description <text>  市场描述
   --overrides <file>    人工覆盖：标题、描述、分类、图标等
   --downloads           抓 npm 近 30 天下载量，作为可排序的 sortKey
+  --stars               抓 GitHub star 数，作为可排序的 sortKey
   --registry <url>      替代 npm registry（默认 ${DEFAULT_REGISTRY}）
   --index-url <url>     发布后的索引地址，仅用于校验相对图标（默认 https://market.invalid/index.json）
   --timeout-ms <n>      单个请求超时（默认 30000）
@@ -39,6 +40,7 @@ function parseArgs(argv) {
     indexUrl: 'https://market.invalid/index.json',
     timeoutMs: 30_000,
     downloads: false,
+    stars: false,
   }
   for (let i = 0; i < argv.length; i += 1) {
     const flag = argv[i]
@@ -58,6 +60,7 @@ function parseArgs(argv) {
       case '--index-url': options.indexUrl = next(); break
       case '--timeout-ms': options.timeoutMs = Number(next()); break
       case '--downloads': options.downloads = true; break
+      case '--stars': options.stars = true; break
       case '-h':
       case '--help': options.help = true; break
       default: throw new Error(`未知参数 ${flag}`)
@@ -184,15 +187,37 @@ function homepageOf(homepage) {
   }
 }
 
+/**
+ * 读 GitHub 仓库的 star 数；不是 GitHub 仓库或读取失败时返回 undefined。
+ */
+async function starsOf(repository, timeoutMs) {
+  if (repository === undefined || typeof repository.url !== 'string') return undefined
+  const match = /^https?:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?$/u.exec(repository.url)
+  if (match === null) return undefined
+  const response = await fetch(`https://api.github.com/repos/${match[1]}/${match[2]}`, {
+    signal: AbortSignal.timeout(timeoutMs),
+    headers: { accept: 'application/vnd.github+json', 'user-agent': USER_AGENT },
+  })
+  if (!response.ok) throw new Error(`GitHub API HTTP ${String(response.status)}`)
+  const doc = await response.json()
+  return typeof doc.stargazers_count === 'number' ? doc.stargazers_count : undefined
+}
+
+/**
+ * 找图标：先看输出目录旁的 icons/（CI 会把图标复制进去），再退回仓库根的 icons/。
+ * 返回的是相对路径，DSH 会按索引 URL 解析。
+ */
 async function iconFor(outputDir, name) {
   const safe = name.replace(/^@/u, '').replace(/[/\\]/gu, '__')
-  for (const extension of ICON_EXTENSIONS) {
-    const relative = `icons/${safe}.${extension}`
-    try {
-      await stat(join(outputDir, relative))
-      return relative
-    } catch {
-      // 继续找下一个扩展名
+  for (const base of [outputDir, process.cwd()]) {
+    for (const extension of ICON_EXTENSIONS) {
+      const relative = `icons/${safe}.${extension}`
+      try {
+        await stat(join(base, relative))
+        return relative
+      } catch {
+        // 继续找下一个扩展名
+      }
     }
   }
   return undefined
@@ -246,6 +271,14 @@ async function entryFor(name, doc, context) {
     }
   }
   const repository = override.repository ?? repositoryOf(latest.repository)
+  if (context.stars) {
+    try {
+      const stars = await starsOf(repository, context.timeoutMs)
+      if (stars !== undefined) metadata.sortKeys = { ...(metadata.sortKeys ?? {}), stars }
+    } catch (error) {
+      context.warn(`${name}: star 读取失败（${error instanceof Error ? error.message : String(error)}）`)
+    }
+  }
   const homepage = override.homepage ?? homepageOf(latest.homepage)
   const author = override.author ?? authorNameOf(latest.author)
   const description = override.description ?? (typeof latest.description === 'string' ? latest.description : undefined)
@@ -290,6 +323,7 @@ async function main() {
     outputDir,
     timeoutMs: options.timeoutMs,
     downloads: options.downloads,
+    stars: options.stars,
     warn: (message) => process.stderr.write(`! ${message}\n`),
   }
   const plugins = []
@@ -311,6 +345,12 @@ async function main() {
   if (plugins.length === 0) throw new Error('没有任何可用插件，索引不会写出')
 
   const metadata = structuredClone(overrides.metadata ?? {})
+  if (options.stars) {
+    metadata.sortKeys = {
+      stars: { title: { en: '★ Most stars', zh: '★ 星数最多' }, order: 'desc' },
+      ...(metadata.sortKeys ?? {}),
+    }
+  }
   if (options.downloads) {
     metadata.sortKeys = {
       downloads: { title: { en: '↓ Downloads (30d)', zh: '↓ 近 30 天下载' }, order: 'desc' },

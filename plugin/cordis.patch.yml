@@ -1,0 +1,4 @@
+# 把本插件挂进 profile：一行 insert 即可，id 用短名，避免插件页里同一个名字出现两次。
+- insert:
+    - id: my-market
+      name: dsh-market-xivie
