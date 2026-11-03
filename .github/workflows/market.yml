@@ -35,18 +35,22 @@ jobs:
           node-version: 22
 
       - name: 生成索引
+        # token 只用于读 GitHub API 拿 star；不加会被 Actions 共用出口 IP 限流
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p dist
           if [ -d icons ]; then cp -r icons dist/; fi
           EXTRA=""
           if [ -f overrides.json ]; then EXTRA="--overrides overrides.json"; fi
-          # 改这里的标题 / 描述 / 排序键；要 star 就加 --stars（需配 GITHUB_TOKEN，否则会被限流）
+          # 改这里的标题 / 描述 / 排序键
           node scripts/build-index.mjs \
             --input plugins.txt \
             --output dist/index.json \
             --title "DSH 插件市场" \
             --description "社区插件索引，每条人工审核后收录" \
             --downloads \
+            --stars \
             $EXTRA
 
       - name: 发布前校验

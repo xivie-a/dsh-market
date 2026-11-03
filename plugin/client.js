@@ -29,6 +29,9 @@ window.__ModuleLoader__.load({
       refresh: '刷新',
       error: '读取索引失败',
       confirm: '确认安装这个插件？',
+      installedOk: '已安装完成',
+      needsApproval: '这个插件要运行安装脚本，需要到「插件」页安装并确认',
+      dismissed: '已关闭',
       source: '来源',
       versions: '个版本',
       plugins: '个插件',
@@ -56,6 +59,9 @@ window.__ModuleLoader__.load({
       refresh: 'Refresh',
       error: 'Could not read the index',
       confirm: 'Install this plugin?',
+      installedOk: 'Installed',
+      needsApproval: 'This plugin runs install scripts; install it from the Plugins page to approve them',
+      dismissed: 'Dismissed',
       source: 'Source',
       versions: 'versions',
       plugins: 'plugins',
@@ -67,35 +73,64 @@ window.__ModuleLoader__.load({
     }
 
     const STYLES = `
-.dm-root { display: flex; flex-direction: column; gap: 14px; padding: 20px 24px 40px; height: 100%; overflow: auto; }
-.dm-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.dm-head h1 { font-size: 20px; font-weight: 600; margin: 0; }
-.dm-head p { margin: 0; font-size: 12px; opacity: .6; }
-.dm-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.dm-search { flex: 1 1 220px; min-width: 180px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--dsh-border, rgba(127,127,127,.28)); background: transparent; color: inherit; font: inherit; }
-.dm-search:focus { outline: 2px solid var(--dsh-accent, #4d6bfe); outline-offset: -1px; }
-.dm-refresh { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--dsh-border, rgba(127,127,127,.28)); background: transparent; color: inherit; cursor: pointer; font: inherit; }
-.dm-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.dm-chip { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--dsh-border, rgba(127,127,127,.28)); background: transparent; color: inherit; cursor: pointer; font-size: 12px; }
-.dm-chip[aria-pressed="true"] { background: var(--dsh-accent, #4d6bfe); border-color: transparent; color: #fff; }
-.dm-list { display: flex; flex-direction: column; gap: 10px; }
-.dm-card { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--dsh-border, rgba(127,127,127,.22)); }
-.dm-card:hover { border-color: var(--dsh-accent, #4d6bfe); }
-.dm-icon { width: 38px; height: 38px; border-radius: 10px; flex: none; display: grid; place-items: center; overflow: hidden; background: rgba(127,127,127,.12); font-weight: 600; font-size: 15px; }
-.dm-icon img { width: 100%; height: 100%; object-fit: contain; }
-.dm-body { flex: 1 1 auto; min-width: 0; }
-.dm-name { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-.dm-name strong { font-size: 14px; font-weight: 600; }
-.dm-name code { font-size: 11px; opacity: .55; }
-.dm-desc { font-size: 12.5px; opacity: .75; margin: 3px 0 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.dm-meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 11.5px; opacity: .55; margin-top: 6px; }
-.dm-actions { flex: none; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
-.dm-install { padding: 6px 14px; border-radius: 8px; border: 1px solid var(--dsh-border, rgba(127,127,127,.28)); background: transparent; color: inherit; cursor: pointer; font: inherit; font-size: 12.5px; white-space: nowrap; }
-.dm-install:hover { border-color: var(--dsh-accent, #4d6bfe); color: var(--dsh-accent, #4d6bfe); }
-.dm-install[disabled] { cursor: default; opacity: .55; }
-.dm-state { padding: 28px 4px; font-size: 13px; opacity: .65; display: flex; gap: 10px; align-items: center; }
-.dm-state button { padding: 5px 12px; border-radius: 8px; border: 1px solid var(--dsh-border, rgba(127,127,127,.28)); background: transparent; color: inherit; cursor: pointer; font: inherit; }
-.dm-notice { font-size: 12.5px; padding: 8px 12px; border-radius: 8px; background: rgba(127,127,127,.12); }
+.dm-root { --dm-accent: var(--dsh-accent, #4d6bfe); --dm-line: var(--dsh-border, rgba(127,127,127,.22));
+  display: flex; flex-direction: column; gap: 18px; padding: 26px 28px 56px; height: 100%; overflow: auto; box-sizing: border-box; }
+.dm-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.dm-hero h1 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
+.dm-pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: rgba(77,107,254,.14); color: var(--dm-accent); }
+.dm-sub { margin: 6px 0 0; font-size: 12.5px; opacity: .55; }
+.dm-ghost { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 9px; border: 1px solid var(--dm-line);
+  background: transparent; color: inherit; cursor: pointer; font: inherit; font-size: 12.5px; transition: border-color .15s, color .15s; }
+.dm-ghost:hover { border-color: var(--dm-accent); color: var(--dm-accent); }
+.dm-search-wrap { position: relative; display: flex; align-items: center; }
+.dm-search-wrap svg { position: absolute; left: 12px; opacity: .4; pointer-events: none; }
+.dm-search { width: 100%; box-sizing: border-box; padding: 10px 12px 10px 36px; border-radius: 11px; border: 1px solid var(--dm-line);
+  background: transparent; color: inherit; font: inherit; font-size: 13px; transition: border-color .15s, box-shadow .15s; }
+.dm-search:focus { outline: none; border-color: var(--dm-accent); box-shadow: 0 0 0 3px rgba(77,107,254,.15); }
+.dm-chips { display: flex; gap: 7px; flex-wrap: wrap; }
+.dm-chip { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--dm-line); background: transparent; color: inherit;
+  cursor: pointer; font: inherit; font-size: 12px; transition: border-color .15s, color .15s, background .15s; }
+.dm-chip:hover { border-color: var(--dm-accent); color: var(--dm-accent); }
+.dm-chip[aria-pressed="true"] { background: var(--dm-accent); border-color: var(--dm-accent); color: #fff; box-shadow: 0 2px 10px rgba(77,107,254,.3); }
+.dm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 12px; }
+.dm-card { display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 14px; border: 1px solid var(--dm-line);
+  transition: border-color .18s, box-shadow .18s, transform .18s; }
+.dm-card:hover { border-color: var(--dm-accent); box-shadow: 0 6px 22px rgba(0,0,0,.09); transform: translateY(-1px); }
+.dm-card-top { display: flex; gap: 11px; align-items: center; min-width: 0; }
+.dm-thumb { width: 42px; height: 42px; flex: none; border-radius: 12px; display: grid; place-items: center; overflow: hidden;
+  background: linear-gradient(135deg, rgba(127,127,127,.16), rgba(127,127,127,.06)); border: 1px solid var(--dm-line);
+  font-weight: 650; font-size: 16px; }
+.dm-thumb img { width: 100%; height: 100%; object-fit: contain; }
+.dm-titles { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dm-title { font-size: 14.5px; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dm-pkg { font-size: 11px; opacity: .5; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dm-desc { margin: 0; font-size: 12.5px; line-height: 1.55; opacity: .72; min-height: 2.9em;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dm-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; }
+.dm-meta { display: flex; gap: 6px; flex-wrap: wrap; font-size: 11px; }
+.dm-tag { padding: 2px 7px; border-radius: 6px; background: rgba(127,127,127,.1); opacity: .8; white-space: nowrap; }
+.dm-btn { padding: 7px 16px; border-radius: 9px; font: inherit; font-size: 12.5px; font-weight: 550;
+  cursor: pointer; white-space: nowrap; border: 1px solid transparent; transition: filter .15s, box-shadow .15s, opacity .15s; }
+.dm-btn--primary { background: var(--dm-accent); color: #fff; }
+.dm-btn--primary:hover { filter: brightness(1.08); box-shadow: 0 2px 12px rgba(77,107,254,.32); }
+.dm-btn--ghost { background: transparent; border-color: var(--dm-line); color: inherit; opacity: .62; cursor: default; }
+.dm-btn:disabled { cursor: default; opacity: .55; box-shadow: none; filter: none; }
+.dm-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 48px 4px;
+  font-size: 13px; opacity: .6; }
+.dm-state button { padding: 6px 14px; border-radius: 9px; border: 1px solid var(--dm-line); background: transparent;
+  color: inherit; cursor: pointer; font: inherit; font-size: 12.5px; }
+.dm-skel { height: 124px; border-radius: 14px; border: 1px solid var(--dm-line);
+  background: linear-gradient(90deg, rgba(127,127,127,.05) 25%, rgba(127,127,127,.13) 37%, rgba(127,127,127,.05) 63%);
+  background-size: 400% 100%; animation: dm-shimmer 1.4s ease infinite; }
+@keyframes dm-shimmer { 0% { background-position: 100% 0 } 100% { background-position: 0 0 } }
+.dm-toast { position: fixed; right: 26px; bottom: 26px; z-index: 60; display: flex; align-items: center; gap: 10px; max-width: 440px;
+  padding: 11px 14px; border-radius: 12px; font-size: 12.5px; background: rgba(30,30,34,.95); color: #fff;
+  box-shadow: 0 12px 32px rgba(0,0,0,.28); animation: dm-in .18s ease-out; }
+.dm-toast--error { background: rgba(150,40,40,.96); }
+.dm-toast button { border: 0; background: transparent; color: inherit; opacity: .6; cursor: pointer; font-size: 15px; line-height: 1; }
+.dm-toast button:hover { opacity: 1; }
+@keyframes dm-in { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
 .dm-page { height: 100%; overflow: auto; }
 .dm-page .dm-root { height: auto; }
 `
@@ -114,6 +149,16 @@ window.__ModuleLoader__.load({
 
       const formatCount = value => (typeof value !== 'number' ? undefined
         : value >= 10000 ? `${(value / 10000).toFixed(value >= 100000 ? 0 : 1)}万` : String(value))
+
+    const RefreshIcon = () => h('svg', {
+      width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+      strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true
+    }, h('path', { d: 'M21 12a9 9 0 1 1-2.64-6.36' }), h('path', { d: 'M21 3v6h-6' }))
+
+    const SearchIcon = () => h('svg', {
+      width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+      strokeWidth: 2, strokeLinecap: 'round', 'aria-hidden': true
+    }, h('circle', { cx: 11, cy: 11, r: 7 }), h('path', { d: 'm20 20-3.5-3.5' }))
 
     const LOG = '[my-market]'
     const messageOf = error => (error instanceof Error ? error.message : String(error))
@@ -233,7 +278,7 @@ window.__ModuleLoader__.load({
       const [query, setQuery] = React.useState('')
       const [category, setCategory] = React.useState('')
       const [busy, setBusy] = React.useState('')
-      const [notice, setNotice] = React.useState('')
+      const [notice, setNotice] = React.useState(undefined)
       const [bundles, setBundles] = React.useState(new Map())
 
       const load = React.useCallback(async (force = false) => {
@@ -258,6 +303,13 @@ window.__ModuleLoader__.load({
       }, [])
 
       React.useEffect(() => { void load() }, [load])
+
+      // 结果提示 6 秒后自动消失，也能手动关掉
+      React.useEffect(() => {
+        if (notice === undefined) return undefined
+        const timer = window.setTimeout(() => setNotice(undefined), 6000)
+        return () => window.clearTimeout(timer)
+      }, [notice])
 
       const entries = catalog.entries ?? []
       const categories = catalog.metadata?.categories ?? {}
@@ -290,39 +342,50 @@ window.__ModuleLoader__.load({
 
       async function install(entry) {
         const version = entry.versions?.find((item) => item.version === entry.defaultVersion) ?? entry.versions?.[0]
-        const install = version?.install
-        if (!install?.spec) return setNotice(t('noTarget'))
-        if (!window.confirm(`${pick(entry.title, entry.name)}\n${install.spec}\n\n${t('confirm')}`)) return
+        const target = version?.install
+        if (!target?.spec) return setNotice({ kind: 'error', text: t('noTarget') })
         const manager = managerRef.current?.pluginManager
-        if (!manager?.inspect || !manager?.installBundle) return setNotice(t('inspectFailed'))
+        if (!manager?.inspect || !manager?.installBundle) return setNotice({ kind: 'error', text: t('inspectFailed') })
         setBusy(entry.name)
-        setNotice('')
+        setNotice(undefined)
         try {
-          const inspected = await manager.inspect(install.spec, { registry: install.registry })
-          if (!inspected?.ok) return setNotice(inspected?.error?.message ?? t('inspectFailed'))
-          if (inspected.value?.status === 'refused') return setNotice(inspected.value.reason ?? t('refused'))
+          const inspected = await manager.inspect(target.spec, { registry: target.registry })
+          if (!inspected?.ok) throw new Error(inspected?.error?.message ?? t('inspectFailed'))
+          if (inspected.value?.status === 'refused') throw new Error(inspected.value.reason ?? t('refused'))
           const { registry, selection, saveExact } = inspected.value ?? {}
-          const result = await manager.installBundle(install.spec, {
+          const result = await manager.installBundle(target.spec, {
             enabled: selection ?? true,
             requestId: crypto.randomUUID(),
             registry,
             ...(saveExact === undefined ? {} : { saveExact })
           })
-          if (!result?.ok) return setNotice(result?.error?.message ?? t('installFailed'))
-          setNotice(result.value?.application === 'restart-required' ? t('restart') : t('done'))
+          if (!result?.ok) throw new Error(result?.error?.message ?? t('installFailed'))
+          const value = result.value ?? {}
+          if (value.application === 'failed') {
+            const pending = Array.isArray(value.pendingBuilds) && value.pendingBuilds.length > 0
+            throw new Error(pending ? t('needsApproval') : (value.error?.message ?? t('installFailed')))
+          }
+          setNotice({
+            kind: 'ok',
+            text: `${pick(entry.title, entry.name)} · ${value.application === 'restart-required' ? t('restart') : t('installedOk')}`
+          })
           await load()
         } catch (error) {
-          setNotice(error?.message ?? String(error))
+          setNotice({ kind: 'error', text: `${pick(entry.title, entry.name)} · ${messageOf(error)}` })
         } finally {
           setBusy('')
         }
       }
 
-      const header = h('div', { className: 'dm-head' },
-        h('h1', null, t('title')),
-        h('p', null, `${t('subtitle')} · ${entries.length} ${t('plugins')}`))
+      const header = h('header', { className: 'dm-hero' },
+        h('div', null,
+          h('h1', null, t('title'), h('span', { className: 'dm-pill' }, `${entries.length} ${t('plugins')}`)),
+          h('p', { className: 'dm-sub' }, t('subtitle'))),
+        h('button', { className: 'dm-ghost', type: 'button', onClick: () => void load(true) },
+          h(RefreshIcon), t('refresh')))
 
-      const tools = h('div', { className: 'dm-tools' },
+      const tools = h('div', { className: 'dm-search-wrap' },
+        h(SearchIcon),
         h('input', {
           className: 'dm-search',
           type: 'search',
@@ -330,8 +393,7 @@ window.__ModuleLoader__.load({
           placeholder: t('search'),
           'aria-label': t('search'),
           onChange: (event) => setQuery(event.target.value)
-        }),
-        h('button', { className: 'dm-refresh', type: 'button', onClick: () => void load(true) }, t('refresh')))
+        }))
 
       const chips = Object.keys(categories).length === 0 ? null : h('div', { className: 'dm-chips' },
         h('button', {
@@ -348,49 +410,55 @@ window.__ModuleLoader__.load({
 
       let body
       if (catalog.status === 'loading' && entries.length === 0) {
-        body = h('div', { className: 'dm-state' }, t('loading'))
+        body = h('div', { className: 'dm-grid' },
+          ...Array.from({ length: 6 }, (_, index) => h('div', { className: 'dm-skel', key: index })))
       } else if (catalog.status === 'error') {
         body = h('div', { className: 'dm-state' },
-          `${t('error')}：${catalog.error ?? ''}`,
-          h('button', { type: 'button', onClick: () => void load() }, t('retry')))
+          h('span', null, `${t('error')}：${catalog.error ?? ''}`),
+          h('button', { type: 'button', onClick: () => void load(true) }, t('retry')))
       } else if (filtered.length === 0) {
         body = h('div', { className: 'dm-state' }, t('empty'))
       } else {
-        body = h('div', { className: 'dm-list' }, ...filtered.map((entry) => {
+        body = h('div', { className: 'dm-grid' }, ...filtered.map((entry) => {
           const status = statusOf(entry)
+          const settled = status === 'installed' || status === 'provided'
           const downloads = sortKeyOf(entry, 'downloads')
           const stars = sortKeyOf(entry, 'stars')
           const version = entry.defaultVersion ?? entry.versions?.[0]?.version
+          const title = pick(entry.title, entry.name)
           const label = busy === entry.name
             ? t('installing')
-            : status === 'installed' ? t('installed') : status === 'update' ? t('update') : status === 'provided' ? t('provided') : t('install')
-          return h('div', { className: 'dm-card', key: entry.name },
-            h('div', { className: 'dm-icon' },
-              entry.icon
-                ? h('img', {
-                  src: entry.icon,
-                  alt: '',
-                  loading: 'lazy',
-                  referrerPolicy: 'no-referrer',
-                  onError: (event) => { event.currentTarget.style.display = 'none' }
-                })
-                : String(pick(entry.title, entry.name)).slice(0, 1).toUpperCase()),
-            h('div', { className: 'dm-body' },
-              h('div', { className: 'dm-name' },
-                h('strong', null, pick(entry.title, entry.name)),
-                h('code', null, entry.name)),
-              h('p', { className: 'dm-desc' }, pick(entry.description, '')),
+            : status === 'installed' ? t('installed')
+              : status === 'update' ? t('update')
+                : status === 'provided' ? t('provided')
+                  : t('install')
+          return h('article', { className: 'dm-card', key: entry.name },
+            h('div', { className: 'dm-card-top' },
+              h('div', { className: 'dm-thumb' },
+                entry.icon
+                  ? h('img', {
+                    src: entry.icon,
+                    alt: '',
+                    loading: 'lazy',
+                    referrerPolicy: 'no-referrer',
+                    onError: (event) => { event.currentTarget.style.display = 'none' }
+                  })
+                  : String(title).slice(0, 1).toUpperCase()),
+              h('div', { className: 'dm-titles' },
+                h('h3', { className: 'dm-title', title }, title),
+                h('code', { className: 'dm-pkg', title: entry.name }, entry.name))),
+            h('p', { className: 'dm-desc' }, pick(entry.description, '')),
+            h('div', { className: 'dm-foot' },
               h('div', { className: 'dm-meta' },
-                version ? h('span', null, `v${version}`) : null,
-                entry.author ? h('span', null, entry.author) : null,
-                stars !== undefined ? h('span', null, `★ ${formatCount(stars)}`) : null,
-                downloads !== undefined ? h('span', null, `↓ ${formatCount(downloads)}`) : null,
-                versionsLabel(entry))),
-            h('div', { className: 'dm-actions' },
+                version ? h('span', { className: 'dm-tag' }, `v${version}`) : null,
+                entry.author ? h('span', { className: 'dm-tag' }, entry.author) : null,
+                stars !== undefined ? h('span', { className: 'dm-tag' }, `★ ${formatCount(stars)}`) : null,
+                downloads !== undefined ? h('span', { className: 'dm-tag' }, `↓ ${formatCount(downloads)}`) : null,
+                versionsLabel(entry)),
               h('button', {
-                className: 'dm-install',
+                className: `dm-btn ${settled ? 'dm-btn--ghost' : 'dm-btn--primary'}`,
                 type: 'button',
-                disabled: status === 'installed' || status === 'provided' || busy !== '',
+                disabled: settled || busy !== '',
                 onClick: () => void install(entry)
               }, label)))
         }))
@@ -400,8 +468,14 @@ window.__ModuleLoader__.load({
         header,
         tools,
         chips,
-        notice === '' ? null : h('div', { className: 'dm-notice' }, notice),
-        body)
+        body,
+        notice === undefined ? null : h('div', { className: `dm-toast dm-toast--${notice.kind}`, role: 'status' },
+          h('span', null, notice.text),
+          h('button', {
+            type: 'button',
+            'aria-label': t('dismissed'),
+            onClick: () => setNotice(undefined)
+          }, '×')))
     }
 
     function apply(ctx) {
