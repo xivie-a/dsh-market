@@ -2,5 +2,6 @@ node_modules/
 dist/
 .ci/
 .plugin-market-cache/
+.deploy-key/
 *.log
 .DS_Store
