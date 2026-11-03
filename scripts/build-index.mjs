@@ -189,14 +189,20 @@ function homepageOf(homepage) {
 
 /**
  * 读 GitHub 仓库的 star 数；不是 GitHub 仓库或读取失败时返回 undefined。
+ * 设了 GITHUB_TOKEN 就用它认证：Actions 共用出口 IP，未认证的 60 次/小时很容易打满。
  */
 async function starsOf(repository, timeoutMs) {
   if (repository === undefined || typeof repository.url !== 'string') return undefined
   const match = /^https?:\/\/github\.com\/([^/]+)\/([^/]+?)(?:\.git)?$/u.exec(repository.url)
   if (match === null) return undefined
+  const token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN
   const response = await fetch(`https://api.github.com/repos/${match[1]}/${match[2]}`, {
     signal: AbortSignal.timeout(timeoutMs),
-    headers: { accept: 'application/vnd.github+json', 'user-agent': USER_AGENT },
+    headers: {
+      accept: 'application/vnd.github+json',
+      'user-agent': USER_AGENT,
+      ...(token === undefined || token === '' ? {} : { authorization: `Bearer ${token}` }),
+    },
   })
   if (!response.ok) throw new Error(`GitHub API HTTP ${String(response.status)}`)
   const doc = await response.json()

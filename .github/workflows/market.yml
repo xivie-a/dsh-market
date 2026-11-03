@@ -35,6 +35,9 @@ jobs:
           node-version: 22
 
       - name: 生成索引
+        # 带上 token 读 GitHub API，否则共用出口 IP 会被限流，star 会是空的
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p dist
           if [ -d icons ]; then cp -r icons dist/; fi
