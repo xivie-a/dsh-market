@@ -220,6 +220,10 @@ window.__ModuleLoader__.load({
 .dm-bgrow button { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--dm-line); background: transparent;
   color: inherit; cursor: pointer; font: inherit; font-size: 12px; }
 .dm-columns { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+@media (max-width: 1180px) {
+  .dm-columns { grid-template-columns: minmax(0, 1fr); }
+  .dm-detail { position: static; }
+}
 .dm-main { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
 .dm-detail { position: sticky; top: 4px; display: flex; flex-direction: column; gap: 12px; padding: 18px; border-radius: 16px;
   border: 1px solid rgba(127,127,127,.16); background: rgba(127,127,127,.055); animation: dm-slide .22s cubic-bezier(.2,.7,.3,1) both; }
