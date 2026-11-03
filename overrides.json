@@ -22,28 +22,52 @@
   "plugins": {
     "dsh-dream-skin": {
       "title": { "en": "Dream Skin", "zh": "梦幻皮肤" },
+      "description": {
+        "en": "Eight clean, glassy themes with wallpapers, accent colors and shareable theme packs.",
+        "zh": "8 套清透冷调主题，含弥散光壁纸、强调色和可分享的主题包。"
+      },
       "category": "appearance",
       "labels": ["new"]
     },
     "dsh-kimino-theme": {
       "title": { "en": "Kimi no Na wa Theme", "zh": "你的名字主题" },
+      "description": {
+        "en": "Your Name theme with wallpapers and logo assets for the DSH web interface.",
+        "zh": "《你的名字》主题，含壁纸与标识素材。"
+      },
       "category": "appearance"
     },
     "dsh-web-mobile": {
       "title": { "en": "Mobile Web Layout", "zh": "网页移动端适配" },
+      "description": {
+        "en": "Adapts the web interface to portrait screens and mobile devices.",
+        "zh": "让网页界面适配竖屏和手机。"
+      },
       "category": "interface"
     },
     "dsh-session-continuity": {
       "title": { "en": "Session Continuity", "zh": "会话接续" },
+      "description": {
+        "en": "Injects a short handoff note into a new session so work continues where it left off.",
+        "zh": "新会话开始时注入简短交接提示，接着上次的进度继续。"
+      },
       "category": "interface"
     },
     "dsh-plugin-session-fulltext": {
       "title": { "en": "Session Full-text Search", "zh": "会话全文搜索" },
+      "description": {
+        "en": "Full-text search across session history, with Chinese-friendly matching and match navigation.",
+        "zh": "跨会话全文搜索，支持中文短词匹配和命中跳转。"
+      },
       "category": "tools",
       "labels": ["reviewed"]
     },
     "misakanet": {
       "title": { "en": "MisakaNet", "zh": "MisakaNet 经验记忆" },
+      "description": {
+        "en": "Searches a public MCP service for evidence-rated failure lessons from other agents.",
+        "zh": "通过公共 MCP 服务检索带证据评级的失败经验。"
+      },
       "category": "memory",
       "labels": ["caution"]
     }
