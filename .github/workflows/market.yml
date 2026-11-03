@@ -39,13 +39,14 @@ jobs:
           if [ -d icons ]; then cp -r icons dist/; fi
           EXTRA=""
           if [ -f overrides.json ]; then EXTRA="--overrides overrides.json"; fi
-          # 改这里的标题 / 描述 / 是否带下载量
+          # 改这里的标题 / 描述 / 排序键
           node scripts/build-index.mjs \
             --input plugins.txt \
             --output dist/index.json \
             --title "DSH 插件市场" \
             --description "社区插件索引，每条人工审核后收录" \
             --downloads \
+            --stars \
             $EXTRA
 
       - name: 发布前校验
