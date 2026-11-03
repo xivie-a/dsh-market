@@ -1,0 +1,33 @@
+name: 申请下架插件
+description: 请求把某个插件从市场移除
+title: "[下架] "
+labels: ["removal"]
+body:
+  - type: input
+    id: package
+    attributes:
+      label: npm 包名
+      placeholder: dsh-my-plugin
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reason
+    attributes:
+      label: 原因
+      options:
+        - 作者本人要求下架
+        - 存在安全问题
+        - 包已废弃或长期不维护
+        - 描述与实际不符
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: detail
+    attributes:
+      label: 补充说明
+      description: 涉及安全问题的请写清楚复现方式或证据
+    validations:
+      required: false

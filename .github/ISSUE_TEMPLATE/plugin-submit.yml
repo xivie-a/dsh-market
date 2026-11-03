@@ -1,0 +1,83 @@
+name: 申请收录插件
+description: 把你的 DSH 插件加进这个市场
+title: "[收录] "
+labels: ["submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请确认两件事：包**已发布到 npm**，并且 `package.json` 里声明了 `dsh.bundle`。
+        没有这两样的包装不进 DSH，市场也不会收录。
+
+  - type: input
+    id: package
+    attributes:
+      label: npm 包名
+      placeholder: dsh-my-plugin 或 @scope/dsh-my-plugin
+    validations:
+      required: true
+
+  - type: input
+    id: repo
+    attributes:
+      label: 源码仓库
+      placeholder: https://github.com/you/dsh-my-plugin
+    validations:
+      required: true
+
+  - type: input
+    id: license
+    attributes:
+      label: 许可证
+      placeholder: MIT
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: 它做什么
+      description: 一两句话，会直接用在市场卡片上
+      placeholder: 在输入框下方显示当前模型和账户余额。
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 分类
+      options:
+        - 外观
+        - 界面
+        - 工具
+        - 记忆
+        - 模型供应商
+        - 工作流与协作
+        - 集成
+        - 用量与费用
+        - 开发与运维
+        - 知识与研究
+        - 技能
+    validations:
+      required: true
+
+  - type: textarea
+    id: permissions
+    attributes:
+      label: 它会碰什么
+      description: 请老实说明：读文件？发网络请求？执行命令？读凭据或 API key？
+      placeholder: 只读取当前会话的模型名，不联网，不读文件。
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: 确认
+      options:
+        - label: 我是作者，或已获得作者同意
+          required: true
+        - label: 源码公开、许可证明确、描述属实
+          required: true
+        - label: 我理解市场只做索引，不审计代码，安装风险由使用者自担
+          required: true

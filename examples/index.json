@@ -1,0 +1,70 @@
+{
+  "format": 1,
+  "title": { "en": "My DSH Plugins", "zh": "我的插件市场" },
+  "description": {
+    "en": "A minimal hand-written format 1 index, for reading next to the spec.",
+    "zh": "手写的最小索引，用来对照格式和字段。"
+  },
+  "metadata": {
+    "categories": {
+      "interface": { "title": { "en": "Interface", "zh": "界面" } },
+      "appearance": { "title": { "en": "Appearance", "zh": "外观" } }
+    },
+    "sortKeys": {
+      "downloads": {
+        "title": { "en": "↓ Downloads (30d)", "zh": "↓ 近 30 天下载" },
+        "order": "desc"
+      }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-web-mobile",
+      "title": { "en": "Mobile Web Layout", "zh": "网页移动端适配" },
+      "description": {
+        "en": "Adapt the web interface for portrait screens and mobile devices.",
+        "zh": "为竖屏和移动设备调整网页界面布局。"
+      },
+      "author": "mexiaosh",
+      "homepage": "https://github.com/mexiaosqwq/dsh-web-mobile#readme",
+      "repository": { "url": "https://github.com/mexiaosqwq/dsh-web-mobile" },
+      "metadata": {
+        "category": "interface",
+        "keywords": ["dsh", "dsh-plugin", "mobile", "responsive"],
+        "sortKeys": { "downloads": 8079 }
+      },
+      "versions": [
+        {
+          "version": "3.2.1",
+          "publishTimestamp": 1792504507,
+          "source": { "type": "npm" },
+          "engines": { "dsh": ">=0.2.0-rc.1 <0.3.0-0" }
+        }
+      ]
+    },
+    {
+      "name": "dsh-dream-skin",
+      "title": { "en": "Dream Skin", "zh": "梦幻皮肤" },
+      "description": {
+        "en": "Switch between shareable themes with wallpapers, accent colors and translucent surfaces.",
+        "zh": "切换可分享的主题，调整壁纸、强调色与半透明界面。"
+      },
+      "author": "RevolutionLA",
+      "homepage": "https://github.com/RevolutionLA/dsh-dream-skin#readme",
+      "repository": { "url": "https://github.com/RevolutionLA/dsh-dream-skin" },
+      "metadata": {
+        "category": "appearance",
+        "keywords": ["dsh", "dsh-plugin", "theme", "wallpaper"],
+        "sortKeys": { "downloads": 43649 }
+      },
+      "versions": [
+        {
+          "version": "11.4.0",
+          "publishTimestamp": 1793733172,
+          "source": { "type": "npm" },
+          "engines": { "dsh": ">=0.1.0-rc.6 <0.3.0-0" }
+        }
+      ]
+    }
+  ]
+}

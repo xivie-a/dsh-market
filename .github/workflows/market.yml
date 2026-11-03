@@ -1,0 +1,68 @@
+name: 构建插件市场索引
+
+# 定时重建，让「更新时间」「下载量」这类数据不会老掉。
+# GitHub 的定时任务不保证准点，晚几分钟是常态。
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - plugins.txt
+      - overrides.json
+      - icons/**
+      - scripts/**
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 生成索引
+        run: |
+          mkdir -p dist
+          if [ -d icons ]; then cp -r icons dist/; fi
+          EXTRA=""
+          if [ -f overrides.json ]; then EXTRA="--overrides overrides.json"; fi
+          # 改这里的标题 / 描述 / 是否带下载量
+          node scripts/build-index.mjs \
+            --input plugins.txt \
+            --output dist/index.json \
+            --title "我的插件市场" \
+            --description "团队内部的 DSH 插件索引" \
+            --downloads \
+            $EXTRA
+
+      - name: 发布前校验
+        run: |
+          node scripts/check-index.mjs dist/index.json \
+            "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/index.json"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

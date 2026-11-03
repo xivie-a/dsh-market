@@ -1,0 +1,40 @@
+name: 校验收录列表
+
+# 每次有人改 plugins.txt / overrides.json / 脚本，都先跑一遍生成器。
+# 有包不存在、没声明 dsh.bundle、或者生成的索引不合规，这里会红叉，
+# 不会自动发到线上。
+on:
+  pull_request:
+    paths:
+      - plugins.txt
+      - overrides.json
+      - icons/**
+      - scripts/**
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 生成索引（不发布）
+        run: |
+          mkdir -p .ci
+          EXTRA=""
+          if [ -f overrides.json ]; then EXTRA="--overrides overrides.json"; fi
+          node scripts/build-index.mjs \
+            --input plugins.txt \
+            --output .ci/index.json \
+            --title "CI" \
+            --downloads \
+            $EXTRA
+
+      - name: 校验格式
+        run: node scripts/check-index.mjs .ci/index.json "https://example.invalid/index.json"

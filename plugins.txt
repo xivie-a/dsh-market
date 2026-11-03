@@ -1,0 +1,20 @@
+# 你的插件市场收录列表
+#
+# 每行一个 npm 包名；空行和 # 开头的行会被忽略。
+# 这里的条目只是示例，删掉换成你自己的。
+# 生成索引：
+#   node scripts/build-index.mjs --input plugins.txt --output dist/index.json --title "我的插件市场"
+#
+# 注意：只有声明了 dsh.bundle 的包才会被列出；普通 npm 包会被跳过并给出提示。
+
+# 外观
+dsh-dream-skin
+dsh-kimino-theme
+
+# 界面
+dsh-web-mobile
+dsh-session-continuity
+
+# 工具 / 记忆
+dsh-plugin-session-fulltext
+misakanet

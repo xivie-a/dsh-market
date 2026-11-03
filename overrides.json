@@ -1,0 +1,51 @@
+{
+  "metadata": {
+    "categories": {
+      "appearance": { "title": { "en": "Appearance", "zh": "外观" } },
+      "interface": { "title": { "en": "Interface", "zh": "界面" } },
+      "tools": { "title": { "en": "Tools", "zh": "工具" } },
+      "memory": { "title": { "en": "Memory", "zh": "记忆" } },
+      "providers": { "title": { "en": "Providers", "zh": "模型供应商" } },
+      "workflow": { "title": { "en": "Workflows & agents", "zh": "工作流与协作" } },
+      "integrations": { "title": { "en": "Integrations", "zh": "集成" } },
+      "usage": { "title": { "en": "Usage & costs", "zh": "用量与费用" } },
+      "development": { "title": { "en": "Development & operations", "zh": "开发与运维" } },
+      "knowledge": { "title": { "en": "Knowledge & research", "zh": "知识与研究" } },
+      "skills": { "title": { "en": "Skills", "zh": "技能" } }
+    },
+    "labels": {
+      "reviewed": { "title": { "en": "✅ Reviewed", "zh": "✅ 已审查" } },
+      "new": { "title": { "en": "🆕 New", "zh": "🆕 新收录" } },
+      "caution": { "title": { "en": "⚠️ Use with care", "zh": "⚠️ 慎用" } }
+    }
+  },
+  "plugins": {
+    "dsh-dream-skin": {
+      "title": { "en": "Dream Skin", "zh": "梦幻皮肤" },
+      "category": "appearance",
+      "labels": ["new"]
+    },
+    "dsh-kimino-theme": {
+      "title": { "en": "Kimi no Na wa Theme", "zh": "你的名字主题" },
+      "category": "appearance"
+    },
+    "dsh-web-mobile": {
+      "title": { "en": "Mobile Web Layout", "zh": "网页移动端适配" },
+      "category": "interface"
+    },
+    "dsh-session-continuity": {
+      "title": { "en": "Session Continuity", "zh": "会话接续" },
+      "category": "interface"
+    },
+    "dsh-plugin-session-fulltext": {
+      "title": { "en": "Session Full-text Search", "zh": "会话全文搜索" },
+      "category": "tools",
+      "labels": ["reviewed"]
+    },
+    "misakanet": {
+      "title": { "en": "MisakaNet", "zh": "MisakaNet 经验记忆" },
+      "category": "memory",
+      "labels": ["caution"]
+    }
+  }
+}
