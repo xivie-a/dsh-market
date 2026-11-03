@@ -28,6 +28,7 @@ const HELP = `用法: node scripts/build-index.mjs --input <plugins.txt> --outpu
   --overrides <file>    人工覆盖：标题、描述、分类、图标等
   --downloads           抓 npm 近 30 天下载量，作为可排序的 sortKey
   --stars               抓 GitHub star 数，作为可排序的 sortKey
+  --max-versions <n>    每个插件最多保留最近的 n 个版本（默认 50，0 表示不限）
   --registry <url>      替代 npm registry（默认 ${DEFAULT_REGISTRY}）
   --index-url <url>     发布后的索引地址，仅用于校验相对图标（默认 https://market.invalid/index.json）
   --timeout-ms <n>      单个请求超时（默认 30000）
@@ -41,6 +42,7 @@ function parseArgs(argv) {
     timeoutMs: 30_000,
     downloads: false,
     stars: false,
+    maxVersions: 50,
   }
   for (let i = 0; i < argv.length; i += 1) {
     const flag = argv[i]
@@ -61,6 +63,7 @@ function parseArgs(argv) {
       case '--timeout-ms': options.timeoutMs = Number(next()); break
       case '--downloads': options.downloads = true; break
       case '--stars': options.stars = true; break
+      case '--max-versions': options.maxVersions = Number(next()); break
       case '-h':
       case '--help': options.help = true; break
       default: throw new Error(`未知参数 ${flag}`)
@@ -71,6 +74,7 @@ function parseArgs(argv) {
     if (!options[required]) throw new Error(`缺少 --${required}`)
   }
   if (!Number.isFinite(options.timeoutMs) || options.timeoutMs <= 0) throw new Error('--timeout-ms 必须是正数')
+  if (!Number.isInteger(options.maxVersions) || options.maxVersions < 0) throw new Error('--max-versions 必须是 0 或正整数')
   return options
 }
 
@@ -254,6 +258,7 @@ async function entryFor(name, doc, context) {
   }
   if (versions.length === 0) return undefined
   versions.sort((left, right) => compareSemver(right.version, left.version))
+  const kept = context.maxVersions > 0 ? versions.slice(0, context.maxVersions) : versions
 
   const latest = doc.versions[versions[0].version]
   const override = context.overrides[name] ?? {}
@@ -297,7 +302,7 @@ async function entryFor(name, doc, context) {
     ...(homepage === undefined ? {} : { homepage }),
     ...(repository === undefined ? {} : { repository }),
     metadata,
-    versions,
+    versions: kept,
   }
 }
 
@@ -330,6 +335,7 @@ async function main() {
     timeoutMs: options.timeoutMs,
     downloads: options.downloads,
     stars: options.stars,
+    maxVersions: options.maxVersions,
     warn: (message) => process.stderr.write(`! ${message}\n`),
   }
   const plugins = []

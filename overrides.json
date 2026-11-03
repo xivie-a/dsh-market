@@ -1,36 +1,114 @@
 {
   "metadata": {
     "categories": {
-      "appearance": { "title": { "en": "Appearance", "zh": "外观" } },
-      "interface": { "title": { "en": "Interface", "zh": "界面" } },
-      "tools": { "title": { "en": "Tools", "zh": "工具" } },
-      "memory": { "title": { "en": "Memory", "zh": "记忆" } },
-      "providers": { "title": { "en": "Providers", "zh": "模型供应商" } },
-      "workflow": { "title": { "en": "Workflows & agents", "zh": "工作流与协作" } },
-      "integrations": { "title": { "en": "Integrations", "zh": "集成" } },
-      "usage": { "title": { "en": "Usage & costs", "zh": "用量与费用" } },
-      "development": { "title": { "en": "Development & operations", "zh": "开发与运维" } },
-      "knowledge": { "title": { "en": "Knowledge & research", "zh": "知识与研究" } },
-      "skills": { "title": { "en": "Skills", "zh": "技能" } }
+      "appearance": {
+        "title": {
+          "en": "Appearance",
+          "zh": "外观"
+        }
+      },
+      "interface": {
+        "title": {
+          "en": "Interface",
+          "zh": "界面"
+        }
+      },
+      "tools": {
+        "title": {
+          "en": "Tools",
+          "zh": "工具"
+        }
+      },
+      "memory": {
+        "title": {
+          "en": "Memory",
+          "zh": "记忆"
+        }
+      },
+      "providers": {
+        "title": {
+          "en": "Providers",
+          "zh": "模型供应商"
+        }
+      },
+      "workflow": {
+        "title": {
+          "en": "Workflows & agents",
+          "zh": "工作流与协作"
+        }
+      },
+      "integrations": {
+        "title": {
+          "en": "Integrations",
+          "zh": "集成"
+        }
+      },
+      "usage": {
+        "title": {
+          "en": "Usage & costs",
+          "zh": "用量与费用"
+        }
+      },
+      "development": {
+        "title": {
+          "en": "Development & operations",
+          "zh": "开发与运维"
+        }
+      },
+      "knowledge": {
+        "title": {
+          "en": "Knowledge & research",
+          "zh": "知识与研究"
+        }
+      },
+      "skills": {
+        "title": {
+          "en": "Skills",
+          "zh": "技能"
+        }
+      }
     },
     "labels": {
-      "reviewed": { "title": { "en": "✅ Reviewed", "zh": "✅ 已审查" } },
-      "new": { "title": { "en": "🆕 New", "zh": "🆕 新收录" } },
-      "caution": { "title": { "en": "⚠️ Use with care", "zh": "⚠️ 慎用" } }
+      "reviewed": {
+        "title": {
+          "en": "✅ Reviewed",
+          "zh": "✅ 已审查"
+        }
+      },
+      "new": {
+        "title": {
+          "en": "🆕 New",
+          "zh": "🆕 新收录"
+        }
+      },
+      "caution": {
+        "title": {
+          "en": "⚠️ Use with care",
+          "zh": "⚠️ 慎用"
+        }
+      }
     }
   },
   "plugins": {
     "dsh-dream-skin": {
-      "title": { "en": "Dream Skin", "zh": "梦幻皮肤" },
+      "title": {
+        "en": "Dream Skin",
+        "zh": "梦幻皮肤"
+      },
       "description": {
         "en": "Eight clean, glassy themes with wallpapers, accent colors and shareable theme packs.",
         "zh": "8 套清透冷调主题，含弥散光壁纸、强调色和可分享的主题包。"
       },
       "category": "appearance",
-      "labels": ["new"]
+      "labels": [
+        "new"
+      ]
     },
     "dsh-kimino-theme": {
-      "title": { "en": "Kimi no Na wa Theme", "zh": "你的名字主题" },
+      "title": {
+        "en": "Kimi no Na wa Theme",
+        "zh": "你的名字主题"
+      },
       "description": {
         "en": "Your Name theme with wallpapers and logo assets for the DSH web interface.",
         "zh": "《你的名字》主题，含壁纸与标识素材。"
@@ -38,7 +116,10 @@
       "category": "appearance"
     },
     "dsh-web-mobile": {
-      "title": { "en": "Mobile Web Layout", "zh": "网页移动端适配" },
+      "title": {
+        "en": "Mobile Web Layout",
+        "zh": "网页移动端适配"
+      },
       "description": {
         "en": "Adapts the web interface to portrait screens and mobile devices.",
         "zh": "让网页界面适配竖屏和手机。"
@@ -46,7 +127,10 @@
       "category": "interface"
     },
     "dsh-session-continuity": {
-      "title": { "en": "Session Continuity", "zh": "会话接续" },
+      "title": {
+        "en": "Session Continuity",
+        "zh": "会话接续"
+      },
       "description": {
         "en": "Injects a short handoff note into a new session so work continues where it left off.",
         "zh": "新会话开始时注入简短交接提示，接着上次的进度继续。"
@@ -54,22 +138,464 @@
       "category": "interface"
     },
     "dsh-plugin-session-fulltext": {
-      "title": { "en": "Session Full-text Search", "zh": "会话全文搜索" },
+      "title": {
+        "en": "Session Full-text Search",
+        "zh": "会话全文搜索"
+      },
       "description": {
         "en": "Full-text search across session history, with Chinese-friendly matching and match navigation.",
         "zh": "跨会话全文搜索，支持中文短词匹配和命中跳转。"
       },
       "category": "tools",
-      "labels": ["reviewed"]
+      "labels": [
+        "reviewed"
+      ]
     },
     "misakanet": {
-      "title": { "en": "MisakaNet", "zh": "MisakaNet 经验记忆" },
+      "title": {
+        "en": "MisakaNet",
+        "zh": "MisakaNet 经验记忆"
+      },
       "description": {
         "en": "Searches a public MCP service for evidence-rated failure lessons from other agents.",
         "zh": "通过公共 MCP 服务检索带证据评级的失败经验。"
       },
       "category": "memory",
-      "labels": ["caution"]
+      "labels": [
+        "caution"
+      ]
+    },
+    "dshmarket": {
+      "title": {
+        "en": "DSH Market",
+        "zh": "DSH Market"
+      },
+      "description": "在 DSH 内浏览社区插件，并通过可视化市场管理安装。",
+      "category": "tools"
+    },
+    "@linxin666/dsh-client-ui-git-graph": {
+      "title": {
+        "en": "Git Graph",
+        "zh": "Git 分支图"
+      },
+      "description": "在网页界面查看分支历史，并操作工作区 Git 仓库。",
+      "category": "development"
+    },
+    "@linxin666/dsh-client-ui-skill-explorer": {
+      "title": {
+        "en": "Skill Explorer",
+        "zh": "技能浏览器"
+      },
+      "description": "按来源浏览、开关、创建和删除技能。",
+      "category": "skills"
+    },
+    "@linxin666/dsh-client-ui-task-board": {
+      "title": {
+        "en": "Web Task Board",
+        "zh": "网页任务看板"
+      },
+      "description": "在网页界面管理 Agent 任务、定时执行和运行状态。",
+      "category": "interface"
+    },
+    "@linxin666/dsh-remote-web-ui": {
+      "title": {
+        "en": "Remote Web UI",
+        "zh": "扫码远程访问"
+      },
+      "description": "通过局域网或 Cloudflare 隧道扫码配对手机与电脑，访问同一网页界面。",
+      "category": "integrations"
+    },
+    "@linxin666/dsh-ssh": {
+      "title": {
+        "en": "SSH Workspace",
+        "zh": "SSH 工作区"
+      },
+      "description": "连接 SSH 主机，使用远程命令、终端、SFTP 与端口转发。",
+      "category": "integrations"
+    },
+    "dsh-whale-widget": {
+      "title": {
+        "en": "Balance Whale Widget",
+        "zh": "余额小鲸鱼挂件"
+      },
+      "description": "用可自定义的鲸鱼挂件显示账户余额与每轮用量。",
+      "category": "interface"
+    },
+    "dsh-pet": {
+      "title": {
+        "en": "Pet",
+        "zh": "宠物"
+      },
+      "description": "在 DSH 中添加蓝色鱼形桌宠，会玩魔方、吃零食、打盹和聊天，并显示账户余额。",
+      "category": "appearance"
+    },
+    "dsh-ops": {
+      "title": {
+        "en": "DSH Ops",
+        "zh": "DSH 命令工具"
+      },
+      "description": "为 Windows 上的 DSH 提供 Bash、PowerShell 7 和 Rust 命令工具。",
+      "category": "development"
+    },
+    "dsh-plugin-wallpaper-engine": {
+      "title": {
+        "en": "Wallpaper Engine",
+        "zh": "Wallpaper Engine 壁纸"
+      },
+      "description": "在 DSH 界面使用本机 Wallpaper Engine 场景、网页与视频壁纸。",
+      "category": "appearance"
+    },
+    "dsh-better-sidebar": {
+      "title": {
+        "en": "Better Sidebar",
+        "zh": "Better Sidebar"
+      },
+      "description": "在每个会话的侧栏中查看文件、编辑器、变更、任务与旁聊。",
+      "category": "interface"
+    },
+    "@liustack/modlens": {
+      "title": {
+        "en": "ModLens",
+        "zh": "ModLens 视觉接入"
+      },
+      "description": "通过独立视觉供应商为纯文本模型提供图片理解。",
+      "category": "tools"
+    },
+    "dsh-context": {
+      "title": {
+        "en": "Context Dashboard",
+        "zh": "上下文面板"
+      },
+      "description": "通过面板和命令查看上下文组成、变化与压缩情况。",
+      "category": "usage"
+    },
+    "billion-context": {
+      "title": {
+        "en": "Billion Context",
+        "zh": "Billion Context 上下文压缩"
+      },
+      "description": "压缩会话上下文，保留后续工作需要的历史信息。",
+      "category": "memory"
+    },
+    "cc-safety-net": {
+      "title": {
+        "en": "CC Safety Net",
+        "zh": "CC Safety Net"
+      },
+      "description": "在工具执行前检查破坏性命令及对密钥等敏感文件的访问。",
+      "category": "development"
+    },
+    "dsh-cost-meter": {
+      "title": {
+        "en": "Cost Meter",
+        "zh": "费用统计"
+      },
+      "description": "统计会话与每日模型费用，显示账户余额、预算和订阅套餐用量。",
+      "category": "usage"
+    },
+    "@michengai/dsh-skills-manager": {
+      "title": {
+        "en": "Skills Manager",
+        "zh": "技能管理器"
+      },
+      "description": "管理本机与项目技能，支持仓库安装、更新预览及备份恢复。",
+      "category": "skills"
+    },
+    "@linxin666/dsh-pet": {
+      "title": {
+        "en": "Pet",
+        "zh": "宠物"
+      },
+      "description": "在 DSH 网页添加多只宠物，随模型活动做出反应，支持命名、抚摸、喂食和好感度。",
+      "category": "appearance"
+    },
+    "@linxin666/dsh-client-ui-skin-center": {
+      "title": {
+        "en": "@linxin666/dsh-client-ui-skin-center",
+        "zh": "皮肤中心"
+      },
+      "description": "浏览本地主题素材，实时试用并应用网页皮肤。",
+      "category": "appearance"
+    },
+    "@linxin666/dsh-liangshen": {
+      "title": {
+        "en": "LiangShen",
+        "zh": "梁神"
+      },
+      "description": "提供梁神 Agent 预设及输入框切换入口，可在新会话中选用。",
+      "category": "workflow"
+    },
+    "@linxin666/dsh-web-all": {
+      "title": {
+        "en": "Web UI Bundle",
+        "zh": "网页功能组合包"
+      },
+      "description": "组合安装任务、Git、远程访问和界面外观扩展。",
+      "category": "interface"
+    },
+    "@linxin666/dsh-client-ui-market": {
+      "title": {
+        "en": "Community Workshop",
+        "zh": "社区工坊"
+      },
+      "description": "在网页界面浏览并安装社区插件、皮肤和宠物。",
+      "category": "integrations"
+    },
+    "@linxin666/dsh-client-ui-web-ui-settings": {
+      "title": {
+        "en": "DSH Web Settings",
+        "zh": "DSH Web 设置"
+      },
+      "description": "把 dsh-web 系列插件的开关和配置表单集中到 DSH 设置页的一个分区里。",
+      "category": "interface"
+    },
+    "@linxin666/dsh-usage": {
+      "title": {
+        "en": "Usage",
+        "zh": "Usage"
+      },
+      "description": "查看各供应商余额与套餐额度，通过实时用量账本和价格卡片了解费用。",
+      "category": "usage"
+    },
+    "@linxin666/dsh-client-ui-task-board-github": {
+      "title": {
+        "en": "GitHub Task Board",
+        "zh": "GitHub 任务看板"
+      },
+      "description": "把 GitHub Issues 同步到 DSH 网页任务看板。",
+      "category": "integrations"
+    },
+    "@deepseek-harness-tui/dsh-tui": {
+      "title": {
+        "en": "Harness TUI",
+        "zh": "Harness 终端界面"
+      },
+      "description": "通过交互终端界面管理 Agent、会话和工具。",
+      "category": "interface"
+    },
+    "@xmanrui/dsh-im": {
+      "title": {
+        "en": "Im",
+        "zh": "即时通讯"
+      },
+      "description": "将微信、飞书、企微、钉钉、QQ、Telegram、WhatsApp、Slack、Discord、Matrix 接入 DSH。",
+      "category": "integrations"
+    },
+    "@smalltailqwq/dsh-client-ui-skin-maid-atelier": {
+      "title": {
+        "en": "Maid Atelier",
+        "zh": "Maid Atelier（深海女仆工坊）"
+      },
+      "description": "为网页界面添加深蓝鲸鱼女仆主题与角色侧栏。",
+      "category": "appearance"
+    },
+    "@nanmicoder/dsh-agent-teams": {
+      "title": {
+        "en": "Agent Teams",
+        "zh": "Agent 团队协作"
+      },
+      "description": "通过任务依赖、直接消息与网页监视器协调 Agent 团队。",
+      "category": "workflow"
+    },
+    "dsh-bili-scroll": {
+      "title": {
+        "en": "dsh-bili-scroll",
+        "zh": "B 站阅读日报"
+      },
+      "description": "读取视频字幕并筛选内容，生成日报与消息提醒。",
+      "category": "integrations"
+    },
+    "dsh-image-gen": {
+      "title": {
+        "en": "Image Generation",
+        "zh": "图片生成"
+      },
+      "description": "在会话中接入多家图片生成供应商与本地 ComfyUI。",
+      "category": "workflow"
+    },
+    "dsh-connect-workbuddy": {
+      "title": {
+        "en": "WorkBuddy Accounts",
+        "zh": "WorkBuddy 账号模型"
+      },
+      "description": "接入本机已登录的 WorkBuddy 模型，并查看账户积分。",
+      "category": "providers"
+    },
+    "@liustack/modsearch": {
+      "title": {
+        "en": "ModSearch",
+        "zh": "ModSearch 网页搜索"
+      },
+      "description": "搜索网页和 X 内容、抓取正文，并在请求失败时切换搜索引擎。",
+      "category": "tools"
+    },
+    "dsh-mnemon": {
+      "title": {
+        "en": "Mnemon",
+        "zh": "Mnemon 长期记忆"
+      },
+      "description": "为 DeepSeek Harness 提供可组合记忆、可插拔来源与记忆策略。",
+      "category": "memory"
+    },
+    "@changfenhuang/dsh-genui": {
+      "title": {
+        "en": "GenUI",
+        "zh": "GenUI"
+      },
+      "description": "在助手回复中呈现交互图表、表单、流程图等界面。",
+      "category": "interface"
+    },
+    "dsh-free-search": {
+      "title": {
+        "en": "Free Search",
+        "zh": "多引擎网页搜索"
+      },
+      "description": "使用多个引擎搜索和抓取网页，自定义路由、筛选与失败切换。",
+      "category": "tools"
+    },
+    "dsh-univer-office": {
+      "title": {
+        "en": "Univer Office",
+        "zh": "Univer Office 编辑器"
+      },
+      "description": "在 DSH 内创建、编辑和审阅表格、文档与演示稿，支持 Office 导入导出。",
+      "category": "tools"
+    },
+    "@tencent-connect/dsh-qqbot": {
+      "title": {
+        "en": "@tencent-connect/dsh-qqbot",
+        "zh": "QQ Bot 连接"
+      },
+      "description": "通过 QQ Bot 连接 DSH 消息与会话。",
+      "category": "integrations"
+    },
+    "dsh-meme": {
+      "title": {
+        "en": "Memes",
+        "zh": "表情包"
+      },
+      "description": "在输入框挑选表情包，按情绪或关键词搜索，支持图库安装、导入导出和图片学习。",
+      "category": "appearance"
+    },
+    "@michengai/dsh-archive-manager": {
+      "title": {
+        "en": "Archive Manager",
+        "zh": "会话归档管理"
+      },
+      "description": "归档、恢复、收藏和删除会话，并诊断损坏的会话日志。",
+      "category": "interface"
+    },
+    "@michengai/dsh-codex-ui": {
+      "title": {
+        "en": "DSH Codex UI",
+        "zh": "DSH Codex UI"
+      },
+      "description": "为 DSH Web 提供 Codex 风格的侧栏、工作区会话树、全局搜索和轮次导航，支持浅色和深色主题。不要与 ds-bot 同时启用。",
+      "category": "interface"
+    },
+    "dsh-remote": {
+      "title": {
+        "en": "Remote Workspace",
+        "zh": "远程工作区"
+      },
+      "description": "连接 SSH 远程工作区，使用文件操作、镜像同步、部署与端口转发。",
+      "category": "tools"
+    },
+    "@michengai/dsh-agency-agents": {
+      "title": {
+        "en": "DSH Agency Agents",
+        "zh": "DSH Agency Agents"
+      },
+      "description": "在 DSH 中召唤 331 位专业智能体或 5 个内置专家团，协助代码审查、设计、运营和研究，由主会话汇总结果。",
+      "category": "skills"
+    },
+    "@michengai/dsh-im-connect": {
+      "title": {
+        "en": "DSH IM Connect",
+        "zh": "DSH IM Connect"
+      },
+      "description": "通过飞书、Lark、钉钉、企业微信、微信、QQ、Telegram、Discord 或 Slack 把任务交给本机 DSH，并在同一聊天里接收回复、回答问题和审批工具。",
+      "category": "integrations"
+    },
+    "@michengai/dsh-pua": {
+      "title": {
+        "en": "DSH PUA",
+        "zh": "DSH PUA"
+      },
+      "description": "把 PUA 带到 DSH：在 Agent 反复失败、过早放弃或草率宣告完成时，引导它换方法、拿证据，提供多种风格、验收循环和状态卡片。效果取决于所用模型。",
+      "category": "workflow"
+    },
+    "dsh-genui": {
+      "title": {
+        "en": "GenUI",
+        "zh": "GenUI"
+      },
+      "description": "在回复中渲染图表、表单、计算器与小应用，并将操作反馈给模型。",
+      "category": "interface"
+    },
+    "@linxin666/dsh-client-ui-preset-center": {
+      "title": {
+        "en": "Preset Center",
+        "zh": "预设中心"
+      },
+      "description": "在工坊中下载、注册、停用和卸载社区 Agent 预设。",
+      "category": "workflow"
+    },
+    "@tt-a1i/archify-dsh": {
+      "title": {
+        "en": "Archify",
+        "zh": "Archify 架构图"
+      },
+      "description": "用内置技能把方案与代码库整理为可交互的架构图。",
+      "category": "knowledge"
+    },
+    "@openviking/dsh-memory-plugin": {
+      "title": {
+        "en": "OpenViking Memory",
+        "zh": "OpenViking 记忆"
+      },
+      "description": "为 DSH 接入 OpenViking 记忆与上下文服务。",
+      "category": "memory"
+    },
+    "@wxg-prc-cpg/browser-skill-dsh-plugin": {
+      "title": {
+        "en": "BrowserSkill",
+        "zh": "BrowserSkill"
+      },
+      "description": "通过腾讯 BrowserSkill，让 Agent 在你已登录的 Chrome 或 Edge 中浏览网页、填写表单和截图，并在 DSH Web 里实时查看。需要安装 bsk 命令行和浏览器扩展。",
+      "category": "tools"
+    },
+    "ds-bot": {
+      "title": {
+        "en": "DS Bot",
+        "zh": "DS Bot"
+      },
+      "description": "创建带记忆的长期 Bot，通过私聊和群聊交流，并让多个 Bot 分工协作。",
+      "category": "workflow"
+    },
+    "@smalltailqwq/dsh-client-ui-skin-deep-whale-manager": {
+      "title": {
+        "en": "Deep Whale Skin Manager",
+        "zh": "Deep Whale Skin Manager"
+      },
+      "description": "在设置页切换已安装的皮肤，并调整各皮肤自带的选项。",
+      "category": "appearance"
+    },
+    "@smalltailqwq/dsh-client-ui-skin-orca-link": {
+      "title": {
+        "en": "Orca Link",
+        "zh": "Orca Link（虎鲸链路）"
+      },
+      "description": "提供黑鲸主题、直角界面、线条图标及明暗配色。",
+      "category": "appearance"
+    },
+    "dsh-pocket": {
+      "title": {
+        "en": "DSH Pocket",
+        "zh": "DSH Pocket"
+      },
+      "description": "通过局域网或公网将手机与电脑 DSH 配对，同步访问会话。",
+      "category": "integrations"
     }
   }
 }
