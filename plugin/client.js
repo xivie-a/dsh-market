@@ -18,6 +18,17 @@ window.__ModuleLoader__.load({
       all: '全部',
       featured: '精选 · 下载最多',
       allPlugins: '全部插件',
+      background: '背景',
+      preset: '配色',
+      customImage: '自定义图片地址',
+      apply: '应用',
+      close: '关闭',
+      author: '作者',
+      category: '分类',
+      repo: '仓库',
+      homepage: '主页',
+      versionLabel: '版本',
+      updated: '更新',
       install: '安装',
       installed: '已安装',
       update: '可更新',
@@ -50,6 +61,17 @@ window.__ModuleLoader__.load({
       all: 'All',
       featured: 'Featured · most downloaded',
       allPlugins: 'All plugins',
+      background: 'Background',
+      preset: 'Palette',
+      customImage: 'Image URL',
+      apply: 'Apply',
+      close: 'Close',
+      author: 'Author',
+      category: 'Category',
+      repo: 'Repo',
+      homepage: 'Home',
+      versionLabel: 'Versions',
+      updated: 'Updated',
       install: 'Install',
       installed: 'Installed',
       update: 'Update',
@@ -171,6 +193,62 @@ window.__ModuleLoader__.load({
   .dm-appear, .dm-skel, .dm-toast { animation: none !important; }
   .dm-card, .dm-hero-card, .dm-btn, .dm-thumb { transition: none !important; }
 }
+.dm-root[data-bg="paper"] { background:
+  radial-gradient(900px 300px at 0% -6%, rgba(255,186,110,.14), transparent 68%),
+  radial-gradient(760px 260px at 100% -4%, rgba(255,120,120,.10), transparent 70%); }
+.dm-root[data-bg="mint"] { background:
+  radial-gradient(900px 300px at 10% -6%, rgba(60,200,170,.13), transparent 68%),
+  radial-gradient(760px 260px at 92% 0%, rgba(90,170,255,.10), transparent 70%); }
+.dm-root[data-bg="none"] { background: transparent; }
+.dm-tools-row { display: flex; align-items: center; gap: 8px; justify-content: space-between; flex-wrap: wrap; }
+.dm-bgpop { position: absolute; top: 46px; right: 0; z-index: 40; width: 268px; padding: 14px; border-radius: 14px;
+  border: 1px solid var(--dm-line); background: rgba(127,127,127,.08); backdrop-filter: blur(14px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.18); display: flex; flex-direction: column; gap: 12px; }
+.dm-bgpop-label { font-size: 11px; opacity: .55; }
+.dm-swatches { display: flex; gap: 8px; }
+.dm-swatch { width: 32px; height: 32px; border-radius: 10px; border: 1px solid rgba(127,127,127,.3); cursor: pointer;
+  transition: transform .15s, box-shadow .15s; }
+.dm-swatch:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,.16); }
+.dm-swatch[aria-pressed="true"] { outline: 2px solid var(--dm-accent); outline-offset: 2px; }
+.dm-swatch--aurora { background: linear-gradient(135deg, #4d6bfe, #8f5cff); }
+.dm-swatch--paper { background: linear-gradient(135deg, #ffba6e, #ff7878); }
+.dm-swatch--mint { background: linear-gradient(135deg, #3cc8aa, #5aaaff); }
+.dm-swatch--none { background: repeating-linear-gradient(45deg, rgba(127,127,127,.25) 0 4px, transparent 4px 8px); }
+.dm-bgpop input { width: 100%; box-sizing: border-box; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--dm-line);
+  background: transparent; color: inherit; font: inherit; font-size: 12px; }
+.dm-bgrow { display: flex; gap: 6px; }
+.dm-bgrow button { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--dm-line); background: transparent;
+  color: inherit; cursor: pointer; font: inherit; font-size: 12px; }
+.dm-columns { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+.dm-main { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.dm-detail { position: sticky; top: 4px; display: flex; flex-direction: column; gap: 12px; padding: 18px; border-radius: 16px;
+  border: 1px solid rgba(127,127,127,.16); background: rgba(127,127,127,.055); animation: dm-slide .22s cubic-bezier(.2,.7,.3,1) both; }
+@keyframes dm-slide { from { opacity: 0; transform: translateX(14px) } to { opacity: 1; transform: none } }
+.dm-detail-head { display: flex; gap: 12px; align-items: center; }
+.dm-detail-head .dm-thumb { width: 52px; height: 52px; border-radius: 14px; font-size: 20px; }
+.dm-detail h2 { margin: 0; font-size: 17px; font-weight: 650; }
+.dm-detail-desc { margin: 0; font-size: 13px; line-height: 1.7; opacity: .8; white-space: pre-wrap; }
+.dm-detail-rows { display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.dm-detail-row { display: flex; gap: 8px; }
+.dm-detail-row span:first-child { width: 52px; flex: none; opacity: .45; }
+.dm-detail-row a { color: var(--dm-accent); text-decoration: none; word-break: break-all; }
+.dm-detail-row a:hover { text-decoration: underline; }
+.dm-versions { display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow: auto; }
+.dm-version { display: flex; justify-content: space-between; gap: 10px; padding: 5px 8px; border-radius: 7px;
+  background: rgba(127,127,127,.08); font-size: 11.5px; }
+.dm-version em { font-style: normal; opacity: .5; }
+.dm-detail-foot { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.dm-close { border: 0; background: transparent; color: inherit; opacity: .45; cursor: pointer; font-size: 18px; line-height: 1; }
+.dm-close:hover { opacity: .9; }
+.dm-card { cursor: pointer; }
+.dm-card:hover .dm-thumb { transform: translateY(-3px) scale(1.08); box-shadow: 0 8px 18px rgba(0,0,0,.14); }
+.dm-thumb { transition: transform .2s cubic-bezier(.2,.7,.3,1), box-shadow .2s; }
+.dm-card:hover .dm-title { transform: translateX(2px); }
+.dm-title, .dm-hero-title { transition: transform .2s; }
+.dm-card:hover .dm-tag { transform: translateY(-2px); }
+.dm-tag { transition: transform .2s .04s; }
+.dm-card:hover .dm-btn { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(77,107,254,.3); }
+.dm-card[aria-current="true"] { border-color: var(--dm-accent); background: rgba(77,107,254,.09); }
 .dm-page { height: 100%; overflow: auto; }
 .dm-page .dm-root { height: auto; }
 `
@@ -200,11 +278,72 @@ window.__ModuleLoader__.load({
       strokeWidth: 2, strokeLinecap: 'round', 'aria-hidden': true
     }, h('circle', { cx: 11, cy: 11, r: 7 }), h('path', { d: 'm20 20-3.5-3.5' }))
 
+    const PaletteIcon = () => h('svg', {
+      width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+      strokeWidth: 1.9, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true
+    }, h('path', { d: 'M12 3a9 9 0 1 0 0 18h1.5a2.5 2.5 0 0 0 0-5H13a2 2 0 0 1 0-4h4a4 4 0 0 0 4-4 5 5 0 0 0-5-5Z' }),
+      h('circle', { cx: 8, cy: 9, r: 1.2, fill: 'currentColor', stroke: 'none' }),
+      h('circle', { cx: 12, cy: 6.5, r: 1.2, fill: 'currentColor', stroke: 'none' }))
+
     /** 没图标的插件用名字生成一个稳定的淡色底，比统一灰块有辨识度。 */
     function tintOf(name) {
       let hash = 0
       for (const char of String(name)) hash = (hash * 31 + char.codePointAt(0)) % 360
       return `hsl(${hash} 58% 52% / 0.18)`
+    }
+
+    /** 图标块：有图就用图，没有就用名字首字 + 稳定淡色底。 */
+    function thumbOf(entry, title) {
+      const label = title ?? pick(entry.title, entry.name)
+      return h('div', {
+        className: 'dm-thumb',
+        style: entry.icon ? undefined : { background: tintOf(entry.name), borderColor: 'transparent' }
+      }, entry.icon
+        ? h('img', {
+          src: entry.icon,
+          alt: '',
+          loading: 'lazy',
+          referrerPolicy: 'no-referrer',
+          onError: (event) => { event.currentTarget.style.display = 'none' }
+        })
+        : String(label).slice(0, 1).toUpperCase())
+    }
+
+    const BG_KEY = 'dsh-market-xivie:bg'
+    const BG_PRESETS = [
+      { id: 'aurora', zh: '极光', en: 'Aurora' },
+      { id: 'paper', zh: '暖沙', en: 'Sand' },
+      { id: 'mint', zh: '青雾', en: 'Mint' },
+      { id: 'none', zh: '无背景', en: 'Plain' }
+    ]
+
+    function readBg() {
+      try {
+        const saved = JSON.parse(window.localStorage.getItem(BG_KEY) ?? 'null')
+        if (saved?.kind === 'image' && typeof saved.url === 'string') return saved
+        if (saved?.kind === 'preset' && BG_PRESETS.some((preset) => preset.id === saved.id)) return saved
+      } catch {
+        // 存储不可用时用默认
+      }
+      return { kind: 'preset', id: 'aurora' }
+    }
+
+    function saveBg(value) {
+      try {
+        window.localStorage.setItem(BG_KEY, JSON.stringify(value))
+      } catch {
+        // 存不下就只在这次会话生效
+      }
+    }
+
+    /** 自定义背景图时盖一层和正文同色的半透明遮罩，保证文字可读。 */
+    function scrimOf() {
+      const color = getComputedStyle(document.body).color
+      const match = /rgba?\((\d+),\s*(\d+),\s*(\d+)/u.exec(color)
+      const luminance = match
+        ? (Number(match[1]) * 0.299 + Number(match[2]) * 0.587 + Number(match[3]) * 0.114) / 255
+        : 1
+      return luminance > 0.5 ? 'rgba(255,255,255,0.86)' : 'rgba(18,18,20,0.74)'
     }
 
     const LOG = '[my-market]'
@@ -327,6 +466,16 @@ window.__ModuleLoader__.load({
       const [busy, setBusy] = React.useState('')
       const [notice, setNotice] = React.useState(undefined)
       const [bundles, setBundles] = React.useState(new Map())
+      const [selected, setSelected] = React.useState(undefined)
+      const initialBg = React.useRef(readBg()).current
+      const [bg, setBg] = React.useState(initialBg)
+      const [bgOpen, setBgOpen] = React.useState(false)
+      const [bgDraft, setBgDraft] = React.useState(initialBg.kind === 'image' ? initialBg.url : '')
+      const applyBg = (value) => {
+        setBg(value)
+        saveBg(value)
+        setBgOpen(false)
+      }
 
       const load = React.useCallback(async (force = false) => {
         setCatalog((current) => ({ ...current, status: current.entries ? 'ready' : 'loading' }))
@@ -423,8 +572,42 @@ window.__ModuleLoader__.load({
         h('div', null,
           h('h1', null, t('title'), h('span', { className: 'dm-pill' }, `${entries.length} ${t('plugins')}`)),
           h('p', { className: 'dm-sub' }, t('subtitle'))),
-        h('button', { className: 'dm-ghost', type: 'button', onClick: () => void load(true) },
-          h(RefreshIcon), t('refresh')))
+        h('div', { style: { position: 'relative', display: 'flex', gap: 8 } },
+          h('button', {
+            className: 'dm-ghost',
+            type: 'button',
+            'aria-expanded': bgOpen,
+            onClick: () => setBgOpen(!bgOpen)
+          }, h(PaletteIcon), t('background')),
+          h('button', { className: 'dm-ghost', type: 'button', onClick: () => void load(true) },
+            h(RefreshIcon), t('refresh')),
+          bgOpen ? h('div', { className: 'dm-bgpop' },
+            h('span', { className: 'dm-bgpop-label' }, t('preset')),
+            h('div', { className: 'dm-swatches' }, ...BG_PRESETS.map((preset) => h('button', {
+              key: preset.id,
+              className: `dm-swatch dm-swatch--${preset.id}`,
+              type: 'button',
+              title: pick(preset, preset.id),
+              'aria-pressed': bg.kind === 'preset' && bg.id === preset.id,
+              'aria-label': pick(preset, preset.id),
+              onClick: () => applyBg({ kind: 'preset', id: preset.id })
+            }))),
+            h('span', { className: 'dm-bgpop-label' }, t('customImage')),
+            h('div', { className: 'dm-bgrow' },
+              h('input', {
+                value: bgDraft,
+                placeholder: 'https://…',
+                'aria-label': t('customImage'),
+                onChange: (event) => setBgDraft(event.target.value)
+              }),
+              h('button', {
+                type: 'button',
+                onClick: () => {
+                  const url = bgDraft.trim()
+                  if (url === '') return applyBg({ kind: 'preset', id: 'aurora' })
+                  applyBg({ kind: 'image', url })
+                }
+              }, t('apply')))) : null))
 
       const tools = h('div', { className: 'dm-search-wrap' },
         h(SearchIcon),
@@ -472,26 +655,24 @@ window.__ModuleLoader__.load({
             disabled: busy !== '',
             onClick: () => void install(entry)
           }, label)
-        const thumb = h('div', {
-          className: 'dm-thumb',
-          style: entry.icon ? undefined : { background: tintOf(entry.name), borderColor: 'transparent' }
-        }, entry.icon
-          ? h('img', {
-            src: entry.icon,
-            alt: '',
-            loading: 'lazy',
-            referrerPolicy: 'no-referrer',
-            onError: (event) => { event.currentTarget.style.display = 'none' }
-          })
-          : String(title).slice(0, 1).toUpperCase())
+        const thumb = thumbOf(entry, title)
         const meta = h('div', { className: 'dm-meta' },
           version ? h('span', { className: 'dm-tag' }, `v${version}`) : null,
           stars !== undefined ? h('span', { className: 'dm-tag' }, `★ ${formatCount(stars)}`) : null,
           downloads !== undefined ? h('span', { className: 'dm-tag' }, `↓ ${formatCount(downloads)}`) : null)
         const delay = { animationDelay: `${Math.min(index, 14) * 22}ms` }
+        const current = selected?.name === entry.name ? 'true' : undefined
+        const open = (event) => {
+          if (event.target.closest('button, a')) return
+          setSelected(entry)
+        }
 
         if (hero) {
-          return h('article', { className: 'dm-hero-card dm-appear', key: entry.name, style: delay },
+          return h('article', {
+            className: 'dm-hero-card dm-appear', key: entry.name, style: delay,
+            'aria-current': current, onClick: open, role: 'button', tabIndex: 0,
+            onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') setSelected(entry) }
+          },
             h('div', { className: 'dm-card-top' },
               thumb,
               h('div', { className: 'dm-titles' },
@@ -500,7 +681,11 @@ window.__ModuleLoader__.load({
             h('p', { className: 'dm-hero-desc' }, pick(entry.description, '')),
             h('div', { className: 'dm-hero-foot' }, meta, action))
         }
-        return h('article', { className: 'dm-card dm-appear', key: entry.name, style: delay },
+        return h('article', {
+          className: 'dm-card dm-appear', key: entry.name, style: delay,
+          'aria-current': current, onClick: open, role: 'button', tabIndex: 0,
+          onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') setSelected(entry) }
+        },
           h('div', { className: 'dm-card-top' },
             thumb,
             h('div', { className: 'dm-titles' },
@@ -542,11 +727,78 @@ window.__ModuleLoader__.load({
             h('div', { className: 'dm-grid' }, ...gridEntries.map((entry, index) => cardOf(entry, index + featured.length)))))
       }
 
-      return h('div', { className: 'dm-root' },
+      const detail = selected === undefined ? null : (() => {
+        const entry = selected
+        const title = pick(entry.title, entry.name)
+        const status = statusOf(entry)
+        const settled = status === 'installed' || status === 'provided'
+        const versions = entry.versions ?? []
+        const row = (label, value) => (value === undefined || value === ''
+          ? null
+          : h('div', { className: 'dm-detail-row' }, h('span', null, label), h('span', null, value)))
+        const link = (label, href) => (href === undefined
+          ? null
+          : h('div', { className: 'dm-detail-row' },
+            h('span', null, label),
+            h('a', { href, target: '_blank', rel: 'noopener noreferrer' }, href.replace(/^https?:\/\//u, ''))))
+        return h('aside', { className: 'dm-detail', 'aria-label': title },
+          h('div', { className: 'dm-detail-head' },
+            thumbOf(entry, title),
+            h('div', { className: 'dm-titles', style: { minWidth: 0 } },
+              h('h2', { title }, title),
+              h('code', { className: 'dm-pkg' }, entry.name)),
+            h('button', {
+              className: 'dm-close', type: 'button', 'aria-label': t('close'), onClick: () => setSelected(undefined)
+            }, '×')),
+          h('p', { className: 'dm-detail-desc' }, pick(entry.description, '')),
+          h('div', { className: 'dm-detail-rows' },
+            row(t('author'), entry.author),
+            row(t('category'), categories[entry.metadata?.category] ? pick(categories[entry.metadata.category].title, entry.metadata.category) : undefined),
+            link(t('repo'), entry.repository?.url),
+            link(t('homepage'), entry.homepage),
+            row(t('versionLabel'), `${versions.length}`),
+            row(t('updated'), versions[0]?.publishTimestamp
+              ? new Date(versions[0].publishTimestamp * 1000).toLocaleDateString('zh-CN')
+              : undefined)),
+          versions.length === 0 ? null : h('div', { className: 'dm-versions' },
+            ...versions.slice(0, 10).map((version) => h('div', { className: 'dm-version', key: version.version },
+              h('span', null, `v${version.version}`),
+              h('em', null, version.publishTimestamp
+                ? new Date(version.publishTimestamp * 1000).toLocaleDateString('zh-CN')
+                : '')))),
+          h('div', { className: 'dm-detail-foot' },
+            h('span', { className: 'dm-meta' },
+              sortKeyOf(entry, 'stars') !== undefined ? h('span', { className: 'dm-tag' }, `★ ${formatCount(sortKeyOf(entry, 'stars'))}`) : null,
+              sortKeyOf(entry, 'downloads') !== undefined ? h('span', { className: 'dm-tag' }, `↓ ${formatCount(sortKeyOf(entry, 'downloads'))}`) : null),
+            settled
+              ? h('span', { className: 'dm-installed' }, `✓ ${t('installed')}`)
+              : h('button', {
+                className: 'dm-btn dm-btn--primary',
+                type: 'button',
+                disabled: busy !== '',
+                onClick: () => void install(entry)
+              }, busy === entry.name ? t('installing') : t('install'))))
+      })()
+
+      const rootProps = { className: 'dm-root' }
+      if (bg.kind === 'image' && bg.url !== '') {
+        const scrim = scrimOf()
+        rootProps.style = {
+          backgroundImage: `linear-gradient(${scrim}, ${scrim}), url("${bg.url}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }
+      } else {
+        rootProps['data-bg'] = bg.kind === 'preset' ? bg.id : 'aurora'
+      }
+
+      return h('div', rootProps,
         header,
         tools,
         chips,
-        body,
+        h('div', { className: selected === undefined ? 'dm-main' : 'dm-columns' },
+          h('div', { className: 'dm-main' }, body),
+          detail),
         notice === undefined ? null : h('div', { className: `dm-toast dm-toast--${notice.kind}`, role: 'status' },
           h('span', null, notice.text),
           h('button', {
