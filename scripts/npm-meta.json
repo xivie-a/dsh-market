@@ -1,0 +1,362 @@
+{
+  "dsh-dream-skin": {
+    "version": "11.4.1",
+    "description": "DeepSeek Harness 换肤插件（Dream Skin for DSH）：8 套 iOS / Linear 式清透冷调的高质感主题 + 弥散光壁纸 + 每皮肤智能背景 + 强调色 + 主题包分享，把换肤做成材质与配色克制的高级感工艺，而非贴图。Works in native DSH Web and third-party desktop clients (DSH Desktop): 8 original premium themes, glass materials, wallpaper 2.0",
+    "icon": "ok",
+    "iconFile": "icons/dsh-dream-skin.svg"
+  },
+  "dsh-kimino-theme": {
+    "version": "68.4.2",
+    "description": "Kimi no Na wa (Your Name) theme for DeepSeek Harness Web GUI — dynamic Cordis plugin source (host + client halves) plus an installable dsh bundle, with wallpaper/logo assets",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "dsh-web-mobile": {
+    "version": "3.2.3",
+    "description": "尽可能的使dsh适配竖屏等移动端设备",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "dsh-session-continuity": {
+    "version": "0.3.2",
+    "description": "新会话开始时注入一条很小的接续指针；没有交接文档时优先复用上个会话的压缩摘要。",
+    "icon": "ok",
+    "iconFile": "icons/dsh-session-continuity.svg"
+  },
+  "dsh-plugin-session-fulltext": {
+    "version": "1.0.0",
+    "description": "CJK-friendly full-text content search for the DSH sidebar: literal substring search over Session history, click-to-reveal highlighting, and in-session previous/next match navigation.",
+    "icon": "ok",
+    "iconFile": "icons/dsh-plugin-session-fulltext.svg"
+  },
+  "misakanet": {
+    "version": "3.5.0",
+    "description": "MisakaNet failure-memory skill — evidence-rated failure lessons for AI agents. DSH bundle: registers the MCP tools as mcp__misakanet__* (misakanet_search/get_lesson/…), served by the public Streamable HTTP endpoint https://misakanet.org/mcp — live tools f",
+    "icon": "ok",
+    "iconFile": "icons/misakanet.svg"
+  },
+  "dshmarket": {
+    "version": "1.73.11",
+    "description": "Visual plugin market inside DeepSeek Harness — browse, search, and one-click install community plugins. · DSH 可视化插件市场：逛一逛，点一下，装好。",
+    "icon": "ok",
+    "iconFile": "icons/dshmarket.svg"
+  },
+  "@linxin666/dsh-client-ui-git-graph": {
+    "version": "0.4.14",
+    "description": "External dsh web GUI plugin: a blank-session git branch selector + Git graph, with real host-side git operations and guards, as a dsh profile bundle",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-client-ui-git-graph.svg"
+  },
+  "@linxin666/dsh-client-ui-skill-explorer": {
+    "version": "0.4.15",
+    "description": "DSH skill center: browse loaded skills by source (bundled / project / user / custom / runtime), enable or disable, create and delete, in a web GUI panel.",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-client-ui-skill-explorer.svg"
+  },
+  "@linxin666/dsh-client-ui-task-board": {
+    "version": "0.4.15",
+    "description": "Host-authoritative task board for the DSH Web GUI with real session execution, Host cron scheduling, and optional cross-platform idle-sleep protection; mounted without DSH source changes.",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-client-ui-task-board.svg"
+  },
+  "@linxin666/dsh-remote-web-ui": {
+    "version": "0.4.15",
+    "description": "Scan-to-pair remote access for the dsh web GUI that shares one official interface: a QR beside the settings button pairs phones and PCs into the same Web GUI (a portrait-touch adaptation layer for phones, full desktop on PCs) through one-time tokens and r",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-remote-web-ui.svg"
+  },
+  "@linxin666/dsh-ssh": {
+    "version": "0.4.15",
+    "description": "Remote SSH operations for the dsh web GUI: host config store (~/.dsh/dsh-ssh.json, import from ~/.ssh/config), a persistent ssh2 connection pool with jump-host support, exec / PTY web terminal / SFTP transfer / local port-forward tunnels / cluster executi",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-ssh.svg"
+  },
+  "dsh-whale-widget": {
+    "version": "0.4.2",
+    "description": "DSH Web 界面右下角的 DeepSeek 余额小鲸鱼挂件:余额/今日已用/峰谷定价、自定义泡泡点击序列(文本/余额/今日/峰谷/图片/随机语句与并列加权选择)、逐行样式与字体、悬浮快捷编辑、音效与每轮消耗、自定义角色/动图/音效、吸附与翻转自定义",
+    "icon": "ok",
+    "iconFile": "icons/dsh-whale-widget.png"
+  },
+  "dsh-pet": {
+    "version": "0.4.3",
+    "description": "吃白饭的蓝色大肥鱼，赖在 DeepSeek Harness 里不走了。平时爱玩魔方、爱吃各种零食、偶尔打个盹，闲不住就在桌面上溜达两圈，被你拖来甩去也照旧赖着；你忙起来它跟着忙前忙后，也会帮你打理余额钱包，闲下来爱碎碎念，还乐意陪你唠两句。",
+    "icon": "ok",
+    "iconFile": "icons/dsh-pet.png"
+  },
+  "dsh-ops": {
+    "version": "0.4.4",
+    "description": "Native file and PTC tools for DSH on Windows x64, Linux x64 and macOS arm64/x64; Windows-only optional Bash payload and host PowerShell integration",
+    "icon": "ok",
+    "iconFile": "icons/dsh-ops.png"
+  },
+  "dsh-plugin-wallpaper-engine": {
+    "version": "1.4.0",
+    "description": "Wallpaper Engine backgrounds for the DSH web GUI: render your local Wallpaper Engine wallpapers behind the chat — Scene and Web in real time through the bundled WebWallGL engine, Video played directly — with iOS-style liquid glass, adjustable blur/scrim/b",
+    "icon": "ok",
+    "iconFile": "icons/dsh-plugin-wallpaper-engine.png"
+  },
+  "dsh-better-sidebar": {
+    "version": "0.30.0",
+    "description": "Better Sidebar for DSH — file tree, editor, changes, tasks and side chat in one column, separate for every conversation. Also exposes a service other plugins use to register sidebar tabs and file viewers.",
+    "icon": "ok",
+    "iconFile": "icons/dsh-better-sidebar.svg"
+  },
+  "@liustack/modlens": {
+    "version": "3.27.2",
+    "description": "Plug-in vision for text-only LLMs, powered by the free Antigravity CLI",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "dsh-context": {
+    "version": "0.81.2",
+    "description": "A DeepSeek Harness plugin for context insight and management, with context dashboard and context command, for understanding how the context is made of, and how it evolves.",
+    "icon": "ok",
+    "iconFile": "icons/dsh-context.svg"
+  },
+  "billion-context": {
+    "version": "0.1.212",
+    "description": "A context-compression plugin — small context windows (a 100K context is enough), 5x fewer tokens, month-long single sessions (billions of tokens), and compression quality — for all agents: pi, OpenCode, Codex, Claude Code, and more. billion-context is all",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "cc-safety-net": {
+    "version": "2.7.3",
+    "description": "A coding agent CLI hook - block destructive commands and secret file access",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "dsh-cost-meter": {
+    "version": "1.9.57",
+    "description": "DeepSeek Harness 会话费用统计插件:本会话成本、当日费用、历史记录与官方价格同步,支持多厂商多模型价格计费(内置 170+ 模型 ID 价格目录与自动匹配)、主流 Coding Plan 订阅额度查询与显示(16 家,含 WorkBuddy 官方积分、OpenDesign 工作区查询、含小米 MiMo Token Plan 控制台 Cookie 查询、SCNet Token Plan 本地 Credits 计量与火山方舟 Volcano Ark Coding Plan AK/SK 签名查询",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "@michengai/dsh-skills-manager": {
+    "version": "1.2.29",
+    "description": "DSH Skills Manager — 在 DeepSeek Harness 中统一加载并安全管理本机 Agent Skills · Load and safely manage local Agent Skills in DSH",
+    "icon": "ok",
+    "iconFile": "icons/michengai__dsh-skills-manager.svg"
+  },
+  "@linxin666/dsh-pet": {
+    "version": "0.4.15",
+    "description": "Multi-pet companion plugin for the dsh web GUI: a registry-driven floating pet that reacts to model activity, with per-pet naming, petting/feeding interactions and an affinity score",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-pet.svg"
+  },
+  "@linxin666/dsh-client-ui-skin-center": {
+    "version": "0.4.15",
+    "description": "In-GUI skin center for the dsh web GUI — the single skin package: skins are pure asset directories (built-in plus $DSH_HOME/skins) loaded and rendered only by the skin center; live try-on and one-click apply switch atomically in the page (no reload, no co",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-client-ui-skin-center.svg"
+  },
+  "@linxin666/dsh-liangshen": {
+    "version": "0.4.15",
+    "description": "LiangShen (梁神) agent preset plus its composer lever for the dsh web GUI. The host half declares the bundled preset to the harness's agent-preset registry at activation (declare = enabled), so the preset is selectable for new sessions without writing anyth",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-liangshen.svg"
+  },
+  "@linxin666/dsh-web-all": {
+    "version": "0.4.15",
+    "description": "DSH Web UI 全家桶聚合插件：一键安装全部功能插件（task-board / pet / web-ui-settings / skin-center / community-plugins / compat shim）。compat 桥接层已并入本包（src/client），无需独立 compat npm 包。",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-web-all.svg"
+  },
+  "@linxin666/dsh-client-ui-market": {
+    "version": "0.4.15",
+    "description": "Workshop browser card: browse skins, pets and community plugins from dsh-market.com and install them in the GUI (assets into the DSH home directories, plugins through the optional plugin manager).",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-client-ui-market.svg"
+  },
+  "@linxin666/dsh-client-ui-web-ui-settings": {
+    "version": "0.4.15",
+    "description": "Web UI plugin group for the dsh settings page: one first-level settings section that hosts the dsh-web family plugins' enable switches and configuration forms.",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-client-ui-web-ui-settings.svg"
+  },
+  "@linxin666/dsh-usage": {
+    "version": "0.4.15",
+    "description": "Usage statistics plugin for the dsh web GUI: per-provider balance and coding-plan quota detection plus a live token usage ledger, with a compact price glance card above the sidebar's Settings row",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-usage.svg"
+  },
+  "@linxin666/dsh-client-ui-task-board-github": {
+    "version": "0.4.15",
+    "description": "External provider extension for the dsh Web GUI task board that synchronizes GitHub Issues into the board; shipped as a dsh profile bundle with no DSH source changes.",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-client-ui-task-board-github.svg"
+  },
+  "@deepseek-harness-tui/dsh-tui": {
+    "version": "0.18.0",
+    "description": "Interactive terminal interface for DeepSeek Harness agents, sessions and tools.",
+    "icon": "ok",
+    "iconFile": "icons/deepseek-harness-tui__dsh-tui.svg"
+  },
+  "@xmanrui/dsh-im": {
+    "version": "5.10.0",
+    "description": "把微信、飞书、企微、钉钉、QQ、Telegram、WhatsApp、Slack、Discord、Matrix接入DSH。 Connect Telegram, WhatsApp, Slack, Discord, Matrix, WeChat, Feishu, WeCom, DingTalk, and QQ to DSH.",
+    "icon": "ok",
+    "iconFile": "icons/xmanrui__dsh-im.webp"
+  },
+  "@smalltailqwq/dsh-client-ui-skin-maid-atelier": {
+    "version": "0.1.9",
+    "description": "Two whale maids, navy lace and a chibi sidebar turn DSH into a maid atelier.",
+    "icon": "ok",
+    "iconFile": "icons/smalltailqwq__dsh-client-ui-skin-maid-atelier.png"
+  },
+  "@nanmicoder/dsh-agent-teams": {
+    "version": "0.1.28",
+    "description": "AgentTeams for DeepSeek Harness: multi-agent team collaboration (captain, members, tasks with dependencies, messaging) driven by natural language, with a tree monitor in the web GUI",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "dsh-bili-scroll": {
+    "version": "2.5.0",
+    "description": "DSH 插件：每天替你刷一轮 B站 —— 读字幕挑出值得的、写一份日报，值得的就 @ 你",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "dsh-image-gen": {
+    "version": "0.10.2",
+    "description": "Bring ChatGPT-like image generation to DeepSeek Harness — Gemini, OpenAI, Seedream, DashScope, local ComfyUI & more.",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "dsh-connect-workbuddy": {
+    "version": "5.18.1",
+    "description": "把本机登录的 WorkBuddy 模型（国内版与国际版）接入 DeepSeek Harness：每次刷新按上游目录自动读取每个模型的积分倍率，支持逐模型图片输入开关、多账号切换与账号池自动换号，并提供每日签到、卡片与输入框里的胶囊积分读数等只读积分概览。",
+    "icon": "ok",
+    "iconFile": "icons/dsh-connect-workbuddy.png"
+  },
+  "@liustack/modsearch": {
+    "version": "5.10.11",
+    "description": "The strongest free web search plugin for coding agents. Plug-in web search, X search, and page fetch for models without native web access. Free out of the box: no signup, no API key (Firecrawl keyless, 1,000 free credits/month)",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "dsh-mnemon": {
+    "version": "0.5.40",
+    "description": "Composable, view-based context for DeepSeek Harness. Pluggable sources and strategies, with layered memory and self-evolving skills out of the box.",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "@changfenhuang/dsh-genui": {
+    "version": "0.15.0",
+    "description": "GenUI for DeepSeek Harness: interactive UI components rendered inline in assistant replies via the ```dsh-ui fence — layout, charts, plots, forms, quizzes, mermaid, 3D scenes, and an action event loop back to the model. Ships the fence-teaching host plugi",
+    "icon": "ok",
+    "iconFile": "icons/changfenhuang__dsh-genui.svg"
+  },
+  "dsh-free-search": {
+    "version": "0.9.31",
+    "description": "Free web search for DeepSeek Harness: 27 engines (Bing/DuckDuckGo/AnySearch/SearXNG/Exa/Tavily/Keenable/Firecrawl/Parallel/You.com keyless; Zhihu global/site via MCP and Perplexity/SerpBase/DeepSeek (official + native tools/search)/Baidu/Kimi/Aliyun/Douba",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "dsh-univer-office": {
+    "version": "0.4.0",
+    "description": "DSH × Univer integration with a bundled collaboration Gateway and Viewer: inline previews, live floating Worktree windows, and session-end review actions in DeepSeek Harness.",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "@tencent-connect/dsh-qqbot": {
+    "version": "0.5.5",
+    "description": "在 QQ 私聊和群聊里直接对话 DeepSeek Harness。 Chat with DeepSeek Harness in QQ private and group chats.",
+    "icon": "ok",
+    "iconFile": "icons/tencent-connect__dsh-qqbot.svg"
+  },
+  "dsh-meme": {
+    "version": "0.1.77",
+    "description": "DeepSeek Harness 表情包插件：输入框一键发图（图库/情绪多选筛选、悬浮大图预览）、多图库开关、情绪与关键词搜图、AI 学图，图库可从市场一键安装或导入/导出 ZIP。",
+    "icon": "ok",
+    "iconFile": "icons/dsh-meme.jpg"
+  },
+  "@michengai/dsh-archive-manager": {
+    "version": "1.2.6",
+    "description": "归档、恢复、收藏和永久删除会话，并诊断损坏的会话日志。 · Archive, restore, favorite, and permanently delete sessions, and diagnose damaged session logs.",
+    "icon": "ok",
+    "iconFile": "icons/michengai__dsh-archive-manager.svg"
+  },
+  "@michengai/dsh-codex-ui": {
+    "version": "2.0.17",
+    "description": "DSH Codex UI — 为 DeepSeek Harness 提供极速历史召回、全屏设置皮肤、原生物理毛玻璃换肤、模块化侧栏与桌面原生窗口菜单 · Input enhancement, settings skin, native glass theme, modular sidebar, and desktop titlebar menu for DSH",
+    "icon": "ok",
+    "iconFile": "icons/michengai__dsh-codex-ui.svg"
+  },
+  "dsh-remote": {
+    "version": "0.8.72",
+    "description": "Remote-work assistant for DeepSeek Harness: connect SSH (password/key/agent/keyboard-interactive, multi-hop ProxyJump), list hosts from ~/.ssh/config, pick a remote workspace, operate on it with 21 rw_* tools, conflict-aware mirror sync, an embedded PTY t",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "@michengai/dsh-agency-agents": {
+    "version": "1.2.25",
+    "description": "DSH Agency Agents — 为 DeepSeek Harness 提供 331 名可召唤的专业智能体 · 331 summonable domain experts for DeepSeek Harness",
+    "icon": "ok",
+    "iconFile": "icons/michengai__dsh-agency-agents.svg"
+  },
+  "@michengai/dsh-im-connect": {
+    "version": "1.0.26",
+    "description": "DSH IM Connect — 将主流即时通讯平台接入本机 DeepSeek Harness · Connect major messaging platforms to local DeepSeek Harness agents",
+    "icon": "ok",
+    "iconFile": "icons/michengai__dsh-im-connect.svg"
+  },
+  "@michengai/dsh-pua": {
+    "version": "1.0.6",
+    "description": "DSH PUA — 为 DeepSeek Harness 提供 PUA 任务推进、角色风味、验收循环和运行状态卡片 · PUA task persistence, personas, verification loops, and live status cards for DeepSeek Harness",
+    "icon": "ok",
+    "iconFile": "icons/michengai__dsh-pua.svg"
+  },
+  "dsh-genui": {
+    "version": "0.3.2",
+    "description": "GenUI for DeepSeek Harness: interactive charts, forms, calculators, dashboards, and mini apps rendered inline in assistant replies, with actions that flow back to the model.",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "@linxin666/dsh-client-ui-preset-center": {
+    "version": "0.4.15",
+    "description": "Community agent-preset manager: the Workshop's Presets panel and the host library that installs, declares, disables and uninstalls presets downloaded from dsh-market.com, keeping a downloaded composition inert until the plugin declares it to the agent-pre",
+    "icon": "ok",
+    "iconFile": "icons/linxin666__dsh-client-ui-preset-center.svg"
+  },
+  "@tt-a1i/archify-dsh": {
+    "version": "1.0.0",
+    "description": "Opt-in DeepSeek Harness Skill-only bundle for the Archify architecture-diagram skill.",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "@openviking/dsh-memory-plugin": {
+    "version": "0.5.32",
+    "description": "OpenViking memory and context bundle for DeepSeek Harness",
+    "icon": "ok",
+    "iconFile": "icons/openviking__dsh-memory-plugin.svg"
+  },
+  "@wxg-prc-cpg/browser-skill-dsh-plugin": {
+    "version": "0.4.1",
+    "description": "DeepSeek Harness tool plugin that exposes BrowserSkill browser automation (bsk_* tools) to the model",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "ds-bot": {
+    "version": "0.2.7",
+    "description": "DS Bot: a team of long-lived Bots for DeepSeek Harness, with Main Bots, Bot-to-Bot messages and group chats",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  },
+  "@smalltailqwq/dsh-client-ui-skin-deep-whale-manager": {
+    "version": "0.1.8",
+    "description": "Switch between installed skins and tune each skin's own options. Find it under Settings → Skins.",
+    "icon": "ok",
+    "iconFile": "icons/smalltailqwq__dsh-client-ui-skin-deep-whale-manager.svg"
+  },
+  "@smalltailqwq/dsh-client-ui-skin-orca-link": {
+    "version": "0.1.9",
+    "description": "A cool little black-whale operator, square corners throughout and icons redrawn in straight lines; functional by day, soothing by night.",
+    "icon": "ok",
+    "iconFile": "icons/smalltailqwq__dsh-client-ui-skin-orca-link.svg"
+  },
+  "dsh-pocket": {
+    "version": "2.12.0",
+    "description": "把 DeepSeek Harness 装进你的口袋：一个包、一个设置页，手机扫码即同步访问电脑上的 DSH（局域网 + 公网，实时同屏）。",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
+  }
+}
