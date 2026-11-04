@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "suites": [
+    {
+      "id": "fresh-look",
+      "glyph": "✳",
+      "title": { "zh": "界面焕新", "en": "Fresh look" },
+      "desc": {
+        "zh": "换一套主题，给侧栏和组件补上细节，让每天打开的界面顺眼一点。",
+        "en": "A theme plus a few finishing touches for the sidebar and widgets."
+      },
+      "plugins": [
+        "dsh-dream-skin",
+        "@linxin666/dsh-client-ui-skin-center",
+        "dsh-better-sidebar",
+        "dsh-whale-widget"
+      ]
+    },
+    {
+      "id": "memory-search",
+      "glyph": "∞",
+      "title": { "zh": "记忆与检索", "en": "Memory & search" },
+      "desc": {
+        "zh": "把长对话压住、把历史搜出来，让上一次的结论能直接接到这一次。",
+        "en": "Compress long sessions and search history so earlier conclusions carry over."
+      },
+      "plugins": [
+        "billion-context",
+        "misakanet",
+        "dsh-plugin-session-fulltext",
+        "dsh-mnemon"
+      ]
+    },
+    {
+      "id": "remote-collab",
+      "glyph": "⊞",
+      "title": { "zh": "远程与协作", "en": "Remote & collaboration" },
+      "desc": {
+        "zh": "在手机上接管这台机器，或者让 agent 通过 SSH 去别的机器干活。",
+        "en": "Drive this machine from a phone, or let the agent work over SSH."
+      },
+      "plugins": [
+        "@linxin666/dsh-remote-web-ui",
+        "@linxin666/dsh-ssh",
+        "@linxin666/dsh-client-ui-task-board"
+      ]
+    }
+  ]
+}

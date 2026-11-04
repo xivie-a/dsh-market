@@ -39,6 +39,21 @@ node ../scripts/build-preview.mjs
 
 不要直接改 `client.js` 里的那份 CSS —— 下次内联会被覆盖。
 
+## 场景套装的数据
+
+套装不写死在插件里：仓库根目录的 [`suites.json`](../suites.json) 会随索引一起发布到 `https://xivie-a.github.io/dsh-market/suites.json`，插件运行时拉取。改套装（增删、换插件、改文案）只要改那个文件并推送，**不用重装插件**。
+
+```json
+{
+  "version": 1,
+  "suites": [
+    { "id": "memory-search", "glyph": "∞", "title": { "zh": "记忆与检索" }, "plugins": ["billion-context", "misakanet"] }
+  ]
+}
+```
+
+`plugins` 里写的是索引中的包名；找不到的会被忽略，少于 2 个可用插件的套装不显示。
+
 索引地址写在 `index.js` 和 `client.js` 各一处常量里：
 
 ```

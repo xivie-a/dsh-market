@@ -43,6 +43,18 @@ window.__ModuleLoader__.load({
       related: '相关推荐',
       layoutGrid: '网格视图',
       layoutList: '列表视图',
+      suites: '场景套装',
+      suitesSub: '按场景搭配，一次装齐',
+      installAll: '全部获取',
+      suiteInstalling: '正在获取…',
+      suiteDone: '套装已处理完，重启 DSH 生效',
+      pending: '待获取',
+      failed: '失败',
+      working: '处理中…',
+      remove: '卸载',
+      removed: '已卸载',
+      disabled: '已停用',
+      removeUnsupported: '这个 DSH 版本不支持从这里卸载，请到「插件」页操作',
       appearance: '外观',
       prev: '上一个',
       next: '下一个',
@@ -120,6 +132,18 @@ window.__ModuleLoader__.load({
       related: 'Related plugins',
       layoutGrid: 'Grid view',
       layoutList: 'List view',
+      suites: 'Bundles',
+      suitesSub: 'Picked sets, installed in one go',
+      installAll: 'Get all',
+      suiteInstalling: 'Getting…',
+      suiteDone: 'Bundle finished. Restart DSH to apply.',
+      pending: 'Pending',
+      failed: 'Failed',
+      working: 'Working…',
+      remove: 'Remove',
+      removed: 'Removed',
+      disabled: 'Disabled',
+      removeUnsupported: 'This DSH build cannot remove plugins here; use the Plugins page',
       appearance: 'Appearance',
       prev: 'Previous',
       next: 'Next',
@@ -735,6 +759,70 @@ window.__ModuleLoader__.load({
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .dm-related-name small { color: var(--muted); font-size: 10.5px; }
+
+/* ── 场景套装 ─────────────────────────────────────────────────────────── */
+.dm-suite-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.dm-suite-card {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  padding: 18px; text-align: left;
+  border: 1px solid var(--line); border-radius: 16px; background: var(--panel);
+  transition: border-color .16s, box-shadow .16s, transform .16s;
+}
+.dm-suite-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--line));
+  box-shadow: 0 10px 26px rgba(21, 59, 48, .12);
+  transform: translateY(-2px);
+}
+.dm-suite-glyph {
+  display: grid; place-items: center; width: 38px; height: 38px;
+  border-radius: 11px; background: var(--tint); color: var(--accent); font-size: 18px;
+}
+.dm-suite-card strong { font-size: 14.5px; font-weight: 700; }
+.dm-suite-desc { color: var(--muted); font-size: 12px; line-height: 1.6; }
+.dm-suite-foot {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  margin-top: 4px; color: var(--muted); font-size: 11px;
+}
+
+.dm-suite-detail {
+  position: fixed; inset: 0 0 0 auto; z-index: 72;
+  display: flex; flex-direction: column; gap: 16px;
+  width: 480px; max-width: 100vw; padding: 22px;
+  border-left: 1px solid var(--line); background: var(--panel);
+  box-shadow: -16px 0 64px rgba(21, 59, 48, .16);
+  overflow-y: auto;
+  animation: dm-slide .22s cubic-bezier(.2, .7, .3, 1);
+}
+.dm-suite-detail-head { display: flex; align-items: flex-start; gap: 12px; }
+.dm-suite-detail-head h2 { margin: 0 0 4px; font-size: 18px; font-weight: 750; }
+.dm-suite-detail-head p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.7; }
+.dm-suite-detail-head .dm-close { margin-left: auto; }
+.dm-suite-items { display: flex; flex-direction: column; gap: 6px; }
+.dm-suite-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px;
+}
+.dm-suite-item .dm-thumb { width: 34px; height: 34px; border-radius: 9px; font-size: 14px; }
+.dm-suite-item .dm-thumb img { width: 22px; height: 22px; }
+.dm-suite-item-name { min-width: 0; flex: 1 1 auto; }
+.dm-suite-item-name strong { display: block; font-size: 13px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dm-suite-item-name small { color: var(--muted); font-size: 10.5px; }
+.dm-suite-state { flex: none; color: var(--muted); font-size: 11px; white-space: nowrap; }
+.dm-suite-state--error { color: #c05050; }
+.dm-suite-detail-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line);
+}
+.dm-btn--danger { background: transparent; color: #b6463f; border: 1px solid color-mix(in srgb, #b6463f 35%, var(--line)); }
+.dm-btn--danger:hover:not(:disabled) { background: color-mix(in srgb, #b6463f 10%, transparent); }
+
+@media (max-width: 999px) {
+  .dm-suite-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .dm-suite-grid { grid-template-columns: minmax(0, 1fr); }
+  .dm-suite-detail { width: 100vw; }
+}
 `
 
     /** 本地化文本 → 字符串；优先中文，其次英文，其次第一个。 */
@@ -806,6 +894,24 @@ window.__ModuleLoader__.load({
           entry.author ?? ''
         ].join(' ').toLowerCase().includes(needle))
       return pool.slice(0, limit)
+    }
+
+    /** 场景套装：跟索引放在同一个静态目录里，改数据不用重装插件。 */
+    const SUITES_URL = 'https://xivie-a.github.io/dsh-market/suites.json'
+
+    async function loadSuitesFile() {
+      try {
+        const response = await fetch(SUITES_URL, {
+          headers: { accept: 'application/json' },
+          signal: AbortSignal.timeout(8000)
+        })
+        if (!response.ok) return []
+        const doc = await response.json()
+        if (!Array.isArray(doc?.suites)) return []
+        return doc.suites.filter((suite) => Array.isArray(suite?.plugins) && suite.plugins.length > 1)
+      } catch {
+        return []
+      }
     }
 
     const FAV_KEY = 'dsh-market-xivie:favs'
@@ -1061,6 +1167,10 @@ window.__ModuleLoader__.load({
       const [paletteOpen, setPaletteOpen] = React.useState(false)
       const [paletteQuery, setPaletteQuery] = React.useState('')
       const [paletteIndex, setPaletteIndex] = React.useState(0)
+      const [suites, setSuites] = React.useState([])
+      const [suiteId, setSuiteId] = React.useState(undefined)
+      const [suiteJobs, setSuiteJobs] = React.useState({})
+      const [suiteRunning, setSuiteRunning] = React.useState(false)
       const [favs, setFavs] = React.useState(readFavs)
       const [favOnly, setFavOnly] = React.useState(false)
       const toggleFav = (name, event) => {
@@ -1156,6 +1266,13 @@ window.__ModuleLoader__.load({
 
       React.useEffect(() => { void load() }, [load])
 
+      // 套装数据单独拉一次；拉不到就整块不显示
+      React.useEffect(() => {
+        let alive = true
+        void loadSuitesFile().then((list) => { if (alive) setSuites(list) })
+        return () => { alive = false }
+      }, [])
+
       // 结果提示 6 秒后自动消失，也能手动关掉
       React.useEffect(() => {
         if (notice === undefined) return undefined
@@ -1201,34 +1318,80 @@ window.__ModuleLoader__.load({
         return 'idle'
       }
 
-      async function install(entry) {
+      /** 装一个插件；失败抛错，交给调用方决定怎么提示。 */
+      async function installEntry(entry) {
         const version = entry.versions?.find((item) => item.version === entry.defaultVersion) ?? entry.versions?.[0]
         const target = version?.install
-        if (!target?.spec) return setNotice({ kind: 'error', text: t('noTarget') })
+        if (!target?.spec) throw new Error(t('noTarget'))
         const manager = managerRef.current?.pluginManager
-        if (!manager?.inspect || !manager?.installBundle) return setNotice({ kind: 'error', text: t('inspectFailed') })
+        if (!manager?.inspect || !manager?.installBundle) throw new Error(t('inspectFailed'))
+        const inspected = await manager.inspect(target.spec, { registry: target.registry })
+        if (!inspected?.ok) throw new Error(inspected?.error?.message ?? t('inspectFailed'))
+        if (inspected.value?.status === 'refused') throw new Error(inspected.value.reason ?? t('refused'))
+        const { registry, selection, saveExact } = inspected.value ?? {}
+        const result = await manager.installBundle(target.spec, {
+          enabled: selection ?? true,
+          requestId: crypto.randomUUID(),
+          registry,
+          ...(saveExact === undefined ? {} : { saveExact })
+        })
+        if (!result?.ok) throw new Error(result?.error?.message ?? t('installFailed'))
+        const value = result.value ?? {}
+        if (value.application === 'failed') {
+          const pending = Array.isArray(value.pendingBuilds) && value.pendingBuilds.length > 0
+          throw new Error(pending ? t('needsApproval') : (value.error?.message ?? t('installFailed')))
+        }
+        return value
+      }
+
+      /** 卸载或停用已安装的插件：DSH 的卸载接口可能叫不同名字，逐个探测。 */
+      async function removeEntry(entry) {
+        const manager = managerRef.current?.pluginManager
+        if (!manager) throw new Error(t('inspectFailed'))
+        const calls = [
+          ['uninstallBundle', { requestId: crypto.randomUUID() }],
+          ['removeBundle', { requestId: crypto.randomUUID() }],
+          ['uninstall', { requestId: crypto.randomUUID() }]
+        ]
+        for (const [method, options] of calls) {
+          if (typeof manager[method] !== 'function') continue
+          const result = await manager[method](entry.name, options)
+          if (result?.ok === false) throw new Error(result.error?.message ?? t('installFailed'))
+          return 'removed'
+        }
+        if (typeof manager.setBundleEnabled === 'function') {
+          const change = await manager.setBundleEnabled(entry.name, false)
+          if (change?.application === 'failed') throw new Error(change.error?.message ?? t('installFailed'))
+          return 'disabled'
+        }
+        throw new Error(t('removeUnsupported'))
+      }
+
+      async function install(entry) {
         setBusy(entry.name)
         setNotice(undefined)
         try {
-          const inspected = await manager.inspect(target.spec, { registry: target.registry })
-          if (!inspected?.ok) throw new Error(inspected?.error?.message ?? t('inspectFailed'))
-          if (inspected.value?.status === 'refused') throw new Error(inspected.value.reason ?? t('refused'))
-          const { registry, selection, saveExact } = inspected.value ?? {}
-          const result = await manager.installBundle(target.spec, {
-            enabled: selection ?? true,
-            requestId: crypto.randomUUID(),
-            registry,
-            ...(saveExact === undefined ? {} : { saveExact })
-          })
-          if (!result?.ok) throw new Error(result?.error?.message ?? t('installFailed'))
-          const value = result.value ?? {}
-          if (value.application === 'failed') {
-            const pending = Array.isArray(value.pendingBuilds) && value.pendingBuilds.length > 0
-            throw new Error(pending ? t('needsApproval') : (value.error?.message ?? t('installFailed')))
-          }
+          const value = await installEntry(entry)
           setNotice({
             kind: 'ok',
             text: `${pick(entry.title, entry.name)} · ${value.application === 'restart-required' ? t('restart') : t('installedOk')}`
+          })
+          await load()
+        } catch (error) {
+          setNotice({ kind: 'error', text: `${pick(entry.title, entry.name)} · ${messageOf(error)}` })
+        } finally {
+          setBusy('')
+        }
+      }
+
+      async function uninstall(entry) {
+        setBusy(entry.name)
+        setNotice(undefined)
+        try {
+          const how = await removeEntry(entry)
+          setNotice({
+            kind: 'ok',
+            text: `${pick(entry.title, entry.name)} · ${how === 'disabled' ? t('disabled') : t('removed')}`
           })
           await load()
         } catch (error) {
@@ -1488,6 +1651,48 @@ window.__ModuleLoader__.load({
         miniOf('✳', t('miniTheme'), t('miniThemeSub'), 'appearance'),
         miniOf('⌘', t('miniWorkflow'), t('miniWorkflowSub'), 'workflow'))
 
+      // 套装：按场景把几个插件打包，点开可以逐个或一次装齐
+      const suiteOf = (id) => suites.find((suite) => suite.id === id)
+      const suiteEntries = (suite) => (suite?.plugins ?? [])
+        .map((name) => entries.find((entry) => entry.name === name))
+        .filter(Boolean)
+
+      const installSuite = async (suite) => {
+        if (suiteRunning) return
+        setSuiteRunning(true)
+        const pending = suiteEntries(suite).filter((entry) => {
+          const installed = bundles.get(entry.name)?.installed === true || entry.installation?.status === 'installed'
+          return !installed
+        })
+        for (const entry of pending) {
+          setSuiteJobs((current) => ({ ...current, [entry.name]: 'running' }))
+          try {
+            await installEntry(entry)
+            setSuiteJobs((current) => ({ ...current, [entry.name]: 'done' }))
+          } catch (error) {
+            setSuiteJobs((current) => ({ ...current, [entry.name]: 'error', [`${entry.name}:error`]: messageOf(error) }))
+          }
+        }
+        setSuiteRunning(false)
+        await load()
+        setNotice({ kind: 'ok', text: t('suiteDone') })
+      }
+
+      const suiteSection = suites.length === 0 ? null : h('section', { className: 'dm-section dm-suites' },
+        h('div', { className: 'dm-catalog-head' },
+          h('h2', null, t('suites'), h('small', null, t('suitesSub')))),
+        h('div', { className: 'dm-suite-grid' }, ...suites.map((suite) => h('button', {
+          key: suite.id,
+          className: 'dm-suite-card',
+          type: 'button',
+          onClick: () => { setSuiteId(suite.id); setSuiteJobs({}) }
+        },
+          h('span', { className: 'dm-suite-glyph' }, suite.glyph ?? '◈'),
+          h('strong', null, pick(suite.title, suite.id)),
+          h('span', { className: 'dm-suite-desc' }, pick(suite.desc, '')),
+          h('span', { className: 'dm-suite-foot' },
+            `${suiteEntries(suite).length} ${t('plugins')}`, h('span', null, '↗'))))))
+
       // 空结果也要保留搜索框和分类，用户才能自己改回来
       const gridContent = filtered.length === 0
         ? h('div', { className: 'dm-state' },
@@ -1569,7 +1774,7 @@ window.__ModuleLoader__.load({
           h('span', null, `${t('error')}：${catalog.error ?? ''}`),
           h('button', { type: 'button', onClick: () => void load(true) }, t('retry')))
       } else {
-        body = h(React.Fragment, null, banner, minis, catalogSection)
+        body = h(React.Fragment, null, banner, minis, suiteSection, catalogSection)
       }
 
       const detail = selected === undefined ? null : (() => {
@@ -1639,7 +1844,14 @@ window.__ModuleLoader__.load({
               sortKeyOf(entry, 'stars') !== undefined ? h('span', { className: 'dm-tag' }, `★ ${formatCount(sortKeyOf(entry, 'stars'))}`) : null,
               sortKeyOf(entry, 'downloads') !== undefined ? h('span', { className: 'dm-tag' }, `↓ ${formatCount(sortKeyOf(entry, 'downloads'))}`) : null),
             settled
-              ? h('span', { className: 'dm-installed' }, `✓ ${t('installed')}`)
+              ? h(React.Fragment, null,
+                h('span', { className: 'dm-installed' }, `✓ ${t('installed')}`),
+                h('button', {
+                  className: 'dm-btn dm-btn--danger',
+                  type: 'button',
+                  disabled: busy !== '',
+                  onClick: () => void uninstall(entry)
+                }, busy === entry.name ? t('working') : t('remove')))
               : h('button', {
                 className: 'dm-btn dm-btn--primary',
                 type: 'button',
@@ -1665,6 +1877,54 @@ window.__ModuleLoader__.load({
         detail === null ? null : h(React.Fragment, null,
           h('div', { className: 'dm-mask', onClick: () => setSelected(undefined) }),
           detail),
+        suiteId === undefined ? null : (() => {
+          const suite = suiteOf(suiteId)
+          if (suite === undefined) return null
+          const items = suiteEntries(suite)
+          const closeSuite = () => { setSuiteId(undefined); setSuiteJobs({}) }
+          return h(React.Fragment, null,
+            h('div', { className: 'dm-mask', onClick: closeSuite }),
+            h('aside', {
+              className: 'dm-suite-detail',
+              role: 'dialog',
+              'aria-modal': 'true',
+              'aria-label': pick(suite.title, suite.id)
+            },
+              h('div', { className: 'dm-suite-detail-head' },
+                h('span', { className: 'dm-suite-glyph' }, suite.glyph ?? '◈'),
+                h('div', null,
+                  h('h2', null, pick(suite.title, suite.id)),
+                  h('p', null, pick(suite.desc, ''))),
+                h('button', {
+                  className: 'dm-close', type: 'button', 'aria-label': t('close'), onClick: closeSuite
+                }, '×')),
+              h('div', { className: 'dm-suite-items' }, ...items.map((entry) => {
+                const installed = bundles.get(entry.name)?.installed === true || entry.installation?.status === 'installed'
+                const state = suiteJobs[entry.name]
+                const label = state === 'error' ? t('failed')
+                  : installed || state === 'done' ? `✓ ${t('added')}`
+                    : state === 'running' ? t('installing')
+                      : t('pending')
+                return h('div', { className: 'dm-suite-item', key: entry.name },
+                  thumbOf(entry),
+                  h('div', { className: 'dm-suite-item-name' },
+                    h('strong', null, pick(entry.title, entry.name)),
+                    h('small', null, entry.metadata?.category === undefined
+                      ? t('community')
+                      : pick(categories[entry.metadata.category]?.title, entry.metadata.category))),
+                  h('span', {
+                    className: state === 'error' ? 'dm-suite-state dm-suite-state--error' : 'dm-suite-state'
+                  }, label))
+              })),
+              h('div', { className: 'dm-suite-detail-foot' },
+                h('span', { className: 'dm-meta' }, `${items.length} ${t('plugins')}`),
+                h('button', {
+                  className: 'dm-btn dm-btn--primary',
+                  type: 'button',
+                  disabled: suiteRunning,
+                  onClick: () => void installSuite(suite)
+                }, suiteRunning ? t('suiteInstalling') : t('installAll')))))
+        })(),
         paletteOpen ? h(React.Fragment, null,
           h('div', { className: 'dm-palette-mask', onClick: () => setPaletteOpen(false) }),
           h('div', { className: 'dm-palette', role: 'dialog', 'aria-modal': 'true', 'aria-label': t('quickSearch') },

@@ -55,6 +55,18 @@ const HARNESS = String.raw`
   const React = window.React
   const ReactDOM = window.ReactDOM
 
+  // 预览里把 suites.json 的请求打到本地注入的数据上
+  const realFetch = window.fetch.bind(window)
+  window.fetch = (input, init) => {
+    const url = String(input)
+    if (url.includes('suites.json') && window.__SUITES__) {
+      return Promise.resolve(new Response(JSON.stringify(window.__SUITES__), {
+        status: 200, headers: { 'content-type': 'application/json' }
+      }))
+    }
+    return realFetch(input, init)
+  }
+
   // 截图参数：?theme=dark / ?layout=list 预置状态（必须在渲染前写，组件初始化时读取）
   const previewParams = new URLSearchParams(location.search)
   if (previewParams.has('theme')) {
@@ -163,6 +175,12 @@ const HARNESS = String.raw`
       window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }))
     }, 500)
   }
+  // ?suite=N 打开第 N 个套装
+  if (params.has('suite')) {
+    setTimeout(() => {
+      document.querySelectorAll('.dm-suite-card')[Number(params.get('suite')) || 0]?.click()
+    }, 600)
+  }
   if (params.has('select')) {
     const index = Number(params.get('select') ?? 2)
     setTimeout(() => {
@@ -177,6 +195,12 @@ async function main() {
   const clientSource = await readFile(join(root, 'plugin', 'client.js'), 'utf8')
   const styles = extractStyles(clientSource)
   const index = JSON.parse(await readFile(join(root, 'dist', 'index.json'), 'utf8'))
+  let suites = { version: 1, suites: [] }
+  try {
+    suites = JSON.parse(await readFile(join(root, 'suites.json'), 'utf8'))
+  } catch {
+    // 没有套装数据就不注入，页面不会显示这一块
+  }
 
   const html = `<!doctype html>
 <html lang="zh-CN">
@@ -194,6 +218,7 @@ ${styles}
 <body>
 <div id="root"></div>
 <script>window.__INDEX__ = ${JSON.stringify(index)};</script>
+<script>window.__SUITES__ = ${JSON.stringify(suites)};</script>
 <script>window.__ModuleLoader__ = { load(spec) { window.__spec = spec } };</script>
 <script src="./vendor/react.js"></script>
 <script src="./vendor/react-dom.js"></script>

@@ -1,0 +1,22 @@
+const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const code=fs.readFileSync(path.join(__dirname,'suite.js'),'utf8');
+const nodes=new Map(),get=s=>{if(!nodes.has(s))nodes.set(s,{innerHTML:'',textContent:'',open:false,showModal(){this.open=true},close(){this.open=false},querySelector(){return null},contains(){return false}});return nodes.get(s)};const host=get('#suite-panel-fish'),timers=[];
+vm.runInNewContext(code,{document:{querySelector:get,activeElement:null},setTimeout:f=>timers.push(f),console});
+const click=action=>host.onclick({target:{closest:()=>({disabled:false,dataset:{suiteAction:action}})}});
+const failure=()=>host.onchange({target:{dataset:{},hasAttribute:()=>true,checked:true}});
+const tick=async()=>{const f=timers.shift();assert.ok(f,'pending queue timer');f();await new Promise(r=>setImmediate(r))};
+(async()=>{
+ assert.equal((get('#suite').innerHTML.match(/data-open-pack=/g)||[]).length,3);assert.equal((get('#suite').innerHTML.match(/<dialog /g)||[]).length,3);assert.doesNotMatch(get('#suite').innerHTML,/<dialog[^>]*\sopen(?:[\s>]|=)/);
+ const region=get('#suite');region.onclick({target:{closest:s=>s==='[data-open-pack]'?{dataset:{openPack:'fish'}}:null}});assert.equal(get('#suite-dialog-fish').open,true);region.onclick({target:{closest:s=>s==='[data-close-pack]'?{dataset:{closePack:'fish'}}:null}});assert.equal(get('#suite-dialog-fish').open,false);
+ assert.match(host.innerHTML,/搭配你的能力组合/);assert.match(host.innerHTML,/已选 3 项/);
+ click('clear');assert.match(host.innerHTML,/已选 1 项/);
+ click('selectAll');assert.match(host.innerHTML,/已选 4 项/);
+ click('all');assert.match(host.innerHTML,/正在搭建/);await tick();await tick();await tick();await tick();assert.match(host.innerHTML,/所选插件已添加/);assert.match(host.innerHTML,/待添加 0 项/);
+ click('reset');failure();click('selected');await tick();await tick();await tick();assert.match(host.innerHTML,/模拟失败/);assert.match(host.innerHTML,/重试未完成项/);
+ click('retry');await tick();assert.match(host.innerHTML,/所选插件已添加/);assert.equal((host.innerHTML.match(/data-state="skipped"/g)||[]).length,2);
+ click('reset');click('all');await tick();click('pause');assert.match(host.innerHTML,/任务已暂停/);const old=timers.shift();old();await new Promise(r=>setImmediate(r));assert.match(host.innerHTML,/任务已暂停/);
+ click('retry');await tick();await tick();await tick();assert.match(host.innerHTML,/所选插件已添加/);
+ click('reset');assert.match(host.innerHTML,/待添加 3 项/);assert.doesNotMatch(host.innerHTML,/suite-job-name/);
+ const workflow=get('#suite-panel-workflow');assert.match(workflow.innerHTML,/已选 3 项/);assert.doesNotMatch(workflow.innerHTML,/suite-job-name/);workflow.onclick({target:{closest:()=>({disabled:false,dataset:{suiteAction:'all'}})}});click('all');for(let i=0;i<8;i++)await tick();assert.match(workflow.innerHTML,/所选插件已添加/);assert.match(host.innerHTML,/所选插件已添加/);assert.match(get('#suite-status-workflow').textContent,/已添加 4\/4/);assert.match(get('#suite-status-fish').textContent,/已添加 4\/4/);assert.match(get('#suite-panel-knowledge').innerHTML,/待添加 3 项/);
+ console.log('PASS: three compact cards, initially closed dialogs, open/close controls, independent selections and concurrent queues, mandatory dependency, select/clear all, sequential batch, failure and retry, skip completed, pause cancellation, resume, reset.');
+})().catch(e=>{console.error(e);process.exitCode=1});
