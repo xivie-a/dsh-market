@@ -1512,18 +1512,32 @@ window.__ModuleLoader__.load({
         return value
       }
 
-      /** 卸载或停用已安装的插件：DSH 的卸载接口可能叫不同名字，逐个探测。 */
+      /**
+       * 卸载已安装的插件。
+       * 各版本 DSH 的接口名和参数个数都不一样（removeBundle 只收 1 个参数），
+       * 所以按「方法名 × 参数个数」逐个试，只有参数个数不对才换下一个，其它错误直接抛。
+       */
       async function removeEntry(entry) {
         const manager = managerRef.current?.pluginManager
         if (!manager) throw new Error(t('inspectFailed'))
-        const calls = [
-          ['uninstallBundle', { requestId: crypto.randomUUID() }],
-          ['removeBundle', { requestId: crypto.randomUUID() }],
-          ['uninstall', { requestId: crypto.randomUUID() }]
-        ]
-        for (const [method, options] of calls) {
+        const callWith = async (method) => {
+          const attempts = [[entry.name], [entry.name, { requestId: crypto.randomUUID() }]]
+          let lastError
+          for (const args of attempts) {
+            try {
+              return await manager[method](...args)
+            } catch (error) {
+              lastError = error
+              const text = messageOf(error)
+              if (/expected\s+\d+\s+argument/iu.test(text)) continue
+              throw error
+            }
+          }
+          throw lastError ?? new Error(t('removeUnsupported'))
+        }
+        for (const method of ['removeBundle', 'uninstallBundle', 'uninstall']) {
           if (typeof manager[method] !== 'function') continue
-          const result = await manager[method](entry.name, options)
+          const result = await callWith(method)
           if (result?.ok === false) throw new Error(result.error?.message ?? t('installFailed'))
           return 'removed'
         }
