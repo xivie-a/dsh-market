@@ -17,6 +17,17 @@ window.__ModuleLoader__.load({
       search: '搜索插件',
       all: '全部',
       featured: '精选 · 下载最多',
+      featuredShort: '本期精选',
+      headline: '好工具，让灵感走得更远。',
+      catalogTitle: '探索全部',
+      viewDetails: '查看详情',
+      get: '获取 +',
+      added: '已添加',
+      community: '社区插件',
+      miniTheme: '给工作空间换一种心情',
+      miniThemeSub: '外观与主题插件',
+      miniWorkflow: '少一点重复，多一点心流',
+      miniWorkflowSub: '工作流与效率工具',
       allPlugins: '全部插件',
       background: '背景',
       preset: '配色',
@@ -65,6 +76,17 @@ window.__ModuleLoader__.load({
       search: 'Search plugins',
       all: 'All',
       featured: 'Featured · most downloaded',
+      featuredShort: "Editor's pick",
+      headline: 'Good tools take ideas further.',
+      catalogTitle: 'Browse all',
+      viewDetails: 'View details',
+      get: 'Get +',
+      added: 'Added',
+      community: 'Community',
+      miniTheme: 'Change the mood of your workspace',
+      miniThemeSub: 'Themes and appearance',
+      miniWorkflow: 'Less repetition, more flow',
+      miniWorkflowSub: 'Workflows and productivity',
       allPlugins: 'All plugins',
       background: 'Background',
       preset: 'Palette',
@@ -282,6 +304,140 @@ window.__ModuleLoader__.load({
 @media (forced-colors: active) {
   .dm-card[aria-current="true"], .dm-hero-card[aria-current="true"], .dm-chip[aria-pressed="true"] { outline: 2px solid Highlight; outline-offset: -2px; }
   .dm-mask { background: CanvasText; opacity: .35; }
+}
+`
+    // ── 品牌视觉层：移植自概念稿（暖白底 + 深绿主视觉 + 酸绿 CTA） ──────────────
+    const STYLES_BRAND = `
+.dm-root {
+  --bg: #f5f6f2; --panel: #fff; --text: #182b27; --muted: #78827c; --line: #e4e8e1;
+  --accent: #246b51; --tint: #e9f2e7; --lime: #d5f48b; --hero: #153f32;
+  background: var(--bg); color: var(--text); max-width: 1200px; gap: 26px;
+  padding: 30px 34px 64px; font-size: 14px; line-height: 1.6;
+}
+@media (prefers-color-scheme: dark) {
+  .dm-root { --bg: #141c19; --panel: #1b2621; --text: #e6eee7; --muted: #a0afa4;
+    --line: #304038; --accent: #b4dcaa; --tint: #2c4033; --lime: #cbe88f; --hero: #123a2d; }
+}
+.dm-root h1, .dm-root h2, .dm-root h3 { letter-spacing: -.02em; }
+.dm-eyebrow { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.dm-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.dm-heading h1 { margin: 10px 0 6px; font-size: 34px; font-weight: 800; line-height: 1.25; }
+.dm-heading p { margin: 0; color: var(--muted); font-size: 13.5px; }
+.dm-total { flex: none; color: var(--muted); font-size: 12px; }
+
+/* 精选横幅 */
+.dm-banner { position: relative; display: grid; grid-template-columns: 1.15fr .85fr; gap: 24px;
+  padding: 34px 38px; border-radius: 22px; background: var(--hero); color: #eef4ee; overflow: hidden; }
+.dm-banner-label { display: flex; align-items: center; gap: 8px; color: rgba(238,244,238,.62);
+  font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.dm-banner-label i { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); }
+.dm-banner h2 { margin: 16px 0 12px; font-size: 32px; font-weight: 750; line-height: 1.28; color: #fff; }
+.dm-banner h2 em { font-style: normal; color: var(--lime); }
+.dm-banner p { margin: 0; max-width: 34em; color: rgba(238,244,238,.72); font-size: 13px; line-height: 1.7; }
+.dm-banner-cta { margin-top: 20px; display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 20px; border: 0; border-radius: 12px; background: var(--lime); color: #153f32;
+  font-size: 13px; font-weight: 650; cursor: pointer; transition: filter .15s, transform .1s; }
+.dm-banner-cta:hover { filter: brightness(1.05); }
+.dm-banner-cta:active { transform: translateY(1px); }
+.dm-art { position: relative; min-height: 190px; }
+.dm-art::before, .dm-art::after { content: ""; position: absolute; inset: 50% auto auto 50%;
+  border: 1px solid rgba(213,244,139,.22); border-radius: 50%; transform: translate(-50%, -50%); }
+.dm-art::before { width: 300px; height: 300px; }
+.dm-art::after { width: 190px; height: 190px; }
+.dm-art-core { position: absolute; inset: 50% auto auto 50%; width: 102px; height: 102px;
+  transform: translate(-50%, -50%) rotate(-6deg); border-radius: 26px;
+  background: linear-gradient(160deg, #2f7a5c, #1c5340); box-shadow: 0 18px 40px rgba(0,0,0,.35);
+  display: grid; place-items: center; overflow: hidden; }
+.dm-art-core img { width: 54px; height: 54px; object-fit: contain; }
+.dm-art-glyph { color: var(--lime); font-size: 40px; line-height: 1; }
+.dm-art-tag { position: absolute; display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 12px; border: 1px solid rgba(213,244,139,.18); border-radius: 11px;
+  background: rgba(255,255,255,.05); color: rgba(238,244,238,.86); font-size: 11.5px; white-space: nowrap; }
+.dm-art-tag b { color: var(--lime); }
+.dm-art-tag.one { top: 4%; left: 2%; }
+.dm-art-tag.two { top: 30%; right: -4%; }
+.dm-art-tag.three { bottom: 6%; left: 10%; }
+.dm-art-index { position: absolute; right: 0; bottom: 0; color: rgba(238,244,238,.4);
+  font-size: 11px; letter-spacing: .14em; }
+
+/* 两枚编辑式入口 */
+.dm-minis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.dm-mini { display: flex; align-items: center; gap: 14px; padding: 18px 20px; text-align: left;
+  border: 1px solid var(--line); border-radius: 16px; background: var(--panel); cursor: pointer;
+  transition: border-color .16s, box-shadow .16s; }
+.dm-mini:hover { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); box-shadow: 0 8px 22px rgba(24,43,39,.06); }
+.dm-mini-icon { display: grid; place-items: center; flex: none; width: 44px; height: 44px;
+  border-radius: 12px; background: var(--tint); color: var(--accent); font-size: 20px; }
+.dm-mini strong { display: block; font-size: 14px; font-weight: 650; }
+.dm-mini p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+.dm-mini-arrow { margin-left: auto; color: var(--muted); font-size: 17px; }
+
+/* 目录头 */
+.dm-catalog-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 14px; }
+.dm-catalog-head h2 { margin: 0; font-size: 21px; font-weight: 750; }
+.dm-catalog-head small { margin-left: 8px; color: var(--muted); font-size: 12px; font-weight: 500; }
+.dm-search, .dm-select { min-height: 40px; border: 1px solid var(--line); border-radius: 11px;
+  background: var(--panel); color: var(--text); }
+.dm-search { padding-left: 38px; font-size: 13px; }
+.dm-search-wrap svg { left: 13px; color: var(--muted); }
+.dm-select { padding: 9px 12px; font-size: 12px; }
+.dm-chips { gap: 4px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.dm-chip { min-height: 32px; padding: 6px 12px; border: 0; border-radius: 9px; background: transparent;
+  color: var(--muted); font-size: 13px; }
+.dm-chip:hover { background: var(--tint); color: var(--accent); }
+.dm-chip[aria-pressed="true"] { background: var(--accent); color: #fff; font-weight: 650; }
+.dm-chip[aria-pressed="true"] .dm-chip-count { color: rgba(255,255,255,.75); }
+.dm-chip-count { margin-left: 6px; font-size: 11px; }
+
+/* 卡片 */
+.dm-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.dm-card { min-height: 172px; padding: 22px; border: 1px solid var(--line); border-radius: 18px;
+  background: var(--panel); gap: 12px; }
+.dm-card:hover { border-color: color-mix(in srgb, var(--accent) 32%, var(--line));
+  box-shadow: 0 10px 28px rgba(24,43,39,.07); }
+.dm-thumb { width: 44px; height: 44px; border-radius: 12px; border: 0;
+  background: var(--tint); color: var(--accent); font-size: 18px; }
+.dm-thumb img { width: 26px; height: 26px; }
+.dm-title { font-size: 14.5px; font-weight: 700; }
+.dm-cat { color: var(--muted); font-size: 11.5px; line-height: 1.4; }
+.dm-desc { color: var(--muted); font-size: 12.5px; line-height: 1.65; min-height: 0; }
+.dm-foot { margin-top: auto; }
+.dm-meta { gap: 0; color: var(--muted); font-size: 11.5px; }
+.dm-meta .dm-tag { padding: 0; background: transparent; }
+.dm-btn { border: 0; border-radius: 10px; background: var(--tint); color: var(--accent);
+  font-size: 12.5px; font-weight: 650; min-height: 32px; padding: 6px 14px; }
+.dm-btn--primary { background: var(--tint); color: var(--accent); }
+.dm-btn--primary:hover:not(:disabled) { background: color-mix(in srgb, var(--accent) 16%, var(--bg)); }
+.dm-installed { background: transparent; color: var(--muted); font-size: 11.5px; padding: 6px 0; }
+[aria-current="true"].dm-card { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* 抽屉 */
+.dm-detail { background: var(--panel); border-left: 1px solid var(--line); gap: 20px; }
+.dm-detail-head { background: var(--panel); border-bottom: 1px solid var(--line); }
+.dm-detail-foot { background: var(--panel); border-top: 1px solid var(--line); }
+.dm-detail-desc { color: var(--muted); }
+.dm-detail-row > span:first-child { color: var(--muted); }
+.dm-detail-row a { color: var(--accent); }
+.dm-detail h2 { font-size: 19px; font-weight: 750; }
+.dm-version { background: transparent; border: 1px solid var(--line); }
+.dm-version:first-child { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); background: var(--tint); }
+.dm-close { background: transparent; border-color: var(--line); }
+.dm-close:hover { background: var(--tint); color: var(--accent); }
+.dm-toast { background: var(--hero); color: #eef4ee; border: 0; }
+.dm-mask { background: rgba(21,63,50,.28); }
+.dm-section-head::before { background: var(--accent); }
+@media (max-width: 1100px) {
+  .dm-banner { grid-template-columns: 1fr; padding: 28px; }
+  .dm-art { display: none; }
+  .dm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 720px) {
+  .dm-root { padding: 22px 18px 48px; }
+  .dm-heading { align-items: flex-start; flex-direction: column; }
+  .dm-heading h1 { font-size: 27px; }
+  .dm-banner h2 { font-size: 25px; }
+  .dm-minis, .dm-grid { grid-template-columns: minmax(0, 1fr); }
+  .dm-catalog-head { align-items: stretch; flex-direction: column; }
 }
 `
     // 旧样式保留在这里只为对照，不参与渲染
@@ -783,10 +939,40 @@ window.__ModuleLoader__.load({
         }
       }
 
-      const header = h('header', { className: 'dm-hero' },
-        h('div', null,
-          h('h1', null, t('title'), h('span', { className: 'dm-pill' }, `${entries.length} ${t('plugins')}`)),
-          h('p', { className: 'dm-sub' }, t('subtitle'))),
+      const bgPopover = !bgOpen ? null : h('div', { className: 'dm-bgpop' },
+        h('span', { className: 'dm-bgpop-label' }, t('preset')),
+        h('div', { className: 'dm-swatches' },
+          ...BG_PRESETS.map((preset) => h('button', {
+            key: preset.id,
+            className: `dm-swatch dm-swatch--${preset.id}`,
+            type: 'button',
+            title: pick(preset, preset.id),
+            'aria-pressed': bg.kind === 'preset' && bg.id === preset.id,
+            'aria-label': pick(preset, preset.id),
+            onClick: () => applyBg({ kind: 'preset', id: preset.id })
+          }))),
+        h('span', { className: 'dm-bgpop-label' }, t('customImage')),
+        h('div', { className: 'dm-bgrow' },
+          h('input', {
+            value: bgDraft,
+            placeholder: 'https://…',
+            'aria-label': t('customImage'),
+            onChange: (event) => setBgDraft(event.target.value)
+          }),
+          h('button', {
+            type: 'button',
+            onClick: () => {
+              const url = bgDraft.trim()
+              if (url === '') {
+                applyBg({ kind: 'preset', id: 'aurora' })
+                return
+              }
+              applyBg({ kind: 'image', url })
+            }
+          }, t('apply'))))
+
+      const actions = h('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
+        h('span', { className: 'dm-total' }, `${entries.length} ${t('plugins')}`),
         h('div', { style: { position: 'relative', display: 'flex', gap: 8 } },
           h('button', {
             className: 'dm-ghost',
@@ -796,33 +982,14 @@ window.__ModuleLoader__.load({
           }, h(PaletteIcon), t('background')),
           h('button', { className: 'dm-ghost', type: 'button', onClick: () => void load(true) },
             h(RefreshIcon), t('refresh')),
-          bgOpen ? h('div', { className: 'dm-bgpop' },
-            h('span', { className: 'dm-bgpop-label' }, t('preset')),
-            h('div', { className: 'dm-swatches' }, ...BG_PRESETS.map((preset) => h('button', {
-              key: preset.id,
-              className: `dm-swatch dm-swatch--${preset.id}`,
-              type: 'button',
-              title: pick(preset, preset.id),
-              'aria-pressed': bg.kind === 'preset' && bg.id === preset.id,
-              'aria-label': pick(preset, preset.id),
-              onClick: () => applyBg({ kind: 'preset', id: preset.id })
-            }))),
-            h('span', { className: 'dm-bgpop-label' }, t('customImage')),
-            h('div', { className: 'dm-bgrow' },
-              h('input', {
-                value: bgDraft,
-                placeholder: 'https://…',
-                'aria-label': t('customImage'),
-                onChange: (event) => setBgDraft(event.target.value)
-              }),
-              h('button', {
-                type: 'button',
-                onClick: () => {
-                  const url = bgDraft.trim()
-                  if (url === '') return applyBg({ kind: 'preset', id: 'aurora' })
-                  applyBg({ kind: 'image', url })
-                }
-              }, t('apply')))) : null))
+          bgPopover))
+
+      const header = h('section', { className: 'dm-heading' },
+        h('div', null,
+          h('div', { className: 'dm-eyebrow' }, 'THE PLUGIN COLLECTION'),
+          h('h1', null, t('headline')),
+          h('p', null, t('subtitle'))),
+        actions)
 
       const tools = h('div', { className: 'dm-tools' },
         h('div', { className: 'dm-search-wrap' },
@@ -872,9 +1039,9 @@ window.__ModuleLoader__.load({
           : status === 'installed' ? t('installed')
             : status === 'update' ? t('update')
               : status === 'provided' ? t('provided')
-                : t('install')
+                : t('get')
         const action = settled
-          ? h('span', { className: 'dm-installed' }, `✓ ${label}`)
+          ? h('span', { className: 'dm-installed' }, `✓ ${t('added')}`)
           : h('button', {
             className: 'dm-btn dm-btn--primary',
             type: 'button',
@@ -882,32 +1049,16 @@ window.__ModuleLoader__.load({
             onClick: () => void install(entry)
           }, label)
         const thumb = thumbOf(entry, title)
+        const categoryLabel = entry.metadata?.category === undefined
+          ? t('community')
+          : pick(categories[entry.metadata.category]?.title, entry.metadata.category)
         const meta = h('div', { className: 'dm-meta' },
-          version ? h('span', { className: 'dm-tag' }, `v${version}`) : null,
-          stars !== undefined ? h('span', { className: 'dm-tag' }, `★ ${formatCount(stars)}`) : null,
-          downloads !== undefined ? h('span', { className: 'dm-tag' }, `↓ ${formatCount(downloads)}`) : null)
+          `${downloads === undefined ? '' : `↧ ${formatCount(downloads)}   `}v${version ?? '1.0'}`)
         const delay = { animationDelay: `${Math.min(index, 14) * 22}ms` }
         const current = selected?.name === entry.name ? 'true' : undefined
         const open = (event) => {
           if (event.target.closest('button, a')) return
           setSelected(entry)
-        }
-
-        if (hero) {
-          return h('article', {
-            className: 'dm-hero-card dm-appear', key: entry.name, style: delay,
-            'aria-current': current, onClick: open, role: 'button', tabIndex: 0,
-            onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') setSelected(entry) }
-          },
-            h('div', { className: 'dm-hero-main' },
-              h('div', { className: 'dm-card-top' },
-                thumb,
-                h('div', { className: 'dm-titles' },
-                  h('h3', { className: 'dm-hero-title', title }, title),
-                  h('code', { className: 'dm-pkg', title: entry.name }, entry.name))),
-              h('p', { className: 'dm-hero-desc' }, pick(entry.description, '')),
-              meta),
-            h('div', { className: 'dm-hero-side' }, action))
         }
         return h('article', {
           className: 'dm-card dm-appear', key: entry.name, style: delay,
@@ -918,7 +1069,7 @@ window.__ModuleLoader__.load({
             thumb,
             h('div', { className: 'dm-titles' },
               h('h3', { className: 'dm-title', title }, title),
-              h('code', { className: 'dm-pkg', title: entry.name }, entry.name))),
+              h('div', { className: 'dm-cat' }, categoryLabel))),
           h('p', { className: 'dm-desc' }, pick(entry.description, '')),
           h('div', { className: 'dm-foot' }, meta, action))
       }
@@ -929,7 +1080,7 @@ window.__ModuleLoader__.load({
           .filter((entry) => entry.icon !== undefined)
           .slice()
           .sort((left, right) => (sortKeyOf(right, 'downloads') ?? 0) - (sortKeyOf(left, 'downloads') ?? 0))
-          .slice(0, 2)
+          .slice(0, 1)
         : []
       const featuredNames = new Set(featured.map((entry) => entry.name))
       const gridEntries = filtered
@@ -940,6 +1091,46 @@ window.__ModuleLoader__.load({
           if (sort === 'name') return pick(left.title, left.name).localeCompare(pick(right.title, right.name), 'zh-Hans-CN')
           return 0
         })
+
+      const top = featured[0]
+      const banner = top === undefined ? null : h('section', { className: 'dm-banner' },
+        h('div', null,
+          h('div', { className: 'dm-banner-label' }, h('i'), `EDITOR'S PICK / ${t('featuredShort')}`),
+          h('h2', null, pick(top.title, top.name)),
+          h('p', null, pick(top.description, '')),
+          h('button', {
+            className: 'dm-banner-cta', type: 'button', onClick: () => setSelected(top)
+          }, t('viewDetails'), h('span', null, '↗'))),
+        h('div', { className: 'dm-art', 'aria-hidden': 'true' },
+          h('div', { className: 'dm-art-core' },
+            top.icon
+              ? h('img', { src: top.icon, alt: '', onError: (event) => { event.currentTarget.style.display = 'none' } })
+              : h('span', { className: 'dm-art-glyph' }, String(pick(top.title, top.name)).slice(0, 1))),
+          sortKeyOf(top, 'downloads') === undefined ? null : h('div', { className: 'dm-art-tag one' },
+            h('b', null, '↧'), ` ${formatCount(sortKeyOf(top, 'downloads'))}`),
+          sortKeyOf(top, 'stars') === undefined ? null : h('div', { className: 'dm-art-tag two' },
+            h('b', null, '★'), ` ${formatCount(sortKeyOf(top, 'stars'))}`),
+          h('div', { className: 'dm-art-tag three' }, h('b', null, '◈'),
+            ` ${(top.versions?.length ?? 0)} ${t('versions')}`),
+          h('div', { className: 'dm-art-index' }, '01 — COLLECTION')))
+
+      const miniOf = (glyph, title, sub, cat) => h('button', {
+        className: 'dm-mini', type: 'button', onClick: () => setCategory(cat)
+      },
+        h('span', { className: 'dm-mini-icon' }, glyph),
+        h('div', null, h('strong', null, title), h('p', null, sub)),
+        h('span', { className: 'dm-mini-arrow' }, '↗'))
+
+      const minis = h('section', { className: 'dm-minis' },
+        miniOf('✳', t('miniTheme'), t('miniThemeSub'), 'appearance'),
+        miniOf('⌘', t('miniWorkflow'), t('miniWorkflowSub'), 'workflow'))
+
+      const catalogSection = h('section', { className: 'dm-section' },
+        h('div', { className: 'dm-catalog-head' },
+          h('h2', null, t('catalogTitle'), h('small', null, `${gridEntries.length} ${t('plugins')}`)),
+          tools),
+        chips,
+        h('div', { className: 'dm-grid' }, ...gridEntries.map((entry, index) => cardOf(entry, index))))
 
       let body
       if (catalog.status === 'loading' && entries.length === 0) {
@@ -952,14 +1143,7 @@ window.__ModuleLoader__.load({
       } else if (filtered.length === 0) {
         body = h('div', { className: 'dm-state' }, t('empty'))
       } else {
-        body = h(React.Fragment, null,
-          featured.length === 0 ? null : h('section', { className: 'dm-section' },
-            h('div', { className: 'dm-section-head' }, h('span', null, t('featured'))),
-            h('div', { className: 'dm-featured' }, ...featured.map((entry, index) => cardOf(entry, index, true)))),
-          h('section', { className: 'dm-section' },
-            h('div', { className: 'dm-section-head' },
-              h('span', null, `${t('allPlugins')} · ${gridEntries.length}`)),
-            h('div', { className: 'dm-grid' }, ...gridEntries.map((entry, index) => cardOf(entry, index + featured.length)))))
+        body = h(React.Fragment, null, banner, minis, catalogSection)
       }
 
       const detail = selected === undefined ? null : (() => {
@@ -1034,8 +1218,6 @@ window.__ModuleLoader__.load({
 
       return h('div', rootProps,
         header,
-        tools,
-        chips,
         h('div', { className: 'dm-main' }, body),
         detail === null ? null : h(React.Fragment, null,
           h('div', { className: 'dm-mask', onClick: () => setSelected(undefined) }),
@@ -1053,7 +1235,7 @@ window.__ModuleLoader__.load({
       ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-market-xivie: dictionaries')
       ctx.effect(() => {
         const style = document.createElement('style')
-        style.textContent = STYLES
+        style.textContent = STYLES + STYLES_BRAND
         document.head.appendChild(style)
         return () => style.remove()
       }, 'dsh-market-xivie: styles')
