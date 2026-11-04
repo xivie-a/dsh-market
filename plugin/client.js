@@ -325,6 +325,8 @@ window.__ModuleLoader__.load({
 .dm-root {
   --bg: #f5f6f2; --panel: #fff; --text: #182b27; --muted: #78827c; --line: #e4e8e1;
   --accent: #246b51; --tint: #e9f2e7; --lime: #d5f48b; --hero: #153f32;
+  /* 旧样式里的 --dm-ink 取自 --dsh-accent，这里跟着品牌色走，避免残留蓝色描边 */
+  --dm-ink: var(--accent);
   background: var(--bg); color: var(--text); max-width: 1200px; gap: 26px;
   padding: 30px 34px 64px; font-size: 14px; line-height: 1.6;
 }
@@ -485,6 +487,11 @@ window.__ModuleLoader__.load({
   --muted: #a0afa4; --line: #304038; --accent: #b4dcaa; --tint: #2c4033; --lime: #cbe88f; --hero: #123a2d; }
 .dm-root[data-theme="light"] { color-scheme: light; --bg: #f5f6f2; --panel: #fff; --text: #182b27;
   --muted: #78827c; --line: #e4e8e1; --accent: #246b51; --tint: #e9f2e7; --lime: #d5f48b; --hero: #153f32; }
+
+/* 深色下强调色是浅绿，选中胶囊要用深色文字，否则对比度不够 */
+.dm-root[data-theme="dark"] .dm-chip[aria-pressed="true"] { color: #141c19; }
+.dm-root[data-theme="dark"] .dm-chip[aria-pressed="true"] .dm-chip-count { color: rgba(20, 28, 25, .62); }
+.dm-root[data-theme="dark"] .dm-banner-cta { color: #141c19; }
 
 /* 精选轮播 */
 .dm-banner[data-slide] .dm-banner-body { animation: dm-swap .28s ease-out; }
@@ -1216,6 +1223,8 @@ window.__ModuleLoader__.load({
           onClick: () => setCategory(category === id ? '' : id)
         }, pick(declaration?.title, id))))
 
+      // 筛选变化时换 key，让卡片重新挂载，入场错峰动画才会重放
+      const filterKey = `${category}|${favOnly ? 1 : 0}|${mineOnly ? 1 : 0}|${sort}`
       const cardOf = (entry, index, hero = false) => {
         const status = statusOf(entry)
         const settled = status === 'installed' || status === 'provided'
@@ -1250,7 +1259,7 @@ window.__ModuleLoader__.load({
           setSelected(entry)
         }
         return h('article', {
-          className: 'dm-card dm-appear', key: entry.name, style: delay,
+          className: 'dm-card dm-appear', key: `${entry.name}|${filterKey}`, style: delay,
           'aria-current': current, onClick: open, role: 'button', tabIndex: 0,
           onMouseMove: trackPointer, onMouseLeave: resetPointer,
           onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') setSelected(entry) }

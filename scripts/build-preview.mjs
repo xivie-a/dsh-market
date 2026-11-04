@@ -55,6 +55,12 @@ const HARNESS = String.raw`
   const React = window.React
   const ReactDOM = window.ReactDOM
 
+  // 截图参数：?theme=dark 预置主题（必须在渲染前写，组件初始化时读取）
+  const previewParams = new URLSearchParams(location.search)
+  if (previewParams.has('theme')) {
+    try { window.localStorage.setItem('dsh-market-xivie:theme', previewParams.get('theme')) } catch {}
+  }
+
   // 把索引数据补成市场服务会返回的形状
   const raw = window.__INDEX__
   const entries = raw.plugins.map((plugin) => {
