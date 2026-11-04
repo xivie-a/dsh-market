@@ -31,6 +31,10 @@ window.__ModuleLoader__.load({
       favorites: '收藏',
       favorite: '收藏这个插件',
       unfavorite: '取消收藏',
+      myPlugins: '我的插件',
+      appearance: '外观',
+      prev: '上一个',
+      next: '下一个',
       allPlugins: '全部插件',
       background: '背景',
       preset: '配色',
@@ -93,6 +97,10 @@ window.__ModuleLoader__.load({
       favorites: 'Favorites',
       favorite: 'Save this plugin',
       unfavorite: 'Remove from favorites',
+      myPlugins: 'My plugins',
+      appearance: 'Appearance',
+      prev: 'Previous',
+      next: 'Next',
       allPlugins: 'All plugins',
       background: 'Background',
       preset: 'Palette',
@@ -363,8 +371,7 @@ window.__ModuleLoader__.load({
 .dm-art-tag.one { top: 4%; left: 2%; }
 .dm-art-tag.two { top: 30%; right: -4%; }
 .dm-art-tag.three { bottom: 6%; left: 10%; }
-.dm-art-index { position: absolute; right: 0; bottom: 0; color: rgba(238,244,238,.4);
-  font-size: 11px; letter-spacing: .14em; }
+.dm-art-index { display: none; }
 
 /* 两枚编辑式入口 */
 .dm-minis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
@@ -472,6 +479,26 @@ window.__ModuleLoader__.load({
   .dm-card::after { display: none; }
   .dm-ripple, .dm-fav--pop { animation: none; }
 }
+
+/* 主题切换：覆盖 prefers-color-scheme，跟随右上角开关 */
+.dm-root[data-theme="dark"] { color-scheme: dark; --bg: #141c19; --panel: #1b2621; --text: #e6eee7;
+  --muted: #a0afa4; --line: #304038; --accent: #b4dcaa; --tint: #2c4033; --lime: #cbe88f; --hero: #123a2d; }
+.dm-root[data-theme="light"] { color-scheme: light; --bg: #f5f6f2; --panel: #fff; --text: #182b27;
+  --muted: #78827c; --line: #e4e8e1; --accent: #246b51; --tint: #e9f2e7; --lime: #d5f48b; --hero: #153f32; }
+
+/* 精选轮播 */
+.dm-banner[data-slide] .dm-banner-body { animation: dm-swap .28s ease-out; }
+@keyframes dm-swap { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+.dm-banner-nav { position: absolute; right: 26px; bottom: 22px; display: flex; align-items: center; gap: 10px; }
+.dm-dots { display: flex; gap: 6px; align-items: center; }
+.dm-dot { width: 6px; height: 6px; padding: 0; border: 0; border-radius: 99px; background: rgba(238,244,238,.28);
+  cursor: pointer; transition: width .2s ease, background .2s ease; }
+.dm-dot[aria-current="true"] { width: 18px; background: var(--lime); }
+.dm-arrow { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border-radius: 50%;
+  border: 1px solid rgba(238,244,238,.22); background: rgba(255,255,255,.06); color: #eef4ee;
+  font-size: 13px; line-height: 1; cursor: pointer; transition: background .15s; }
+.dm-arrow:hover { background: rgba(255,255,255,.15); }
+.dm-banner .dm-banner-body { min-width: 0; }
 `
     // 旧样式保留在这里只为对照，不参与渲染
     const STYLES_LEGACY = `
@@ -713,6 +740,50 @@ window.__ModuleLoader__.load({
       }
     }
 
+    const THEME_KEY = 'dsh-market-xivie:theme'
+
+    function readTheme() {
+      try {
+        const saved = window.localStorage.getItem(THEME_KEY)
+        if (saved === 'dark' || saved === 'light') return saved
+      } catch {
+        // 存储不可用时跟随系统
+      }
+      return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    }
+
+    function saveTheme(value) {
+      try {
+        window.localStorage.setItem(THEME_KEY, value)
+      } catch {
+        // 存不下就只在这个会话里生效
+      }
+    }
+
+    /**
+     * 每日精选：按「最近更新 + 热度」打分，再从当天名次开始错位取 3 个，
+     * 同一份索引每天换一批，不需要人手维护。
+     */
+    function todayFeatured(entries, count = 3) {
+      const pool = entries.filter((entry) => entry.icon !== undefined)
+      if (pool.length === 0) return []
+      const now = Date.now() / 1000
+      const ranked = pool.map((entry) => {
+        const latest = Math.max(0, ...(entry.versions ?? []).map((version) => version.publishTimestamp ?? 0))
+        const days = latest === 0 ? 365 : Math.max(0, (now - latest) / 86400)
+        const freshness = Math.max(0, 1 - days / 120)
+        const popularity = Math.log10(1 + (entry.metadata?.sortKeys?.downloads ?? 0)) / 6
+        const reach = Math.log10(1 + (entry.metadata?.sortKeys?.stars ?? 0)) / 4
+        return { entry, score: freshness * 1.8 + popularity + reach * 0.6 }
+      }).sort((left, right) => right.score - left.score)
+      const top = ranked.slice(0, 12).map((item) => item.entry)
+      const day = Math.floor(Date.now() / 86400000)
+      const start = day % top.length
+      const picks = []
+      for (let index = 0; index < count; index += 1) picks.push(top[(start + index * 4) % top.length])
+      return [...new Map(picks.map((entry) => [entry.name, entry])).values()]
+    }
+
     const BG_KEY = 'dsh-market-xivie:bg'
     const BG_PRESETS = [
       { id: 'aurora', zh: '极光', en: 'Aurora' },
@@ -882,6 +953,9 @@ window.__ModuleLoader__.load({
       const [notice, setNotice] = React.useState(undefined)
       const [bundles, setBundles] = React.useState(new Map())
       const [selected, setSelected] = React.useState(undefined)
+      const [theme, setTheme] = React.useState(readTheme)
+      const [slide, setSlide] = React.useState(0)
+      const [mineOnly, setMineOnly] = React.useState(false)
       const [favs, setFavs] = React.useState(readFavs)
       const [favOnly, setFavOnly] = React.useState(false)
       const toggleFav = (name, event) => {
@@ -976,6 +1050,10 @@ window.__ModuleLoader__.load({
       const categories = catalog.metadata?.categories ?? {}
       const needle = query.trim().toLowerCase()
       const filtered = entries.filter((entry) => {
+        if (mineOnly) {
+          const installed = bundles.get(entry.name)?.installed === true || entry.installation?.status === 'installed'
+          if (!installed && !favs.has(entry.name)) return false
+        }
         if (favOnly && !favs.has(entry.name)) return false
         if (category !== '' && entry?.metadata?.category !== category) return false
         if (needle === '') return true
@@ -1068,16 +1146,18 @@ window.__ModuleLoader__.load({
 
       const actions = h('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
         h('span', { className: 'dm-total' }, `${entries.length} ${t('plugins')}`),
-        h('div', { style: { position: 'relative', display: 'flex', gap: 8 } },
-          h('button', {
-            className: 'dm-ghost',
-            type: 'button',
-            'aria-expanded': bgOpen,
-            onClick: () => setBgOpen(!bgOpen)
-          }, h(PaletteIcon), t('background')),
-          h('button', { className: 'dm-ghost', type: 'button', onClick: () => void load(true) },
-            h(RefreshIcon), t('refresh')),
-          bgPopover))
+        h('button', {
+          className: 'dm-ghost',
+          type: 'button',
+          'aria-pressed': theme === 'dark',
+          onClick: () => {
+            const next = theme === 'dark' ? 'light' : 'dark'
+            setTheme(next)
+            saveTheme(next)
+          }
+        }, theme === 'dark' ? '☀' : '◐', t('appearance')),
+        h('button', { className: 'dm-ghost', type: 'button', onClick: () => void load(true) },
+          h(RefreshIcon), t('refresh')))
 
       const header = h('section', { className: 'dm-heading' },
         h('div', null,
@@ -1108,15 +1188,25 @@ window.__ModuleLoader__.load({
           h('option', { value: 'stars' }, t('sortStars')),
           h('option', { value: 'name' }, t('sortName'))))
 
+      const mineCount = entries.filter((entry) => {
+        const installed = bundles.get(entry.name)?.installed === true || entry.installation?.status === 'installed'
+        return installed || favs.has(entry.name)
+      }).length
+
       const chips = Object.keys(categories).length === 0 ? null : h('div', { className: 'dm-chips' },
         h('button', {
-          className: 'dm-chip', type: 'button', 'aria-pressed': category === '',
-          onClick: () => setCategory('')
+          className: 'dm-chip', type: 'button', 'aria-pressed': category === '' && !favOnly && !mineOnly,
+          onClick: () => { setCategory(''); setFavOnly(false); setMineOnly(false) }
         }, t('all'), h('span', { className: 'dm-chip-count' }, entries.length)),
+        h('button', {
+          className: 'dm-chip', type: 'button', 'aria-pressed': mineOnly,
+          title: t('myPlugins'),
+          onClick: () => { setMineOnly(!mineOnly); setFavOnly(false) }
+        }, t('myPlugins'), h('span', { className: 'dm-chip-count' }, mineCount)),
         h('button', {
           className: 'dm-chip', type: 'button', 'aria-pressed': favOnly,
           title: t('favorites'),
-          onClick: () => setFavOnly(!favOnly)
+          onClick: () => { setFavOnly(!favOnly); setMineOnly(false) }
         }, '♥', h('span', { className: 'dm-chip-count' }, favs.size)),
         ...Object.entries(categories).map(([id, declaration]) => h('button', {
           key: id,
@@ -1124,8 +1214,7 @@ window.__ModuleLoader__.load({
           type: 'button',
           'aria-pressed': category === id,
           onClick: () => setCategory(category === id ? '' : id)
-        }, pick(declaration?.title, id),
-          h('span', { className: 'dm-chip-count' }, entries.filter((entry) => entry.metadata?.category === id).length))))
+        }, pick(declaration?.title, id))))
 
       const cardOf = (entry, index, hero = false) => {
         const status = statusOf(entry)
@@ -1184,16 +1273,11 @@ window.__ModuleLoader__.load({
       }
 
       // 只有没筛选时才展示精选，否则会和下面结果重复
-      const featured = needle === '' && category === '' && entries.length > 0
-        ? entries
-          .filter((entry) => entry.icon !== undefined)
-          .slice()
-          .sort((left, right) => (sortKeyOf(right, 'downloads') ?? 0) - (sortKeyOf(left, 'downloads') ?? 0))
-          .slice(0, 1)
+      const featured = needle === '' && category === '' && !favOnly && !mineOnly && entries.length > 0
+        ? todayFeatured(entries)
         : []
-      const featuredNames = new Set(featured.map((entry) => entry.name))
       const gridEntries = filtered
-        .filter((entry) => !featuredNames.has(entry.name))
+        .slice()
         .sort((left, right) => {
           if (sort === 'downloads') return (sortKeyOf(right, 'downloads') ?? 0) - (sortKeyOf(left, 'downloads') ?? 0)
           if (sort === 'stars') return (sortKeyOf(right, 'stars') ?? 0) - (sortKeyOf(left, 'stars') ?? 0)
@@ -1201,9 +1285,9 @@ window.__ModuleLoader__.load({
           return 0
         })
 
-      const top = featured[0]
-      const banner = top === undefined ? null : h('section', { className: 'dm-banner' },
-        h('div', null,
+      const top = featured[Math.min(slide, featured.length - 1)] ?? featured[0]
+      const banner = top === undefined ? null : h('section', { className: 'dm-banner', 'data-slide': String(slide) },
+        h('div', { className: 'dm-banner-body', key: top.name },
           h('div', { className: 'dm-banner-label' }, h('i'), `EDITOR'S PICK / ${t('featuredShort')}`),
           h('h2', null, pick(top.title, top.name)),
           h('p', null, pick(top.description, '')),
@@ -1221,7 +1305,24 @@ window.__ModuleLoader__.load({
             h('b', null, '★'), ` ${formatCount(sortKeyOf(top, 'stars'))}`),
           h('div', { className: 'dm-art-tag three' }, h('b', null, '◈'),
             ` ${(top.versions?.length ?? 0)} ${t('versions')}`),
-          h('div', { className: 'dm-art-index' }, '01 — COLLECTION')))
+          h('div', { className: 'dm-art-index' }, '01 — COLLECTION')),
+        featured.length < 2 ? null : h('div', { className: 'dm-banner-nav' },
+          h('button', {
+            className: 'dm-arrow', type: 'button', 'aria-label': t('prev'),
+            onClick: () => setSlide((current) => (current - 1 + featured.length) % featured.length)
+          }, '‹'),
+          h('div', { className: 'dm-dots' }, ...featured.map((entry, index) => h('button', {
+            key: entry.name,
+            className: 'dm-dot',
+            type: 'button',
+            'aria-current': index === slide ? 'true' : undefined,
+            'aria-label': pick(entry.title, entry.name),
+            onClick: () => setSlide(index)
+          }))),
+          h('button', {
+            className: 'dm-arrow', type: 'button', 'aria-label': t('next'),
+            onClick: () => setSlide((current) => (current + 1) % featured.length)
+          }, '›')))
 
       const miniOf = (glyph, title, sub, cat) => h('button', {
         className: 'dm-mini', type: 'button', onClick: () => setCategory(cat)
@@ -1236,10 +1337,20 @@ window.__ModuleLoader__.load({
 
       const catalogSection = h('section', { className: 'dm-section', onClick: ripple },
         h('div', { className: 'dm-catalog-head' },
-          h('h2', null, t('catalogTitle'), h('small', null, `${gridEntries.length} ${t('plugins')}`)),
+          h('h2', null, t('catalogTitle'), h('small', null, `${filtered.length} ${t('plugins')}`)),
           tools),
         chips,
         h('div', { className: 'dm-grid' }, ...gridEntries.map((entry, index) => cardOf(entry, index))))
+
+      // 精选自动轮播：尊重「减少动态」
+      React.useEffect(() => {
+        if (featured.length < 2) return undefined
+        if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined
+        const timer = window.setInterval(() => {
+          setSlide((current) => (current + 1) % featured.length)
+        }, 7000)
+        return () => window.clearInterval(timer)
+      }, [featured.length])
 
       let body
       if (catalog.status === 'loading' && entries.length === 0) {
@@ -1313,7 +1424,7 @@ window.__ModuleLoader__.load({
               }, busy === entry.name ? t('installing') : t('install'))))
       })()
 
-      const rootProps = { className: 'dm-root' }
+      const rootProps = { className: 'dm-root', 'data-theme': theme }
       if (bg.kind === 'image' && bg.url !== '') {
         const scrim = scrimOf()
         rootProps.style = {
