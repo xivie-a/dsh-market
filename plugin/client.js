@@ -347,6 +347,79 @@ window.__ModuleLoader__.load({
 .dm-banner-cta:hover { filter: brightness(1.05); }
 .dm-banner-cta:active { transform: translateY(1px); }
 
+/* ── 轮播悬停：整块亮起来，图标站正，标签依次浮起，按钮扫光 ────────────── */
+.dm-banner {
+  transition: box-shadow .28s ease, background-color .28s ease;
+}
+.dm-banner:hover {
+  box-shadow: 0 22px 60px rgba(21, 59, 48, .28), inset 0 0 0 1px rgba(213, 244, 139, .16);
+}
+/* 光晕跟着指针方向轻微偏移（用背景渐变模拟，不产生布局抖动） */
+.dm-banner::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(560px 300px at var(--mx, 30%) var(--my, 20%), rgba(213, 244, 139, .1), transparent 70%);
+  opacity: 0; transition: opacity .3s ease;
+  pointer-events: none;
+}
+.dm-banner:hover::after { opacity: 1; }
+
+.dm-art-core {
+  transition: transform .34s cubic-bezier(.2, .7, .3, 1), box-shadow .34s ease;
+}
+.dm-banner:hover .dm-art-core {
+  transform: translate(-50%, -50%) rotate(0deg) scale(1.07);
+  box-shadow: 0 26px 54px rgba(0, 0, 0, .42);
+}
+.dm-art::before,
+.dm-art::after {
+  transition: transform .5s cubic-bezier(.2, .7, .3, 1), border-color .4s ease;
+}
+.dm-banner:hover .dm-art::before { transform: translate(-50%, -50%) scale(1.09); border-color: rgba(213, 244, 139, .34); }
+.dm-banner:hover .dm-art::after { transform: translate(-50%, -50%) scale(1.13); border-color: rgba(213, 244, 139, .4); }
+
+.dm-art-tag {
+  transition: transform .26s cubic-bezier(.2, .7, .3, 1), border-color .26s ease, background .26s ease;
+}
+.dm-banner:hover .dm-art-tag {
+  transform: translateY(-4px);
+  border-color: rgba(213, 244, 139, .36);
+  background: rgba(255, 255, 255, .09);
+}
+.dm-banner:hover .dm-art-tag.two { transition-delay: 60ms; }
+.dm-banner:hover .dm-art-tag.three { transition-delay: 120ms; }
+
+.dm-banner-cta {
+  position: relative; overflow: hidden;
+  transition: filter .15s, transform .18s cubic-bezier(.2, .7, .3, 1), box-shadow .18s ease;
+}
+.dm-banner-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .24);
+}
+.dm-banner-cta::after {
+  content: ""; position: absolute; inset: 0 auto 0 -60%;
+  width: 45%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .55), transparent);
+  transform: skewX(-18deg);
+  transition: left .5s ease;
+  pointer-events: none;
+}
+.dm-banner-cta:hover::after { left: 120%; }
+
+.dm-arrow { transition: transform .18s ease, background .18s ease, color .18s ease; }
+.dm-arrow:hover { transform: scale(1.12); }
+.dm-dot { transition: width .2s ease, background .2s ease, transform .2s ease; }
+.dm-dot:hover { transform: scaleY(1.6); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-banner:hover .dm-art-core,
+  .dm-banner:hover .dm-art-tag,
+  .dm-banner-cta:hover,
+  .dm-arrow:hover,
+  .dm-dot:hover { transform: none; }
+  .dm-banner-cta:hover::after { left: -60%; }
+}
+
 .dm-art { position: relative; min-height: 190px; }
 .dm-art::before,
 .dm-art::after {
@@ -1800,7 +1873,14 @@ window.__ModuleLoader__.load({
         })
 
       const top = featured[Math.min(slide, featured.length - 1)] ?? featured[0]
-      const banner = top === undefined ? null : h('section', { className: 'dm-banner', 'data-slide': String(slide) },
+      const banner = top === undefined ? null : h('section', { className: 'dm-banner', 'data-slide': String(slide),
+        // 高光跟着鼠标走：只改 CSS 变量，不触发布局
+        onMouseMove: (event) => {
+          const rect = event.currentTarget.getBoundingClientRect()
+          if (rect.width === 0 || rect.height === 0) return
+          event.currentTarget.style.setProperty('--mx', `${Math.round(((event.clientX - rect.left) / rect.width) * 100)}%`)
+          event.currentTarget.style.setProperty('--my', `${Math.round(((event.clientY - rect.top) / rect.height) * 100)}%`)
+        } },
         h('div', { className: 'dm-banner-body', key: top.name },
           h('div', { className: 'dm-banner-label' }, h('i'), `EDITOR'S PICK / ${t('featuredShort')}`),
           h('h2', null,

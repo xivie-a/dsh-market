@@ -169,6 +169,20 @@ const HARNESS = String.raw`
       + ' gridClass=' + String(document.querySelector('.dm-grid')?.className)
     document.body.appendChild(box)
   }
+  // ?hover=1 把轮播的悬停终态固定下来，方便截图核对（只影响预览页）
+  if (params.has('hover')) {
+    const style = document.createElement('style')
+    style.textContent = [
+      '.dm-banner { box-shadow: 0 22px 60px rgba(21,59,48,.28), inset 0 0 0 1px rgba(213,244,139,.16); }',
+      '.dm-banner::after { opacity: 1; }',
+      '.dm-banner .dm-art-core { transform: translate(-50%,-50%) rotate(0deg) scale(1.07); box-shadow: 0 26px 54px rgba(0,0,0,.42); }',
+      '.dm-banner .dm-art::before { transform: translate(-50%,-50%) scale(1.09); border-color: rgba(213,244,139,.34); }',
+      '.dm-banner .dm-art::after { transform: translate(-50%,-50%) scale(1.13); border-color: rgba(213,244,139,.4); }',
+      '.dm-banner .dm-art-tag { transform: translateY(-4px); border-color: rgba(213,244,139,.36); background: rgba(255,255,255,.09); }',
+      '.dm-banner .dm-banner-cta { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(0,0,0,.24); }'
+    ].join('\n')
+    document.head.appendChild(style)
+  }
   // ?palette=1 打开快捷搜索
   if (params.has('palette')) {
     setTimeout(() => {
