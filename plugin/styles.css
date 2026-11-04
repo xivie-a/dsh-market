@@ -473,3 +473,91 @@
   .dm-chip[aria-pressed="true"] { outline: 2px solid Highlight; outline-offset: -2px; }
   .dm-mask { background: CanvasText; opacity: .35; }
 }
+
+/* ── 布局切换 ─────────────────────────────────────────────────────────── */
+.dm-layout { display: flex; gap: 6px; align-items: center; }
+.dm-layout button {
+  display: grid; place-items: center;
+  width: 34px; height: 34px; padding: 0;
+  border: 1px solid var(--line); border-radius: 9px;
+  background: var(--panel); color: var(--muted); font-size: 14px;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.dm-layout button:hover { border-color: var(--accent); color: var(--accent); }
+.dm-layout button[aria-pressed="true"] {
+  background: var(--tint); color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+
+/* 列表模式：一条一行，信息横排 */
+.dm-grid.dm-list { grid-template-columns: 1fr; gap: 10px; }
+.dm-grid.dm-list .dm-card { flex-direction: row; align-items: center; min-height: 0; padding: 14px 18px; gap: 16px; }
+.dm-grid.dm-list .dm-card-top { flex: 0 0 250px; }
+.dm-grid.dm-list .dm-desc { flex: 1 1 auto; min-height: 0; margin: 0; -webkit-line-clamp: 1; }
+.dm-grid.dm-list .dm-foot { margin-top: 0; flex: 0 0 auto; gap: 16px; }
+.dm-grid.dm-list .dm-card:hover { transform: none; }
+.dm-grid.dm-list .dm-card::after { display: none; }
+
+/* ── 快捷搜索 ─────────────────────────────────────────────────────────── */
+.dm-palette-mask { position: fixed; inset: 0; z-index: 95; background: rgba(21, 63, 50, .32); animation: dm-fade .14s ease-out; }
+.dm-palette {
+  position: fixed; z-index: 96; top: 12vh; left: 50%;
+  display: flex; flex-direction: column;
+  width: min(620px, calc(100vw - 40px)); max-height: 62vh;
+  transform: translateX(-50%);
+  border: 1px solid var(--line); border-radius: 16px;
+  background: var(--panel);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .3);
+  overflow: hidden;
+  animation: dm-swap .18s ease-out;
+}
+.dm-palette input {
+  width: 100%; padding: 16px 18px;
+  border: 0; border-bottom: 1px solid var(--line);
+  background: transparent; color: inherit; font-size: 14px;
+}
+.dm-palette input:focus { outline: none; }
+.dm-palette-list { flex: 1 1 auto; overflow-y: auto; padding: 6px; }
+.dm-palette-item {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 9px 12px; border: 0; border-radius: 10px;
+  background: transparent; text-align: left;
+}
+.dm-palette-item[aria-selected="true"] { background: var(--tint); }
+.dm-palette-item .dm-thumb { width: 34px; height: 34px; border-radius: 9px; font-size: 15px; }
+.dm-palette-item .dm-thumb img { width: 22px; height: 22px; }
+.dm-palette-name { min-width: 0; }
+.dm-palette-name strong {
+  display: block; font-size: 13.5px; font-weight: 650;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dm-palette-name small { color: var(--muted); font-size: 11px; }
+.dm-palette-empty { padding: 26px; text-align: center; color: var(--muted); font-size: 12.5px; }
+.dm-palette-hint {
+  display: flex; gap: 16px; padding: 9px 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 11px;
+}
+.dm-palette-hint kbd {
+  padding: 1px 5px; border: 1px solid var(--line); border-radius: 5px;
+  background: var(--tint); font: inherit; font-size: 10px;
+}
+
+/* ── 相关推荐 ─────────────────────────────────────────────────────────── */
+.dm-related { display: flex; flex-direction: column; gap: 6px; }
+.dm-related-title { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.dm-related-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 8px 10px; border: 1px solid transparent; border-radius: 10px;
+  background: transparent; text-align: left;
+  transition: background .15s;
+}
+.dm-related-item:hover { background: var(--tint); }
+.dm-related-item .dm-thumb { width: 30px; height: 30px; border-radius: 8px; font-size: 13px; }
+.dm-related-item .dm-thumb img { width: 20px; height: 20px; }
+.dm-related-name { min-width: 0; }
+.dm-related-name strong {
+  display: block; font-size: 12.5px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dm-related-name small { color: var(--muted); font-size: 10.5px; }

@@ -35,6 +35,14 @@ window.__ModuleLoader__.load({
       unfavorite: '取消收藏',
       myPlugins: '我的插件',
       clearFilters: '清除筛选',
+      quickSearch: '快捷搜索',
+      quickSearchPlaceholder: '搜索插件名称、作者或描述…',
+      paletteNavigate: '选择',
+      paletteOpen: '打开',
+      paletteClose: '关闭',
+      related: '相关推荐',
+      layoutGrid: '网格视图',
+      layoutList: '列表视图',
       appearance: '外观',
       prev: '上一个',
       next: '下一个',
@@ -104,6 +112,14 @@ window.__ModuleLoader__.load({
       unfavorite: 'Remove from favorites',
       myPlugins: 'My plugins',
       clearFilters: 'Clear filters',
+      quickSearch: 'Quick search',
+      quickSearchPlaceholder: 'Search by name, author or description…',
+      paletteNavigate: 'select',
+      paletteOpen: 'open',
+      paletteClose: 'close',
+      related: 'Related plugins',
+      layoutGrid: 'Grid view',
+      layoutList: 'List view',
       appearance: 'Appearance',
       prev: 'Previous',
       next: 'Next',
@@ -626,6 +642,94 @@ window.__ModuleLoader__.load({
   .dm-chip[aria-pressed="true"] { outline: 2px solid Highlight; outline-offset: -2px; }
   .dm-mask { background: CanvasText; opacity: .35; }
 }
+
+/* ── 布局切换 ─────────────────────────────────────────────────────────── */
+.dm-layout { display: flex; gap: 6px; align-items: center; }
+.dm-layout button {
+  display: grid; place-items: center;
+  width: 34px; height: 34px; padding: 0;
+  border: 1px solid var(--line); border-radius: 9px;
+  background: var(--panel); color: var(--muted); font-size: 14px;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.dm-layout button:hover { border-color: var(--accent); color: var(--accent); }
+.dm-layout button[aria-pressed="true"] {
+  background: var(--tint); color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+}
+
+/* 列表模式：一条一行，信息横排 */
+.dm-grid.dm-list { grid-template-columns: 1fr; gap: 10px; }
+.dm-grid.dm-list .dm-card { flex-direction: row; align-items: center; min-height: 0; padding: 14px 18px; gap: 16px; }
+.dm-grid.dm-list .dm-card-top { flex: 0 0 250px; }
+.dm-grid.dm-list .dm-desc { flex: 1 1 auto; min-height: 0; margin: 0; -webkit-line-clamp: 1; }
+.dm-grid.dm-list .dm-foot { margin-top: 0; flex: 0 0 auto; gap: 16px; }
+.dm-grid.dm-list .dm-card:hover { transform: none; }
+.dm-grid.dm-list .dm-card::after { display: none; }
+
+/* ── 快捷搜索 ─────────────────────────────────────────────────────────── */
+.dm-palette-mask { position: fixed; inset: 0; z-index: 95; background: rgba(21, 63, 50, .32); animation: dm-fade .14s ease-out; }
+.dm-palette {
+  position: fixed; z-index: 96; top: 12vh; left: 50%;
+  display: flex; flex-direction: column;
+  width: min(620px, calc(100vw - 40px)); max-height: 62vh;
+  transform: translateX(-50%);
+  border: 1px solid var(--line); border-radius: 16px;
+  background: var(--panel);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .3);
+  overflow: hidden;
+  animation: dm-swap .18s ease-out;
+}
+.dm-palette input {
+  width: 100%; padding: 16px 18px;
+  border: 0; border-bottom: 1px solid var(--line);
+  background: transparent; color: inherit; font-size: 14px;
+}
+.dm-palette input:focus { outline: none; }
+.dm-palette-list { flex: 1 1 auto; overflow-y: auto; padding: 6px; }
+.dm-palette-item {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 9px 12px; border: 0; border-radius: 10px;
+  background: transparent; text-align: left;
+}
+.dm-palette-item[aria-selected="true"] { background: var(--tint); }
+.dm-palette-item .dm-thumb { width: 34px; height: 34px; border-radius: 9px; font-size: 15px; }
+.dm-palette-item .dm-thumb img { width: 22px; height: 22px; }
+.dm-palette-name { min-width: 0; }
+.dm-palette-name strong {
+  display: block; font-size: 13.5px; font-weight: 650;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dm-palette-name small { color: var(--muted); font-size: 11px; }
+.dm-palette-empty { padding: 26px; text-align: center; color: var(--muted); font-size: 12.5px; }
+.dm-palette-hint {
+  display: flex; gap: 16px; padding: 9px 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 11px;
+}
+.dm-palette-hint kbd {
+  padding: 1px 5px; border: 1px solid var(--line); border-radius: 5px;
+  background: var(--tint); font: inherit; font-size: 10px;
+}
+
+/* ── 相关推荐 ─────────────────────────────────────────────────────────── */
+.dm-related { display: flex; flex-direction: column; gap: 6px; }
+.dm-related-title { color: var(--muted); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.dm-related-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 8px 10px; border: 1px solid transparent; border-radius: 10px;
+  background: transparent; text-align: left;
+  transition: background .15s;
+}
+.dm-related-item:hover { background: var(--tint); }
+.dm-related-item .dm-thumb { width: 30px; height: 30px; border-radius: 8px; font-size: 13px; }
+.dm-related-item .dm-thumb img { width: 20px; height: 20px; }
+.dm-related-name { min-width: 0; }
+.dm-related-name strong {
+  display: block; font-size: 12.5px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.dm-related-name small { color: var(--muted); font-size: 10.5px; }
 `
 
     /** 本地化文本 → 字符串；优先中文，其次英文，其次第一个。 */
@@ -682,6 +786,21 @@ window.__ModuleLoader__.load({
           onError: (event) => { event.currentTarget.style.display = 'none' }
         })
         : String(label).slice(0, 1).toUpperCase())
+    }
+
+    /** 快捷搜索用：名称、标题、简介、关键词、作者一起匹配。 */
+    function searchEntries(entries, query, limit = 8) {
+      const needle = query.trim().toLowerCase()
+      const pool = needle === ''
+        ? entries.slice().sort((left, right) => (right.metadata?.sortKeys?.downloads ?? 0) - (left.metadata?.sortKeys?.downloads ?? 0))
+        : entries.filter((entry) => [
+          entry.name,
+          pick(entry.title, ''),
+          pick(entry.description, ''),
+          ...(entry.metadata?.keywords ?? []),
+          entry.author ?? ''
+        ].join(' ').toLowerCase().includes(needle))
+      return pool.slice(0, limit)
     }
 
     const FAV_KEY = 'dsh-market-xivie:favs'
@@ -919,6 +1038,24 @@ window.__ModuleLoader__.load({
       const [theme, setTheme] = React.useState(readTheme)
       const [slide, setSlide] = React.useState(0)
       const [mineOnly, setMineOnly] = React.useState(false)
+      const [layout, setLayout] = React.useState(() => {
+        try {
+          return window.localStorage.getItem('dsh-market-xivie:layout') === 'list' ? 'list' : 'grid'
+        } catch {
+          return 'grid'
+        }
+      })
+      const setLayoutAndSave = (next) => {
+        setLayout(next)
+        try {
+          window.localStorage.setItem('dsh-market-xivie:layout', next)
+        } catch {
+          // 存不下就只在这个会话里生效
+        }
+      }
+      const [paletteOpen, setPaletteOpen] = React.useState(false)
+      const [paletteQuery, setPaletteQuery] = React.useState('')
+      const [paletteIndex, setPaletteIndex] = React.useState(0)
       const [favs, setFavs] = React.useState(readFavs)
       const [favOnly, setFavOnly] = React.useState(false)
       const toggleFav = (name, event) => {
@@ -1032,6 +1169,7 @@ window.__ModuleLoader__.load({
       const entries = catalog.entries ?? []
       const categories = catalog.metadata?.categories ?? {}
       const needle = query.trim().toLowerCase()
+      const paletteResults = paletteOpen ? searchEntries(entries, paletteQuery) : []
       const filtered = entries.filter((entry) => {
         if (mineOnly) {
           const installed = bundles.get(entry.name)?.installed === true || entry.installation?.status === 'installed'
@@ -1169,7 +1307,22 @@ window.__ModuleLoader__.load({
           h('option', { value: 'index' }, t('sortIndex')),
           h('option', { value: 'downloads' }, t('sortDownloads')),
           h('option', { value: 'stars' }, t('sortStars')),
-          h('option', { value: 'name' }, t('sortName'))))
+          h('option', { value: 'name' }, t('sortName'))),
+        h('div', { className: 'dm-layout' },
+          h('button', {
+            type: 'button',
+            'aria-pressed': layout === 'grid',
+            'aria-label': t('layoutGrid'),
+            title: t('layoutGrid'),
+            onClick: () => setLayoutAndSave('grid')
+          }, '▦'),
+          h('button', {
+            type: 'button',
+            'aria-pressed': layout === 'list',
+            'aria-label': t('layoutList'),
+            title: t('layoutList'),
+            onClick: () => setLayoutAndSave('list')
+          }, '☰')))
 
       const mineCount = entries.filter((entry) => {
         const installed = bundles.get(entry.name)?.installed === true || entry.installation?.status === 'installed'
@@ -1338,7 +1491,8 @@ window.__ModuleLoader__.load({
             type: 'button',
             onClick: () => { setQuery(''); setCategory(''); setFavOnly(false); setMineOnly(false) }
           }, t('clearFilters')))
-        : h('div', { className: 'dm-grid' }, ...gridEntries.map((entry, index) => cardOf(entry, index)))
+        : h('div', { className: layout === 'list' ? 'dm-grid dm-list' : 'dm-grid' },
+          ...gridEntries.map((entry, index) => cardOf(entry, index)))
 
       const catalogSection = h('section', { className: 'dm-section', onClick: ripple },
         h('div', { className: 'dm-catalog-head' },
@@ -1346,6 +1500,50 @@ window.__ModuleLoader__.load({
           tools),
         chips,
         gridContent)
+
+      // ⌘K / Ctrl+K 打开快捷搜索；/ 也打开；↑↓ 选择，Enter 进详情
+      React.useEffect(() => {
+        const onKeyDown = (event) => {
+          if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+            event.preventDefault()
+            setPaletteOpen((open) => !open)
+            setPaletteQuery('')
+            setPaletteIndex(0)
+            return
+          }
+          if (!paletteOpen) {
+            const tag = event.target?.tagName ?? ''
+            if (event.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/u.test(tag)) {
+              event.preventDefault()
+              setPaletteOpen(true)
+              setPaletteQuery('')
+              setPaletteIndex(0)
+            }
+            return
+          }
+          if (event.key === 'Escape') {
+            setPaletteOpen(false)
+            return
+          }
+          const results = searchEntries(entries, paletteQuery)
+          if (event.key === 'ArrowDown') {
+            event.preventDefault()
+            setPaletteIndex((current) => Math.min(current + 1, Math.max(results.length - 1, 0)))
+          } else if (event.key === 'ArrowUp') {
+            event.preventDefault()
+            setPaletteIndex((current) => Math.max(current - 1, 0))
+          } else if (event.key === 'Enter') {
+            const target = results[paletteIndex]
+            if (target !== undefined) {
+              event.preventDefault()
+              setSelected(target)
+              setPaletteOpen(false)
+            }
+          }
+        }
+        window.addEventListener('keydown', onKeyDown)
+        return () => window.removeEventListener('keydown', onKeyDown)
+      }, [paletteOpen, paletteQuery, paletteIndex, entries])
 
       // 精选自动轮播：尊重「减少动态」
       React.useEffect(() => {
@@ -1413,6 +1611,24 @@ window.__ModuleLoader__.load({
               h('em', null, version.publishTimestamp
                 ? new Date(version.publishTimestamp * 1000).toLocaleDateString('zh-CN')
                 : '')))),
+          (() => {
+            const related = entries
+              .filter((item) => item.name !== entry.name
+                && item.metadata?.category !== undefined
+                && item.metadata.category === entry.metadata?.category)
+              .sort((left, right) => (sortKeyOf(right, 'downloads') ?? 0) - (sortKeyOf(left, 'downloads') ?? 0))
+              .slice(0, 4)
+            return related.length === 0 ? null : h('div', { className: 'dm-related' },
+              h('div', { className: 'dm-related-title' }, t('related')),
+              ...related.map((item) => h('button', {
+                key: item.name,
+                className: 'dm-related-item',
+                type: 'button',
+                onClick: () => setSelected(item)
+              }, thumbOf(item), h('div', { className: 'dm-related-name' },
+                h('strong', null, pick(item.title, item.name)),
+                h('small', null, pick(categories[item.metadata.category]?.title, item.metadata.category))))))
+          })(),
           h('div', { className: 'dm-detail-foot' },
             h('span', { className: 'dm-meta' },
               sortKeyOf(entry, 'stars') !== undefined ? h('span', { className: 'dm-tag' }, `★ ${formatCount(sortKeyOf(entry, 'stars'))}`) : null,
@@ -1444,6 +1660,43 @@ window.__ModuleLoader__.load({
         detail === null ? null : h(React.Fragment, null,
           h('div', { className: 'dm-mask', onClick: () => setSelected(undefined) }),
           detail),
+        paletteOpen ? h(React.Fragment, null,
+          h('div', { className: 'dm-palette-mask', onClick: () => setPaletteOpen(false) }),
+          h('div', { className: 'dm-palette', role: 'dialog', 'aria-modal': 'true', 'aria-label': t('quickSearch') },
+            h('input', {
+              autoFocus: true,
+              value: paletteQuery,
+              placeholder: t('quickSearchPlaceholder'),
+              'aria-label': t('quickSearch'),
+              onChange: (event) => {
+                setPaletteQuery(event.target.value)
+                setPaletteIndex(0)
+              }
+            }),
+            h('div', { className: 'dm-palette-list' },
+              paletteResults.length === 0
+                ? h('div', { className: 'dm-palette-empty' }, t('empty'))
+                : paletteResults.map((item, index) => h('button', {
+                  key: item.name,
+                  type: 'button',
+                  className: 'dm-palette-item',
+                  'aria-selected': index === paletteIndex,
+                  onMouseEnter: () => setPaletteIndex(index),
+                  onClick: () => {
+                    setSelected(item)
+                    setPaletteOpen(false)
+                  }
+                }, thumbOf(item),
+                  h('div', { className: 'dm-palette-name' },
+                    h('strong', null, pick(item.title, item.name)),
+                    h('small', null, item.metadata?.category === undefined
+                      ? t('community')
+                      : pick(categories[item.metadata.category]?.title, item.metadata.category)))))),
+            h('div', { className: 'dm-palette-hint' },
+              h('span', null, h('kbd', null, '↑↓'), ' ', t('paletteNavigate')),
+              h('span', null, h('kbd', null, 'Enter'), ' ', t('paletteOpen')),
+              h('span', null, h('kbd', null, 'Esc'), ' ', t('paletteClose')))))
+          : null,
         notice === undefined ? null : h('div', { className: `dm-toast dm-toast--${notice.kind}`, role: 'status' },
           h('span', null, notice.text),
           h('button', {

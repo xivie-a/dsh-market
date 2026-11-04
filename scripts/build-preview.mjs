@@ -55,10 +55,13 @@ const HARNESS = String.raw`
   const React = window.React
   const ReactDOM = window.ReactDOM
 
-  // 截图参数：?theme=dark 预置主题（必须在渲染前写，组件初始化时读取）
+  // 截图参数：?theme=dark / ?layout=list 预置状态（必须在渲染前写，组件初始化时读取）
   const previewParams = new URLSearchParams(location.search)
   if (previewParams.has('theme')) {
     try { window.localStorage.setItem('dsh-market-xivie:theme', previewParams.get('theme')) } catch {}
+  }
+  if (previewParams.has('layout')) {
+    try { window.localStorage.setItem('dsh-market-xivie:layout', previewParams.get('layout')) } catch {}
   }
 
   // 把索引数据补成市场服务会返回的形状
@@ -147,6 +150,19 @@ const HARNESS = String.raw`
 
   // ?select=N 时自动点开第 N 张卡，用来截详情面板
   const params = new URLSearchParams(location.search)
+  if (params.has('debug')) {
+    const box = document.createElement('div')
+    box.style.cssText = 'position:fixed;z-index:9999;left:8px;top:8px;background:#c00;color:#fff;font:12px monospace;padding:4px 8px'
+    box.textContent = 'layout stored=' + String(window.localStorage.getItem('dsh-market-xivie:layout'))
+      + ' gridClass=' + String(document.querySelector('.dm-grid')?.className)
+    document.body.appendChild(box)
+  }
+  // ?palette=1 打开快捷搜索
+  if (params.has('palette')) {
+    setTimeout(() => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true }))
+    }, 500)
+  }
   if (params.has('select')) {
     const index = Number(params.get('select') ?? 2)
     setTimeout(() => {
