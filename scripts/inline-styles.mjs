@@ -19,7 +19,9 @@ const START = '    const STYLES = `'
 const LEGACY = '    const STYLES_LEGACY = `'
 
 const css = (await readFile(cssPath, 'utf8')).trimEnd()
-const source = await readFile(clientPath, 'utf8')
+// 统一成 LF、去掉可能的 BOM：Windows 上的 Set-Content 会写成 CRLF + BOM
+const raw = await readFile(clientPath, 'utf8')
+const source = raw.replace(/^\uFEFF/u, '').replace(/\r\n/gu, '\n')
 
 const start = source.indexOf(START)
 if (start === -1) throw new Error('client.js 里找不到 `const STYLES = ` 的起始位置')

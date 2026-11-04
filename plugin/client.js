@@ -55,6 +55,20 @@ window.__ModuleLoader__.load({
       removed: '已卸载',
       disabled: '已停用',
       removeUnsupported: '这个 DSH 版本不支持从这里卸载，请到「插件」页操作',
+      curatedBundle: '场景套装',
+      suiteCompose: '搭配你的能力组合',
+      installSelected: '安装所选',
+      pickCombo: '选择你的插件组合',
+      selectAll: '全选',
+      keepRequired: '仅保留必需',
+      required: '必需',
+      autoIncluded: '自动包含',
+      optional: '可选',
+      selected: '已选',
+      suiteOrderHint: '必需项优先，其余按清单顺序添加',
+      suiteBuilding: '正在搭建你的插件套装…',
+      suiteReady: '套装已准备好',
+      onlyRunning: '正在处理…',
       appearance: '外观',
       prev: '上一个',
       next: '下一个',
@@ -144,6 +158,20 @@ window.__ModuleLoader__.load({
       removed: 'Removed',
       disabled: 'Disabled',
       removeUnsupported: 'This DSH build cannot remove plugins here; use the Plugins page',
+      curatedBundle: 'Curated bundle',
+      suiteCompose: 'Compose your toolset',
+      installSelected: 'Install selected',
+      pickCombo: 'Pick your combination',
+      selectAll: 'Select all',
+      keepRequired: 'Required only',
+      required: 'Required',
+      autoIncluded: 'included',
+      optional: 'Optional',
+      selected: 'Selected',
+      suiteOrderHint: 'Required items first, then list order',
+      suiteBuilding: 'Building your bundle…',
+      suiteReady: 'Bundle ready',
+      onlyRunning: 'Working…',
       appearance: 'Appearance',
       prev: 'Previous',
       next: 'Next',
@@ -763,7 +791,7 @@ window.__ModuleLoader__.load({
 /* ── 场景套装 ─────────────────────────────────────────────────────────── */
 .dm-suite-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
 .dm-suite-card {
-  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
   padding: 18px; text-align: left;
   border: 1px solid var(--line); border-radius: 16px; background: var(--panel);
   transition: border-color .16s, box-shadow .16s, transform .16s;
@@ -774,54 +802,137 @@ window.__ModuleLoader__.load({
   transform: translateY(-2px);
 }
 .dm-suite-glyph {
-  display: grid; place-items: center; width: 38px; height: 38px;
+  display: grid; place-items: center; width: 38px; height: 38px; margin-bottom: 4px;
   border-radius: 11px; background: var(--tint); color: var(--accent); font-size: 18px;
 }
 .dm-suite-card strong { font-size: 14.5px; font-weight: 700; }
+.dm-suite-label {
+  color: var(--accent); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; opacity: .8;
+}
 .dm-suite-desc { color: var(--muted); font-size: 12px; line-height: 1.6; }
 .dm-suite-foot {
   display: flex; align-items: center; justify-content: space-between; width: 100%;
-  margin-top: 4px; color: var(--muted); font-size: 11px;
+  margin-top: 6px; color: var(--muted); font-size: 11px;
 }
 
-.dm-suite-detail {
-  position: fixed; inset: 0 0 0 auto; z-index: 72;
-  display: flex; flex-direction: column; gap: 16px;
-  width: 480px; max-width: 100vw; padding: 22px;
-  border-left: 1px solid var(--line); background: var(--panel);
-  box-shadow: -16px 0 64px rgba(21, 59, 48, .16);
-  overflow-y: auto;
-  animation: dm-slide .22s cubic-bezier(.2, .7, .3, 1);
+/* 套装弹窗 */
+.dm-suite-mask { position: fixed; inset: 0; z-index: 76; background: rgba(21, 63, 50, .4); animation: dm-fade .16s ease-out; }
+.dm-suite-dialog {
+  position: fixed; z-index: 77; top: 6vh; left: 50%;
+  display: flex; flex-direction: column;
+  width: min(880px, calc(100vw - 48px)); max-height: 88vh;
+  transform: translateX(-50%);
+  border: 1px solid var(--line); border-radius: 20px;
+  background: var(--panel);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .3);
+  overflow: hidden;
+  animation: dm-swap .2s ease-out;
 }
-.dm-suite-detail-head { display: flex; align-items: flex-start; gap: 12px; }
-.dm-suite-detail-head h2 { margin: 0 0 4px; font-size: 18px; font-weight: 750; }
-.dm-suite-detail-head p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.7; }
-.dm-suite-detail-head .dm-close { margin-left: auto; }
-.dm-suite-items { display: flex; flex-direction: column; gap: 6px; }
-.dm-suite-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px;
+.dm-suite-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  padding: 20px 24px 14px;
 }
-.dm-suite-item .dm-thumb { width: 34px; height: 34px; border-radius: 9px; font-size: 14px; }
-.dm-suite-item .dm-thumb img { width: 22px; height: 22px; }
-.dm-suite-item-name { min-width: 0; flex: 1 1 auto; }
-.dm-suite-item-name strong { display: block; font-size: 13px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dm-suite-item-name small { color: var(--muted); font-size: 10.5px; }
+.dm-suite-eyebrow { color: var(--muted); font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.dm-suite-head h2 { margin: 6px 0 0; font-size: 21px; font-weight: 750; letter-spacing: -.02em; }
+.dm-suite-head .dm-close { flex: none; }
+.dm-suite-body {
+  display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 22px;
+  padding: 0 24px 4px; overflow-y: auto;
+}
+.dm-suite-intro { display: flex; flex-direction: column; gap: 10px; }
+.dm-suite-symbol {
+  display: grid; place-items: center; width: 48px; height: 48px;
+  border-radius: 14px; background: var(--tint); color: var(--accent); font-size: 22px;
+}
+.dm-suite-intro h3 { margin: 4px 0 0; font-size: 16px; font-weight: 700; }
+.dm-suite-intro p { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.75; }
+.dm-suite-stats { display: flex; flex-wrap: wrap; gap: 6px; }
+.dm-suite-stats span {
+  padding: 3px 8px; border-radius: 6px; background: var(--tint);
+  color: var(--accent); font-size: 10.5px; font-variant-numeric: tabular-nums;
+}
+.dm-suite-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.dm-suite-actions .dm-btn { justify-content: center; min-height: 38px; }
+/* 弹窗里两个按钮要有主次：安装所选实心，全部获取描边 */
+.dm-suite-actions .dm-btn--primary {
+  background: var(--accent); color: #fff; box-shadow: 0 6px 18px rgba(21, 59, 48, .18);
+}
+.dm-suite-actions .dm-btn--primary:hover:not(:disabled) { filter: brightness(1.06); background: var(--accent); }
+.dm-root[data-theme="dark"] .dm-suite-actions .dm-btn--primary { color: #141c19; }
+.dm-suite-actions .dm-btn:not(.dm-btn--primary) {
+  background: transparent; color: var(--text); border: 1px solid var(--line);
+}
+.dm-suite-actions .dm-btn:not(.dm-btn--primary):hover:not(:disabled) {
+  background: var(--tint); border-color: var(--accent); color: var(--accent);
+}
+
+.dm-suite-picker { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.dm-suite-picker-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.dm-suite-picker-head > span { color: var(--muted); font-size: 11.5px; font-weight: 600; }
+.dm-suite-links { display: flex; gap: 10px; }
+.dm-suite-links button {
+  padding: 0; border: 0; background: transparent; color: var(--accent);
+  font-size: 11.5px; text-decoration: underline; text-underline-offset: 3px;
+}
+.dm-suite-links button:disabled { opacity: .4; cursor: default; }
+.dm-suite-tiles { display: flex; flex-direction: column; gap: 8px; }
+.dm-suite-tile {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line); border-radius: 14px; background: var(--panel);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.dm-suite-tile:hover { border-color: color-mix(in srgb, var(--accent) 32%, var(--line)); }
+.dm-suite-tile.is-picked { background: color-mix(in srgb, var(--accent) 5%, var(--panel)); border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); }
+.dm-suite-tile.is-required { cursor: default; }
+.dm-suite-tile-top { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.dm-suite-tile .dm-thumb { width: 36px; height: 36px; border-radius: 10px; font-size: 15px; }
+.dm-suite-tile .dm-thumb img { width: 24px; height: 24px; }
+.dm-suite-tile-name { flex: 1 1 auto; min-width: 0; }
+.dm-suite-tile-name strong { display: block; font-size: 13.5px; font-weight: 650; }
+.dm-suite-tile-name small { display: block; margin-top: 2px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+.dm-suite-tile input {
+  flex: none; width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer;
+}
+.dm-suite-tile input:disabled { cursor: default; opacity: .55; }
+.dm-suite-tile-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  color: var(--muted); font-size: 10.5px;
+}
+
+.dm-suite-plan {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 12px 24px; border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 11px;
+}
+.dm-suite-plan strong { color: var(--text); font-size: 12px; font-weight: 650; }
+.dm-suite-queue { display: flex; flex-direction: column; gap: 8px; padding: 0 24px 18px; max-height: 210px; overflow-y: auto; }
+.dm-suite-queue-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 11.5px; }
+.dm-suite-queue-head strong { font-size: 12.5px; font-weight: 650; }
+.dm-suite-meter { height: 4px; border-radius: 99px; background: var(--tint); overflow: hidden; }
+.dm-suite-meter span { display: block; height: 100%; border-radius: 99px; background: var(--accent); transition: width .3s ease; }
+.dm-suite-job { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--muted); }
+.dm-suite-job-icon { width: 16px; text-align: center; }
+.dm-suite-job[data-state="done"] .dm-suite-job-icon { color: var(--accent); }
+.dm-suite-job[data-state="error"] .dm-suite-job-icon { color: #c05050; }
+.dm-suite-job-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dm-suite-job-status { flex: none; }
 .dm-suite-state { flex: none; color: var(--muted); font-size: 11px; white-space: nowrap; }
 .dm-suite-state--error { color: #c05050; }
-.dm-suite-detail-foot {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line);
-}
 .dm-btn--danger { background: transparent; color: #b6463f; border: 1px solid color-mix(in srgb, #b6463f 35%, var(--line)); }
 .dm-btn--danger:hover:not(:disabled) { background: color-mix(in srgb, #b6463f 10%, transparent); }
 
 @media (max-width: 999px) {
   .dm-suite-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dm-suite-body { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 720px) {
   .dm-suite-grid { grid-template-columns: minmax(0, 1fr); }
-  .dm-suite-detail { width: 100vw; }
+  .dm-suite-dialog { width: 100vw; max-height: 100vh; top: 0; border-radius: 0; }
+  .dm-suite-head, .dm-suite-body, .dm-suite-plan, .dm-suite-queue { padding-inline: 16px; }
+}
 }
 `
 
@@ -908,7 +1019,16 @@ window.__ModuleLoader__.load({
         if (!response.ok) return []
         const doc = await response.json()
         if (!Array.isArray(doc?.suites)) return []
-        return doc.suites.filter((suite) => Array.isArray(suite?.plugins) && suite.plugins.length > 1)
+        return doc.suites
+          .map((suite) => {
+            const items = Array.isArray(suite?.items)
+              ? suite.items
+              : Array.isArray(suite?.plugins)
+                ? suite.plugins.map((name) => ({ name }))
+                : []
+            return { ...suite, items }
+          })
+          .filter((suite) => suite.items.length > 1)
       } catch {
         return []
       }
@@ -1171,6 +1291,7 @@ window.__ModuleLoader__.load({
       const [suiteId, setSuiteId] = React.useState(undefined)
       const [suiteJobs, setSuiteJobs] = React.useState({})
       const [suiteRunning, setSuiteRunning] = React.useState(false)
+      const [suitePicked, setSuitePicked] = React.useState(new Set())
       const [favs, setFavs] = React.useState(readFavs)
       const [favOnly, setFavOnly] = React.useState(false)
       const toggleFav = (name, event) => {
@@ -1653,24 +1774,28 @@ window.__ModuleLoader__.load({
 
       // 套装：按场景把几个插件打包，点开可以逐个或一次装齐
       const suiteOf = (id) => suites.find((suite) => suite.id === id)
-      const suiteEntries = (suite) => (suite?.plugins ?? [])
-        .map((name) => entries.find((entry) => entry.name === name))
-        .filter(Boolean)
+      /** 套装条目支持 "包名" 或 { name, required, note } 两种写法。 */
+      const suiteItemsOf = (suite) => (suite?.items ?? []).map((item) => {
+        const spec = typeof item === 'string' ? { name: item } : item
+        const entry = entries.find((candidate) => candidate.name === spec.name)
+        if (entry === undefined) return undefined
+        return { entry, name: entry.name, required: spec.required === true, note: spec.note ?? '' }
+      }).filter(Boolean)
 
-      const installSuite = async (suite) => {
+      const isInstalled = (entry) => bundles.get(entry.name)?.installed === true
+        || entry.installation?.status === 'installed'
+
+      const installMany = async (list) => {
         if (suiteRunning) return
         setSuiteRunning(true)
-        const pending = suiteEntries(suite).filter((entry) => {
-          const installed = bundles.get(entry.name)?.installed === true || entry.installation?.status === 'installed'
-          return !installed
-        })
-        for (const entry of pending) {
-          setSuiteJobs((current) => ({ ...current, [entry.name]: 'running' }))
+        const pending = list.filter((item) => !isInstalled(item.entry))
+        for (const item of pending) {
+          setSuiteJobs((current) => ({ ...current, [item.name]: 'running' }))
           try {
-            await installEntry(entry)
-            setSuiteJobs((current) => ({ ...current, [entry.name]: 'done' }))
+            await installEntry(item.entry)
+            setSuiteJobs((current) => ({ ...current, [item.name]: 'done' }))
           } catch (error) {
-            setSuiteJobs((current) => ({ ...current, [entry.name]: 'error', [`${entry.name}:error`]: messageOf(error) }))
+            setSuiteJobs((current) => ({ ...current, [item.name]: 'error', [`${item.name}:error`]: messageOf(error) }))
           }
         }
         setSuiteRunning(false)
@@ -1681,17 +1806,27 @@ window.__ModuleLoader__.load({
       const suiteSection = suites.length === 0 ? null : h('section', { className: 'dm-section dm-suites' },
         h('div', { className: 'dm-catalog-head' },
           h('h2', null, t('suites'), h('small', null, t('suitesSub')))),
-        h('div', { className: 'dm-suite-grid' }, ...suites.map((suite) => h('button', {
-          key: suite.id,
-          className: 'dm-suite-card',
-          type: 'button',
-          onClick: () => { setSuiteId(suite.id); setSuiteJobs({}) }
-        },
-          h('span', { className: 'dm-suite-glyph' }, suite.glyph ?? '◈'),
-          h('strong', null, pick(suite.title, suite.id)),
-          h('span', { className: 'dm-suite-desc' }, pick(suite.desc, '')),
-          h('span', { className: 'dm-suite-foot' },
-            `${suiteEntries(suite).length} ${t('plugins')}`, h('span', null, '↗'))))))
+        h('div', { className: 'dm-suite-grid' }, ...suites.map((suite) => {
+          const items = suiteItemsOf(suite)
+          const ready = items.filter((item) => isInstalled(item.entry)).length
+          return h('button', {
+            key: suite.id,
+            className: 'dm-suite-card',
+            type: 'button',
+            onClick: () => {
+              setSuiteId(suite.id)
+              setSuiteJobs({})
+              setSuitePicked(new Set(items.filter((item) => item.required || !isInstalled(item.entry)).map((item) => item.name)))
+            }
+          },
+            h('span', { className: 'dm-suite-glyph' }, suite.glyph ?? '◈'),
+            h('strong', null, pick(suite.title, suite.id)),
+            h('span', { className: 'dm-suite-label' }, suite.label ?? ''),
+            h('span', { className: 'dm-suite-desc' }, pick(suite.desc, '')),
+            h('span', { className: 'dm-suite-foot' },
+              `${items.length} ${t('plugins')}`,
+              h('span', null, ready > 0 ? `${ready} ${t('added')}` : '↗')))
+        })))
 
       // 空结果也要保留搜索框和分类，用户才能自己改回来
       const gridContent = filtered.length === 0
@@ -1880,50 +2015,125 @@ window.__ModuleLoader__.load({
         suiteId === undefined ? null : (() => {
           const suite = suiteOf(suiteId)
           if (suite === undefined) return null
-          const items = suiteEntries(suite)
+          const items = suiteItemsOf(suite)
+          const picked = items.filter((item) => item.required || suitePicked.has(item.name))
+          const pending = picked.filter((item) => !isInstalled(item.entry))
           const closeSuite = () => { setSuiteId(undefined); setSuiteJobs({}) }
+          const toggle = (name) => {
+            setSuitePicked((current) => {
+              const next = new Set(current)
+              if (next.has(name)) next.delete(name)
+              else next.add(name)
+              return next
+            })
+          }
+          const doneCount = items.filter((item) => isInstalled(item.entry) || suiteJobs[item.name] === 'done').length
           return h(React.Fragment, null,
-            h('div', { className: 'dm-mask', onClick: closeSuite }),
-            h('aside', {
-              className: 'dm-suite-detail',
+            h('div', { className: 'dm-suite-mask', onClick: closeSuite }),
+            h('div', {
+              className: 'dm-suite-dialog',
               role: 'dialog',
               'aria-modal': 'true',
               'aria-label': pick(suite.title, suite.id)
             },
-              h('div', { className: 'dm-suite-detail-head' },
-                h('span', { className: 'dm-suite-glyph' }, suite.glyph ?? '◈'),
+              h('div', { className: 'dm-suite-head' },
                 h('div', null,
-                  h('h2', null, pick(suite.title, suite.id)),
-                  h('p', null, pick(suite.desc, ''))),
+                  h('span', { className: 'dm-suite-eyebrow' }, `${t('curatedBundle')} / ${suite.label ?? t('suites')}`),
+                  h('h2', null, pick(suite.title, suite.id))),
                 h('button', {
                   className: 'dm-close', type: 'button', 'aria-label': t('close'), onClick: closeSuite
                 }, '×')),
-              h('div', { className: 'dm-suite-items' }, ...items.map((entry) => {
-                const installed = bundles.get(entry.name)?.installed === true || entry.installation?.status === 'installed'
-                const state = suiteJobs[entry.name]
-                const label = state === 'error' ? t('failed')
-                  : installed || state === 'done' ? `✓ ${t('added')}`
-                    : state === 'running' ? t('installing')
-                      : t('pending')
-                return h('div', { className: 'dm-suite-item', key: entry.name },
-                  thumbOf(entry),
-                  h('div', { className: 'dm-suite-item-name' },
-                    h('strong', null, pick(entry.title, entry.name)),
-                    h('small', null, entry.metadata?.category === undefined
-                      ? t('community')
-                      : pick(categories[entry.metadata.category]?.title, entry.metadata.category))),
-                  h('span', {
-                    className: state === 'error' ? 'dm-suite-state dm-suite-state--error' : 'dm-suite-state'
-                  }, label))
-              })),
-              h('div', { className: 'dm-suite-detail-foot' },
-                h('span', { className: 'dm-meta' }, `${items.length} ${t('plugins')}`),
-                h('button', {
-                  className: 'dm-btn dm-btn--primary',
-                  type: 'button',
-                  disabled: suiteRunning,
-                  onClick: () => void installSuite(suite)
-                }, suiteRunning ? t('suiteInstalling') : t('installAll')))))
+              h('div', { className: 'dm-suite-body' },
+                h('div', { className: 'dm-suite-intro' },
+                  h('span', { className: 'dm-suite-symbol' }, suite.glyph ?? '◈'),
+                  h('h3', null, t('suiteCompose')),
+                  h('p', null, pick(suite.desc, '')),
+                  h('div', { className: 'dm-suite-stats' },
+                    h('span', null, `${items.length} ${t('plugins')}`),
+                    h('span', null, `${items.filter((item) => item.required).length} ${t('required')}`),
+                    h('span', null, `${doneCount} ${t('added')}`)),
+                  h('div', { className: 'dm-suite-actions' },
+                    h('button', {
+                      className: 'dm-btn dm-btn--primary',
+                      type: 'button',
+                      disabled: suiteRunning || pending.length === 0,
+                      onClick: () => void installMany(picked)
+                    }, suiteRunning ? t('suiteInstalling') : `${t('installSelected')} · ${pending.length}`),
+                    h('button', {
+                      className: 'dm-btn',
+                      type: 'button',
+                      disabled: suiteRunning || items.every((item) => isInstalled(item.entry)),
+                      onClick: () => void installMany(items)
+                    }, t('installAll')))),
+                h('div', { className: 'dm-suite-picker' },
+                  h('div', { className: 'dm-suite-picker-head' },
+                    h('span', null, t('pickCombo')),
+                    h('div', { className: 'dm-suite-links' },
+                      h('button', {
+                        type: 'button',
+                        disabled: suiteRunning,
+                        onClick: () => setSuitePicked(new Set(items.map((item) => item.name)))
+                      }, t('selectAll')),
+                      h('button', {
+                        type: 'button',
+                        disabled: suiteRunning,
+                        onClick: () => setSuitePicked(new Set())
+                      }, t('keepRequired')))),
+                  h('div', { className: 'dm-suite-tiles' }, ...items.map((item) => {
+                    const installed = isInstalled(item.entry)
+                    const state = suiteJobs[item.name]
+                    const on = item.required || suitePicked.has(item.name)
+                    const status = state === 'error' ? t('failed')
+                      : installed || state === 'done' ? `✓ ${t('added')}`
+                        : state === 'running' ? t('installing')
+                          : item.required ? `${t('required')} · ${t('autoIncluded')}`
+                            : t('optional')
+                    return h('label', {
+                      key: item.name,
+                      className: `dm-suite-tile${on ? ' is-picked' : ''}${item.required ? ' is-required' : ''}`
+                    },
+                      h('div', { className: 'dm-suite-tile-top' },
+                        thumbOf(item.entry),
+                        h('div', { className: 'dm-suite-tile-name' },
+                          h('strong', null, pick(item.entry.title, item.entry.name)),
+                          h('small', null, item.note === ''
+                            ? (item.entry.metadata?.category === undefined
+                              ? t('community')
+                              : pick(categories[item.entry.metadata.category]?.title, item.entry.metadata.category))
+                            : item.note)),
+                        h('input', {
+                          type: 'checkbox',
+                          checked: on,
+                          disabled: item.required || suiteRunning,
+                          'aria-label': pick(item.entry.title, item.entry.name),
+                          onChange: () => toggle(item.name)
+                        })),
+                      h('div', { className: 'dm-suite-tile-foot' },
+                        h('span', null, item.required ? '' : t('optional')),
+                        h('span', { className: state === 'error' ? 'dm-suite-state dm-suite-state--error' : 'dm-suite-state' }, status)))
+                  })))),
+              h('div', { className: 'dm-suite-plan' },
+                h('strong', null, `${t('selected')} ${picked.length} · ${t('pending')} ${pending.length}`),
+                h('span', null, t('suiteOrderHint'))),
+              suiteRunning || Object.keys(suiteJobs).length > 0
+                ? h('div', { className: 'dm-suite-queue' },
+                  h('div', { className: 'dm-suite-queue-head' },
+                    h('strong', null, suiteRunning ? t('suiteBuilding') : t('suiteReady')),
+                    h('span', null, `${doneCount} / ${items.length}`)),
+                  h('div', { className: 'dm-suite-meter' },
+                    h('span', { style: { width: `${items.length === 0 ? 0 : Math.round(doneCount / items.length * 100)}%` } })),
+                  ...items.filter((item) => suiteJobs[item.name] !== undefined).map((item) => h('div', {
+                    key: item.name,
+                    className: 'dm-suite-job',
+                    'data-state': suiteJobs[item.name]
+                  },
+                    h('span', { className: 'dm-suite-job-icon' }, suiteJobs[item.name] === 'done' ? '✓' : suiteJobs[item.name] === 'error' ? '!' : '◌'),
+                    h('span', { className: 'dm-suite-job-name' }, pick(item.entry.title, item.entry.name)),
+                    h('span', { className: 'dm-suite-job-status' },
+                      suiteJobs[item.name] === 'done' ? t('added')
+                        : suiteJobs[item.name] === 'error' ? t('failed')
+                          : t('onlyRunning')))))
+                : null))
         })(),
         paletteOpen ? h(React.Fragment, null,
           h('div', { className: 'dm-palette-mask', onClick: () => setPaletteOpen(false) }),

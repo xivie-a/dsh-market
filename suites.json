@@ -4,45 +4,48 @@
     {
       "id": "fresh-look",
       "glyph": "✳",
+      "label": "每天打开的界面",
       "title": { "zh": "界面焕新", "en": "Fresh look" },
       "desc": {
         "zh": "换一套主题，给侧栏和组件补上细节，让每天打开的界面顺眼一点。",
         "en": "A theme plus a few finishing touches for the sidebar and widgets."
       },
-      "plugins": [
-        "dsh-dream-skin",
-        "@linxin666/dsh-client-ui-skin-center",
-        "dsh-better-sidebar",
-        "dsh-whale-widget"
+      "items": [
+        { "name": "dsh-dream-skin", "required": true, "note": "主题基础包，其余组件都基于它换色" },
+        { "name": "@linxin666/dsh-client-ui-skin-center", "note": "在一个面板里挑皮肤、预览、切换" },
+        { "name": "dsh-better-sidebar", "note": "侧栏常驻文件和任务入口" },
+        { "name": "dsh-whale-widget", "note": "悬浮挂件显示账户余额与用量" }
       ]
     },
     {
       "id": "memory-search",
       "glyph": "∞",
+      "label": "让上一次接得上",
       "title": { "zh": "记忆与检索", "en": "Memory & search" },
       "desc": {
         "zh": "把长对话压住、把历史搜出来，让上一次的结论能直接接到这一次。",
         "en": "Compress long sessions and search history so earlier conclusions carry over."
       },
-      "plugins": [
-        "billion-context",
-        "misakanet",
-        "dsh-plugin-session-fulltext",
-        "dsh-mnemon"
+      "items": [
+        { "name": "billion-context", "required": true, "note": "上下文压缩内核，长对话的基础" },
+        { "name": "misakanet", "note": "检索带证据评级的失败经验" },
+        { "name": "dsh-plugin-session-fulltext", "note": "跨会话全文搜索，支持中文短词" },
+        { "name": "dsh-mnemon", "note": "分层记忆，自动保存项目知识" }
       ]
     },
     {
       "id": "remote-collab",
       "glyph": "⊞",
+      "label": "离开这台机器",
       "title": { "zh": "远程与协作", "en": "Remote & collaboration" },
       "desc": {
         "zh": "在手机上接管这台机器，或者让 agent 通过 SSH 去别的机器干活。",
         "en": "Drive this machine from a phone, or let the agent work over SSH."
       },
-      "plugins": [
-        "@linxin666/dsh-remote-web-ui",
-        "@linxin666/dsh-ssh",
-        "@linxin666/dsh-client-ui-task-board"
+      "items": [
+        { "name": "@linxin666/dsh-ssh", "required": true, "note": "SSH 通道，其余远程能力依赖它" },
+        { "name": "@linxin666/dsh-remote-web-ui", "note": "用局域网或隧道在手机上打开同一界面" },
+        { "name": "@linxin666/dsh-client-ui-task-board", "note": "把 agent 任务放到看板上追踪" }
       ]
     }
   ]
