@@ -28,6 +28,9 @@ window.__ModuleLoader__.load({
       miniThemeSub: '外观与主题插件',
       miniWorkflow: '少一点重复，多一点心流',
       miniWorkflowSub: '工作流与效率工具',
+      favorites: '收藏',
+      favorite: '收藏这个插件',
+      unfavorite: '取消收藏',
       allPlugins: '全部插件',
       background: '背景',
       preset: '配色',
@@ -87,6 +90,9 @@ window.__ModuleLoader__.load({
       miniThemeSub: 'Themes and appearance',
       miniWorkflow: 'Less repetition, more flow',
       miniWorkflowSub: 'Workflows and productivity',
+      favorites: 'Favorites',
+      favorite: 'Save this plugin',
+      unfavorite: 'Remove from favorites',
       allPlugins: 'All plugins',
       background: 'Background',
       preset: 'Palette',
@@ -439,6 +445,33 @@ window.__ModuleLoader__.load({
   .dm-minis, .dm-grid { grid-template-columns: minmax(0, 1fr); }
   .dm-catalog-head { align-items: stretch; flex-direction: column; }
 }
+
+/* ── 交互动效层 ─────────────────────────────────────────────── */
+.dm-card { position: relative; transform-style: preserve-3d; will-change: transform;
+  transition: transform .2s cubic-bezier(.2,.7,.3,1), border-color .18s, box-shadow .18s; }
+.dm-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  opacity: 0; transition: opacity .25s ease;
+  background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--accent) 14%, transparent), transparent 68%); }
+.dm-card:hover::after { opacity: 1; }
+.dm-card:hover { transform: translateY(-3px) perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+.dm-btn { position: relative; overflow: hidden; }
+.dm-ripple { position: absolute; border-radius: 50%; pointer-events: none; transform: scale(0);
+  background: color-mix(in srgb, currentColor 26%, transparent); animation: dm-ripple .55s ease-out forwards; }
+@keyframes dm-ripple { to { transform: scale(2.8); opacity: 0; } }
+.dm-fav { margin-left: auto; flex: none; padding: 5px 7px; border: 0; border-radius: 8px; background: transparent;
+  color: var(--muted); font-size: 15px; line-height: 1; cursor: pointer;
+  transition: color .15s, background .15s, transform .12s; }
+.dm-fav:hover { color: #d9534f; background: color-mix(in srgb, #d9534f 10%, transparent); }
+.dm-fav[aria-pressed="true"] { color: #d9534f; }
+.dm-fav:active { transform: scale(.84); }
+.dm-fav--pop { animation: dm-pop .32s ease; }
+@keyframes dm-pop { 50% { transform: scale(1.35); } }
+@media (prefers-reduced-motion: reduce) {
+  .dm-card:hover { transform: none; }
+  .dm-card::after { display: none; }
+  .dm-ripple, .dm-fav--pop { animation: none; }
+}
 `
     // 旧样式保留在这里只为对照，不参与渲染
     const STYLES_LEGACY = `
@@ -661,6 +694,25 @@ window.__ModuleLoader__.load({
         : String(label).slice(0, 1).toUpperCase())
     }
 
+    const FAV_KEY = 'dsh-market-xivie:favs'
+
+    function readFavs() {
+      try {
+        const raw = JSON.parse(window.localStorage.getItem(FAV_KEY) ?? '[]')
+        return new Set(Array.isArray(raw) ? raw.filter((name) => typeof name === 'string') : [])
+      } catch {
+        return new Set()
+      }
+    }
+
+    function saveFavs(set) {
+      try {
+        window.localStorage.setItem(FAV_KEY, JSON.stringify([...set]))
+      } catch {
+        // 存不下就只在这个会话里生效
+      }
+    }
+
     const BG_KEY = 'dsh-market-xivie:bg'
     const BG_PRESETS = [
       { id: 'aurora', zh: '极光', en: 'Aurora' },
@@ -830,6 +882,48 @@ window.__ModuleLoader__.load({
       const [notice, setNotice] = React.useState(undefined)
       const [bundles, setBundles] = React.useState(new Map())
       const [selected, setSelected] = React.useState(undefined)
+      const [favs, setFavs] = React.useState(readFavs)
+      const [favOnly, setFavOnly] = React.useState(false)
+      const toggleFav = (name, event) => {
+        event.stopPropagation()
+        setFavs((current) => {
+          const next = new Set(current)
+          if (next.has(name)) next.delete(name)
+          else next.add(name)
+          saveFavs(next)
+          return next
+        })
+      }
+      // 鼠标位置驱动的倾斜与光晕
+      const trackPointer = (event) => {
+        const card = event.currentTarget
+        const rect = card.getBoundingClientRect()
+        const x = (event.clientX - rect.left) / rect.width
+        const y = (event.clientY - rect.top) / rect.height
+        card.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`)
+        card.style.setProperty('--my', `${(y * 100).toFixed(1)}%`)
+        card.style.setProperty('--ry', `${((x - 0.5) * 6).toFixed(2)}deg`)
+        card.style.setProperty('--rx', `${((0.5 - y) * 6).toFixed(2)}deg`)
+      }
+      const resetPointer = (event) => {
+        event.currentTarget.style.setProperty('--rx', '0deg')
+        event.currentTarget.style.setProperty('--ry', '0deg')
+      }
+      // 按钮点击涟漪
+      const ripple = (event) => {
+        const button = event.target.closest('.dm-btn')
+        if (button === null) return
+        const rect = button.getBoundingClientRect()
+        const size = Math.max(rect.width, rect.height)
+        const dot = document.createElement('span')
+        dot.className = 'dm-ripple'
+        dot.style.width = `${size}px`
+        dot.style.height = `${size}px`
+        dot.style.left = `${event.clientX - rect.left - size / 2}px`
+        dot.style.top = `${event.clientY - rect.top - size / 2}px`
+        button.appendChild(dot)
+        window.setTimeout(() => dot.remove(), 600)
+      }
       const initialBg = React.useRef(readBg()).current
       const [bg, setBg] = React.useState(initialBg)
       const [bgOpen, setBgOpen] = React.useState(false)
@@ -882,6 +976,7 @@ window.__ModuleLoader__.load({
       const categories = catalog.metadata?.categories ?? {}
       const needle = query.trim().toLowerCase()
       const filtered = entries.filter((entry) => {
+        if (favOnly && !favs.has(entry.name)) return false
         if (category !== '' && entry?.metadata?.category !== category) return false
         if (needle === '') return true
         const haystack = [
@@ -1018,6 +1113,11 @@ window.__ModuleLoader__.load({
           className: 'dm-chip', type: 'button', 'aria-pressed': category === '',
           onClick: () => setCategory('')
         }, t('all'), h('span', { className: 'dm-chip-count' }, entries.length)),
+        h('button', {
+          className: 'dm-chip', type: 'button', 'aria-pressed': favOnly,
+          title: t('favorites'),
+          onClick: () => setFavOnly(!favOnly)
+        }, '♥', h('span', { className: 'dm-chip-count' }, favs.size)),
         ...Object.entries(categories).map(([id, declaration]) => h('button', {
           key: id,
           className: 'dm-chip',
@@ -1063,13 +1163,22 @@ window.__ModuleLoader__.load({
         return h('article', {
           className: 'dm-card dm-appear', key: entry.name, style: delay,
           'aria-current': current, onClick: open, role: 'button', tabIndex: 0,
+          onMouseMove: trackPointer, onMouseLeave: resetPointer,
           onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') setSelected(entry) }
         },
           h('div', { className: 'dm-card-top' },
             thumb,
             h('div', { className: 'dm-titles' },
               h('h3', { className: 'dm-title', title }, title),
-              h('div', { className: 'dm-cat' }, categoryLabel))),
+              h('div', { className: 'dm-cat' }, categoryLabel)),
+            h('button', {
+              className: 'dm-fav',
+              type: 'button',
+              'aria-pressed': favs.has(entry.name),
+              'aria-label': t('favorites'),
+              title: favs.has(entry.name) ? t('unfavorite') : t('favorite'),
+              onClick: (event) => toggleFav(entry.name, event)
+            }, favs.has(entry.name) ? '♥' : '♡')),
           h('p', { className: 'dm-desc' }, pick(entry.description, '')),
           h('div', { className: 'dm-foot' }, meta, action))
       }
@@ -1125,7 +1234,7 @@ window.__ModuleLoader__.load({
         miniOf('✳', t('miniTheme'), t('miniThemeSub'), 'appearance'),
         miniOf('⌘', t('miniWorkflow'), t('miniWorkflowSub'), 'workflow'))
 
-      const catalogSection = h('section', { className: 'dm-section' },
+      const catalogSection = h('section', { className: 'dm-section', onClick: ripple },
         h('div', { className: 'dm-catalog-head' },
           h('h2', null, t('catalogTitle'), h('small', null, `${gridEntries.length} ${t('plugins')}`)),
           tools),

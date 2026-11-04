@@ -1,0 +1,31 @@
+/* A tactile layer: lift, light, pressure and a short, soft landing. */
+:root{--ease-out:cubic-bezier(.2,.8,.2,1);--ease-spring:cubic-bezier(.22,1.35,.35,1)}
+.card{isolation:isolate;transform:perspective(900px) translateY(0) rotateX(0) rotateY(0);transition:transform .48s var(--ease-spring),box-shadow .35s var(--ease-out),border-color .25s;background:var(--panel)}
+.card::after{content:"";position:absolute;inset:0;z-index:0;border-radius:inherit;pointer-events:none;opacity:0;background:radial-gradient(240px circle at var(--pointer-x,50%) var(--pointer-y,30%),color-mix(in srgb,var(--accent) 9%,transparent),transparent 75%);transition:opacity .35s}
+.card-open{z-index:1}.card .favorite,.card .install{z-index:2}.cardtop .icon{transition:transform .5s var(--ease-spring),box-shadow .3s}.card h3{transition:color .2s}.card .install{transition:background .2s,box-shadow .2s,transform .25s var(--ease-spring)}
+.card:focus-within{border-color:color-mix(in srgb,var(--accent) 50%,var(--line));box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 8%,transparent)}
+button,.quiet,.drawer-actions a{transition:transform .3s var(--ease-spring),background .2s,color .2s,box-shadow .2s,border-color .2s}
+.install:not(:disabled):active,.quiet:active,.mini:active,.chip:active,.favorite:active,.nav:active,.hero-controls button:active,.hero #featured:active{transform:scale(.95)}
+.favorite{transition:transform .35s var(--ease-spring),color .2s,background .2s}.favorite[aria-pressed="true"]{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 15%,transparent)}
+.mini{transition:transform .4s var(--ease-spring),box-shadow .3s,border-color .3s}.mini .miniicon{transition:transform .5s var(--ease-spring)}.mini .arrow{transition:transform .35s var(--ease-out),color .2s}
+.nav{position:relative;transition:background .22s,color .22s,transform .3s var(--ease-spring)}.nav.active{box-shadow:inset 3px 0 0 var(--accent)}
+.chip{transition:transform .25s var(--ease-spring),background .22s,color .22s,box-shadow .25s}.chip.active{box-shadow:0 4px 10px #16332618}
+.searchbox{border-radius:10px;transition:box-shadow .25s,transform .3s var(--ease-out)}.searchbox:focus-within{box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 10%,transparent);transform:translateY(-1px)}.searchbox input{outline-offset:2px}
+.hero{box-shadow:0 8px 26px #122d2010;transition:background .4s,box-shadow .4s}.art{transform:translate3d(var(--art-x,0px),var(--art-y,0px),0);transition:transform .6s var(--ease-out)}
+.hero #featured{transition:transform .35s var(--ease-spring),box-shadow .3s}.hero #featured span{display:inline-block;transition:transform .3s var(--ease-out)}
+.hero-controls button{transition:transform .3s var(--ease-spring),background .2s,width .25s}.related{transition:background .2s,transform .3s var(--ease-spring);border-radius:10px;padding-inline:8px}.tabs button{transition:color .2s,border-color .2s}
+dialog[open]::backdrop{animation:backdrop-in .25s ease both}@keyframes backdrop-in{from{background-color:transparent}}
+.version{transition:background .2s,transform .3s var(--ease-spring)}
+.ripple-clip{position:fixed;pointer-events:none;z-index:1000;overflow:hidden;contain:strict}.ripple-dot{position:absolute;border-radius:50%;background:currentColor;opacity:0;color:var(--accent)}.favorite-burst{position:fixed;pointer-events:none;z-index:1001;color:var(--accent);font:20px/1 system-ui}
+body.dark .card::after{background:radial-gradient(240px circle at var(--pointer-x,50%) var(--pointer-y,30%),#c9edb60b,transparent 75%)}
+@media(hover:hover) and (pointer:fine){
+ .card:hover{z-index:3;transform:perspective(900px) translateY(-7px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg));border-color:color-mix(in srgb,var(--accent) 38%,var(--line));box-shadow:0 18px 35px -14px #153b3033,0 5px 12px -8px #153b3020}
+ .card.tracking{transition:transform .13s ease-out,box-shadow .35s,border-color .25s}.card:hover::after{opacity:1}.card:hover .cardtop .icon{transform:translateY(-3px) rotate(-5deg);box-shadow:0 7px 13px #19382a15}.card:hover h3{color:var(--accent)}.card:hover .install:not(.busy){background:var(--accent);color:var(--panel);box-shadow:0 4px 12px #12322512}
+ .card .install:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 5px 14px #153a3025}.card .install:active:not(:disabled){transform:scale(.94)}.favorite:hover{transform:scale(1.15) rotate(-7deg)}
+ .mini:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--accent) 30%,var(--line));box-shadow:0 12px 24px -14px #153b3033}.mini:hover .miniicon{transform:rotate(-9deg) scale(1.07)}.mini:hover .arrow{transform:translate(3px,-3px);color:var(--accent)}
+ .hero:hover{box-shadow:0 18px 38px -18px #122d2055}.hero #featured:hover{transform:translateY(-3px);box-shadow:0 6px 18px #071b242a}.hero #featured:hover span{transform:translate(3px,-2px)}.hero-controls button:hover{background:#d8e8d022;transform:scale(1.15)}
+ .quiet:hover{transform:translateY(-2px);box-shadow:0 5px 12px #153b3010;border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}.nav:hover:not(.active){transform:translateX(3px);background:var(--bg)}.chip:hover{transform:translateY(-2px)}.chip:active{transform:scale(.95)}.related:hover{transform:translateX(3px);background:var(--bg)}.version:hover{transform:translateX(3px);background:var(--tint)}
+ .grid.list .card:hover{transform:translateY(-3px)}.grid.list .card:hover .icon{transform:rotate(-4deg)}
+}
+@media(hover:none){.card:active{transform:scale(.988);transition:transform .12s}.card::after{display:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.card,.card:hover,.art,.mini:hover,.card:hover .cardtop .icon,.hero #featured:hover,.related:hover,.version:hover{transform:none!important}.ripple-clip,.favorite-burst{display:none!important}}
