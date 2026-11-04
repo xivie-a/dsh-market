@@ -381,9 +381,14 @@ window.__ModuleLoader__.load({
   border: 0; border-radius: 9px;
   background: transparent; color: var(--muted);
   font-size: 13px;
-  transition: background .16s, color .16s;
+  transition: background .16s, color .16s, transform .16s cubic-bezier(.2, .7, .3, 1), box-shadow .16s;
 }
-.dm-chip:hover { background: var(--tint); color: var(--accent); }
+.dm-chip:hover {
+  background: var(--tint); color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(21, 59, 48, .12);
+}
+.dm-chip:active { transform: translateY(0); box-shadow: none; }
 .dm-chip[aria-pressed="true"] { background: var(--accent); color: #fff; font-weight: 650; }
 .dm-root[data-theme="dark"] .dm-chip[aria-pressed="true"] { color: #141c19; }
 .dm-chip-count { margin-left: 6px; font-size: 11px; font-variant-numeric: tabular-nums; opacity: .75; }
@@ -1173,7 +1178,7 @@ window.__ModuleLoader__.load({
       const filtered = entries.filter((entry) => {
         if (mineOnly) {
           const installed = bundles.get(entry.name)?.installed === true || entry.installation?.status === 'installed'
-          if (!installed && !favs.has(entry.name)) return false
+          if (!installed) return false
         }
         if (favOnly && !favs.has(entry.name)) return false
         if (category !== '' && entry?.metadata?.category !== category) return false
@@ -1326,7 +1331,7 @@ window.__ModuleLoader__.load({
 
       const mineCount = entries.filter((entry) => {
         const installed = bundles.get(entry.name)?.installed === true || entry.installation?.status === 'installed'
-        return installed || favs.has(entry.name)
+        return installed
       }).length
 
       const chips = Object.keys(categories).length === 0 ? null : h('div', { className: 'dm-chips' },
@@ -1343,7 +1348,7 @@ window.__ModuleLoader__.load({
           className: 'dm-chip', type: 'button', 'aria-pressed': favOnly,
           title: t('favorites'),
           onClick: () => { setFavOnly(!favOnly); setMineOnly(false) }
-        }, '♥', h('span', { className: 'dm-chip-count' }, favs.size)),
+        }, t('favorites'), ' ♥', h('span', { className: 'dm-chip-count' }, favs.size)),
         ...Object.entries(categories).map(([id, declaration]) => h('button', {
           key: id,
           className: 'dm-chip',
