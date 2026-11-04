@@ -18,6 +18,8 @@ window.__ModuleLoader__.load({
       all: '全部',
       featured: '精选 · 下载最多',
       featuredShort: '本期精选',
+      bannerLeadPrefix: '让',
+      bannerLeadSuffix: '更好用。',
       headline: '好工具，让灵感走得更远。',
       catalogTitle: '探索全部',
       viewDetails: '查看详情',
@@ -32,6 +34,7 @@ window.__ModuleLoader__.load({
       favorite: '收藏这个插件',
       unfavorite: '取消收藏',
       myPlugins: '我的插件',
+      clearFilters: '清除筛选',
       appearance: '外观',
       prev: '上一个',
       next: '下一个',
@@ -84,6 +87,8 @@ window.__ModuleLoader__.load({
       all: 'All',
       featured: 'Featured · most downloaded',
       featuredShort: "Editor's pick",
+      bannerLeadPrefix: 'Make',
+      bannerLeadSuffix: 'work better.',
       headline: 'Good tools take ideas further.',
       catalogTitle: 'Browse all',
       viewDetails: 'View details',
@@ -98,6 +103,7 @@ window.__ModuleLoader__.load({
       favorite: 'Save this plugin',
       unfavorite: 'Remove from favorites',
       myPlugins: 'My plugins',
+      clearFilters: 'Clear filters',
       appearance: 'Appearance',
       prev: 'Previous',
       next: 'Next',
@@ -283,8 +289,8 @@ window.__ModuleLoader__.load({
 .dm-root[data-bg="none"] { background: var(--dm-bg); }
 .dm-page { height: 100%; min-width: 0; overflow: auto; }
 .dm-page .dm-root { height: auto; min-height: 100%; overflow: visible; }
-.dm-appear { animation: dm-rise .2s ease-out backwards; animation-delay: 0ms !important; }
-@keyframes dm-rise { from { opacity: 0; } to { opacity: 1; } }
+.dm-appear { animation: dm-rise .34s cubic-bezier(.2,.7,.3,1) backwards; }
+@keyframes dm-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes dm-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes dm-slide { from { transform: translateX(24px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 @keyframes dm-shimmer { from { background-position: 150% 0; } to { background-position: -100% 0; } }
@@ -327,6 +333,9 @@ window.__ModuleLoader__.load({
   --accent: #246b51; --tint: #e9f2e7; --lime: #d5f48b; --hero: #153f32;
   /* 旧样式里的 --dm-ink 取自 --dsh-accent，这里跟着品牌色走，避免残留蓝色描边 */
   --dm-ink: var(--accent);
+  /* 把基础样式用的 --dm-* 映射到品牌 token，两套变量从此指向同一组颜色 */
+  --dm-bg: var(--bg); --dm-surface: var(--panel); --dm-text: var(--text);
+  --dm-muted: var(--muted); --dm-line: var(--line); --dm-accent: var(--accent); --dm-soft: var(--tint);
   background: var(--bg); color: var(--text); max-width: 1200px; gap: 26px;
   padding: 30px 34px 64px; font-size: 14px; line-height: 1.6;
 }
@@ -406,16 +415,16 @@ window.__ModuleLoader__.load({
 
 /* 卡片 */
 .dm-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-.dm-card { min-height: 172px; padding: 22px; border: 1px solid var(--line); border-radius: 18px;
+.dm-card { min-height: 208px; padding: 22px; border: 1px solid var(--line); border-radius: 18px;
   background: var(--panel); gap: 12px; }
 .dm-card:hover { border-color: color-mix(in srgb, var(--accent) 32%, var(--line));
   box-shadow: 0 10px 28px rgba(24,43,39,.07); }
-.dm-thumb { width: 44px; height: 44px; border-radius: 12px; border: 0;
-  background: var(--tint); color: var(--accent); font-size: 18px; }
-.dm-thumb img { width: 26px; height: 26px; }
-.dm-title { font-size: 14.5px; font-weight: 700; }
+.dm-thumb { width: 46px; height: 46px; border-radius: 13px; border: 0;
+  background: var(--tint); color: var(--accent); font-size: 19px; }
+.dm-thumb img { width: 30px; height: 30px; }
+.dm-title { font-size: 15px; font-weight: 700; }
 .dm-cat { color: var(--muted); font-size: 11.5px; line-height: 1.4; }
-.dm-desc { color: var(--muted); font-size: 12.5px; line-height: 1.65; min-height: 0; }
+.dm-desc { color: var(--muted); font-size: 12.5px; line-height: 1.7; min-height: 2.4em; }
 .dm-foot { margin-top: auto; }
 .dm-meta { gap: 0; color: var(--muted); font-size: 11.5px; }
 .dm-meta .dm-tag { padding: 0; background: transparent; }
@@ -441,10 +450,10 @@ window.__ModuleLoader__.load({
 .dm-toast { background: var(--hero); color: #eef4ee; border: 0; }
 .dm-mask { background: rgba(21,63,50,.28); }
 .dm-section-head::before { background: var(--accent); }
-@media (max-width: 1100px) {
+/* 1000px 以上保持三列与右侧插画；只在更窄时才降级 */
+@media (max-width: 900px) {
   .dm-banner { grid-template-columns: 1fr; padding: 28px; }
   .dm-art { display: none; }
-  .dm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 720px) {
   .dm-root { padding: 22px 18px 48px; }
@@ -456,14 +465,16 @@ window.__ModuleLoader__.load({
 }
 
 /* ── 交互动效层 ─────────────────────────────────────────────── */
-.dm-card { position: relative; transform-style: preserve-3d; will-change: transform;
+.dm-card { position: relative; transform-style: preserve-3d;
   transition: transform .2s cubic-bezier(.2,.7,.3,1), border-color .18s, box-shadow .18s; }
 .dm-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   opacity: 0; transition: opacity .25s ease;
   background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 50%),
     color-mix(in srgb, var(--accent) 14%, transparent), transparent 68%); }
 .dm-card:hover::after { opacity: 1; }
-.dm-card:hover { transform: translateY(-3px) perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+.dm-card:hover { transform: translateY(-7px) perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  border-color: color-mix(in srgb, var(--accent) 38%, var(--line));
+  box-shadow: 0 18px 35px -14px rgba(21,59,48,.2), 0 5px 12px -8px rgba(21,59,48,.12); }
 .dm-btn { position: relative; overflow: hidden; }
 .dm-ripple { position: absolute; border-radius: 50%; pointer-events: none; transform: scale(0);
   background: color-mix(in srgb, currentColor 26%, transparent); animation: dm-ripple .55s ease-out forwards; }
@@ -967,6 +978,13 @@ window.__ModuleLoader__.load({
       const [favOnly, setFavOnly] = React.useState(false)
       const toggleFav = (name, event) => {
         event.stopPropagation()
+        const adding = !favs.has(name)
+        if (adding && event.currentTarget?.classList) {
+          const button = event.currentTarget
+          button.classList.remove('dm-fav--pop')
+          void button.offsetWidth
+          button.classList.add('dm-fav--pop')
+        }
         setFavs((current) => {
           const next = new Set(current)
           if (next.has(name)) next.delete(name)
@@ -975,16 +993,29 @@ window.__ModuleLoader__.load({
           return next
         })
       }
-      // 鼠标位置驱动的倾斜与光晕
+      // 鼠标位置驱动的倾斜与光晕：按帧合并，粗指针/减少动态时直接跳过
+      let pointerFrame = 0
+      let pending = null
+      const skipPointer = () => window.matchMedia?.('(hover: hover) and (pointer: fine)').matches === false
+        || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
       const trackPointer = (event) => {
+        if (skipPointer()) return
         const card = event.currentTarget
-        const rect = card.getBoundingClientRect()
-        const x = (event.clientX - rect.left) / rect.width
-        const y = (event.clientY - rect.top) / rect.height
-        card.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`)
-        card.style.setProperty('--my', `${(y * 100).toFixed(1)}%`)
-        card.style.setProperty('--ry', `${((x - 0.5) * 6).toFixed(2)}deg`)
-        card.style.setProperty('--rx', `${((0.5 - y) * 6).toFixed(2)}deg`)
+        pending = { card, x: event.clientX, y: event.clientY }
+        if (pointerFrame !== 0) return
+        pointerFrame = window.requestAnimationFrame(() => {
+          pointerFrame = 0
+          if (pending === null) return
+          const { card: target, x: clientX, y: clientY } = pending
+          pending = null
+          const rect = target.getBoundingClientRect()
+          const x = (clientX - rect.left) / rect.width
+          const y = (clientY - rect.top) / rect.height
+          target.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`)
+          target.style.setProperty('--my', `${(y * 100).toFixed(1)}%`)
+          target.style.setProperty('--ry', `${((x - 0.5) * 3).toFixed(2)}deg`)
+          target.style.setProperty('--rx', `${((0.5 - y) * 3).toFixed(2)}deg`)
+        })
       }
       const resetPointer = (event) => {
         event.currentTarget.style.setProperty('--rx', '0deg')
@@ -1262,7 +1293,12 @@ window.__ModuleLoader__.load({
           className: 'dm-card dm-appear', key: `${entry.name}|${filterKey}`, style: delay,
           'aria-current': current, onClick: open, role: 'button', tabIndex: 0,
           onMouseMove: trackPointer, onMouseLeave: resetPointer,
-          onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') setSelected(entry) }
+          onKeyDown: (event) => {
+            if (event.target !== event.currentTarget) return
+            if (event.key !== 'Enter' && event.key !== ' ') return
+            event.preventDefault()
+            setSelected(entry)
+          }
         },
           h('div', { className: 'dm-card-top' },
             thumb,
@@ -1298,8 +1334,14 @@ window.__ModuleLoader__.load({
       const banner = top === undefined ? null : h('section', { className: 'dm-banner', 'data-slide': String(slide) },
         h('div', { className: 'dm-banner-body', key: top.name },
           h('div', { className: 'dm-banner-label' }, h('i'), `EDITOR'S PICK / ${t('featuredShort')}`),
-          h('h2', null, pick(top.title, top.name)),
-          h('p', null, pick(top.description, '')),
+          h('h2', null,
+            t('bannerLeadPrefix'), ' ',
+            h('em', null, top.metadata?.category === undefined
+              ? t('community')
+              : pick(categories[top.metadata.category]?.title, top.metadata.category)),
+            ' ',
+            t('bannerLeadSuffix')),
+          h('p', null, h('strong', null, pick(top.title, top.name)), ' · ', pick(top.description, '')),
           h('button', {
             className: 'dm-banner-cta', type: 'button', onClick: () => setSelected(top)
           }, t('viewDetails'), h('span', null, '↗'))),
@@ -1344,12 +1386,22 @@ window.__ModuleLoader__.load({
         miniOf('✳', t('miniTheme'), t('miniThemeSub'), 'appearance'),
         miniOf('⌘', t('miniWorkflow'), t('miniWorkflowSub'), 'workflow'))
 
+      // 空结果也要保留搜索框和分类，用户才能自己改回来
+      const gridContent = filtered.length === 0
+        ? h('div', { className: 'dm-state' },
+          h('span', null, t('empty')),
+          h('button', {
+            type: 'button',
+            onClick: () => { setQuery(''); setCategory(''); setFavOnly(false); setMineOnly(false) }
+          }, t('clearFilters')))
+        : h('div', { className: 'dm-grid' }, ...gridEntries.map((entry, index) => cardOf(entry, index)))
+
       const catalogSection = h('section', { className: 'dm-section', onClick: ripple },
         h('div', { className: 'dm-catalog-head' },
           h('h2', null, t('catalogTitle'), h('small', null, `${filtered.length} ${t('plugins')}`)),
           tools),
         chips,
-        h('div', { className: 'dm-grid' }, ...gridEntries.map((entry, index) => cardOf(entry, index))))
+        gridContent)
 
       // 精选自动轮播：尊重「减少动态」
       React.useEffect(() => {
@@ -1369,8 +1421,6 @@ window.__ModuleLoader__.load({
         body = h('div', { className: 'dm-state' },
           h('span', null, `${t('error')}：${catalog.error ?? ''}`),
           h('button', { type: 'button', onClick: () => void load(true) }, t('retry')))
-      } else if (filtered.length === 0) {
-        body = h('div', { className: 'dm-state' }, t('empty'))
       } else {
         body = h(React.Fragment, null, banner, minis, catalogSection)
       }
@@ -1433,6 +1483,7 @@ window.__ModuleLoader__.load({
               }, busy === entry.name ? t('installing') : t('install'))))
       })()
 
+      // 背景预设已并入品牌主题，这里只在用户设了自定义图片时才覆盖
       const rootProps = { className: 'dm-root', 'data-theme': theme }
       if (bg.kind === 'image' && bg.url !== '') {
         const scrim = scrimOf()
@@ -1441,8 +1492,6 @@ window.__ModuleLoader__.load({
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }
-      } else {
-        rootProps['data-bg'] = bg.kind === 'preset' ? bg.id : 'aurora'
       }
 
       return h('div', rootProps,
