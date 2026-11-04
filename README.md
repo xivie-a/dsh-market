@@ -81,4 +81,7 @@ https://xivie-a.github.io/dsh-market/index.json
 
 索引在每次构建时自动生成，格式为 DSH 的
 [插件市场索引 format 1](https://deepseek-harness.github.io/deepseek-harness/guide/plugin-market.html)。
-本仓库与 DeepSeek 官方无隶属关系，各插件的版权与许可证归原作者所有。
+
+本仓库与 DeepSeek 官方无隶属关系，与 dshopen.org（开放插件市场）也无隶属或合作关系。
+早期收录列表从公开数据导入起步，来源与处理方式写在 [NOTICE.md](NOTICE.md)；
+各插件的版权与许可证归原作者所有，`icons/` 内的图标同样归各插件作者。
