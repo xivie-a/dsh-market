@@ -235,15 +235,14 @@ window.__ModuleLoader__.load({
 .dm-bgrow { display: flex; gap: 6px; }
 .dm-bgrow button { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--dm-line); background: transparent;
   color: inherit; cursor: pointer; font: inherit; font-size: 12px; }
-.dm-columns { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
-@media (max-width: 1180px) {
-  .dm-columns { grid-template-columns: minmax(0, 1fr); }
-  .dm-detail { position: static; }
-}
 .dm-main { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
-.dm-detail { position: sticky; top: 4px; display: flex; flex-direction: column; gap: 12px; padding: 18px; border-radius: 16px;
-  border: 1px solid rgba(127,127,127,.16); background: rgba(127,127,127,.055); animation: dm-slide .22s cubic-bezier(.2,.7,.3,1) both; }
-@keyframes dm-slide { from { opacity: 0; transform: translateX(14px) } to { opacity: 1; transform: none } }
+.dm-mask { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.18); animation: dm-fade .16s ease-out both; }
+@keyframes dm-fade { from { opacity: 0 } to { opacity: 1 } }
+.dm-detail { position: fixed; top: 0; right: 0; bottom: 0; z-index: 71; width: min(440px, 94vw);
+  display: flex; flex-direction: column; gap: 12px; padding: 20px 20px 24px; overflow: auto;
+  border-left: 1px solid rgba(127,127,127,.2); box-shadow: -20px 0 54px rgba(0,0,0,.2);
+  animation: dm-slide .24s cubic-bezier(.2,.7,.3,1) both; }
+@keyframes dm-slide { from { transform: translateX(100%) } to { transform: none } }
 .dm-detail-head { display: flex; gap: 12px; align-items: center; }
 .dm-detail-head .dm-thumb { width: 52px; height: 52px; border-radius: 14px; font-size: 20px; }
 .dm-detail h2 { margin: 0; font-size: 17px; font-weight: 650; }
@@ -356,14 +355,24 @@ window.__ModuleLoader__.load({
       }
     }
 
-    /** 自定义背景图时盖一层和正文同色的半透明遮罩，保证文字可读。 */
+    /** 详情抽屉要盖住内容，得用接近不透明的底色；正文是深色说明是浅色主题，面板就该是浅色。 */
+    function surfaceOf() {
+      const color = getComputedStyle(document.body).color
+      const match = /rgba?\((\d+),\s*(\d+),\s*(\d+)/u.exec(color)
+      const textLuminance = match
+        ? (Number(match[1]) * 0.299 + Number(match[2]) * 0.587 + Number(match[3]) * 0.114) / 255
+        : 0
+      return textLuminance < 0.5 ? 'rgba(252,252,253,.985)' : 'rgba(26,26,29,.985)'
+    }
+
+    /** 自定义背景图时盖一层和页面同色的半透明遮罩，保证文字可读。 */
     function scrimOf() {
       const color = getComputedStyle(document.body).color
       const match = /rgba?\((\d+),\s*(\d+),\s*(\d+)/u.exec(color)
-      const luminance = match
+      const textLuminance = match
         ? (Number(match[1]) * 0.299 + Number(match[2]) * 0.587 + Number(match[3]) * 0.114) / 255
-        : 1
-      return luminance > 0.5 ? 'rgba(255,255,255,0.86)' : 'rgba(18,18,20,0.74)'
+        : 0
+      return textLuminance < 0.5 ? 'rgba(255,255,255,0.86)' : 'rgba(18,18,20,0.74)'
     }
 
     const LOG = '[my-market]'
@@ -527,6 +536,14 @@ window.__ModuleLoader__.load({
         const timer = window.setTimeout(() => setNotice(undefined), 6000)
         return () => window.clearTimeout(timer)
       }, [notice])
+
+      // Esc 关闭详情抽屉
+      React.useEffect(() => {
+        if (selected === undefined) return undefined
+        const onKeyDown = (event) => { if (event.key === 'Escape') setSelected(undefined) }
+        window.addEventListener('keydown', onKeyDown)
+        return () => window.removeEventListener('keydown', onKeyDown)
+      }, [selected])
 
       const entries = catalog.entries ?? []
       const categories = catalog.metadata?.categories ?? {}
@@ -782,7 +799,13 @@ window.__ModuleLoader__.load({
           : h('div', { className: 'dm-detail-row' },
             h('span', null, label),
             h('a', { href, target: '_blank', rel: 'noopener noreferrer' }, href.replace(/^https?:\/\//u, ''))))
-        return h('aside', { className: 'dm-detail', 'aria-label': title },
+        return h('aside', {
+          className: 'dm-detail',
+          'aria-label': title,
+          role: 'dialog',
+          'aria-modal': 'true',
+          style: { background: surfaceOf() }
+        },
           h('div', { className: 'dm-detail-head' },
             thumbOf(entry, title),
             h('div', { className: 'dm-titles', style: { minWidth: 0 } },
@@ -837,8 +860,9 @@ window.__ModuleLoader__.load({
         header,
         tools,
         chips,
-        h('div', { className: selected === undefined ? 'dm-main' : 'dm-columns' },
-          h('div', { className: 'dm-main' }, body),
+        h('div', { className: 'dm-main' }, body),
+        detail === null ? null : h(React.Fragment, null,
+          h('div', { className: 'dm-mask', onClick: () => setSelected(undefined) }),
           detail),
         notice === undefined ? null : h('div', { className: `dm-toast dm-toast--${notice.kind}`, role: 'status' },
           h('span', null, notice.text),
