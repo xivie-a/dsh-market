@@ -73,3 +73,7 @@ node .\check-interactions.cjs
 套装区域已改为桌面三列紧凑卡片，只显示名称、简短用途和插件数。点击打开原生模态弹窗展示插件清单与队列，不再推移下方全部插件。可点击关闭按钮、按 Esc 或点击遮罩关闭；关闭不会停止队列。小屏使用横向滑动卡片，避免三张纵向堆叠。
 
 `suite-accordion.backup.js` 和 `index-before-compact-bundles.html` 是横排弹窗改动前的备份，不参与构建。前文的展开式总览说明属于上一版本。
+
+## 颜色与信息层级
+
+`visual-hierarchy.css` 管理当前的套装分色、普通插件分类色和勾选状态层级，加载在其他 CSS 之后。套装使用青绿、靛紫、琥珀三种点缀色；内部插件保留中性底板，通过图标、细边框和选中标识区分。普通插件的分类色映射在 `market-app.js` 的 `categoryColors`，不再按列表位置随机分配。`index-before-color-hierarchy.html` 是本次视觉调整前的备份。

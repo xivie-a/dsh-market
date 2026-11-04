@@ -1,3 +1,8 @@
+/**
+ * DSH 插件市场（dsh-market-xivie）
+ * Copyright (c) 2026 xivie-a. All rights reserved.
+ * 专有许可：允许安装使用，禁止复制、再分发或改作同类市场。见仓库根目录 LICENSE。
+ */
 // Browser 半边：插件页的「我的市场」标签 + 左侧导航的「我的市场」入口。
 // 手写成 DSH 模块加载器要的形状，所以这个包不需要任何构建步骤。
 window.__ModuleLoader__.load({
@@ -219,6 +224,11 @@ window.__ModuleLoader__.load({
     }
 
     const STYLES = `
+/*
+   DSH 插件市场（dsh-market-xivie）
+   Copyright (c) 2026 xivie-a. All rights reserved.
+   专有许可：允许安装使用，禁止复制、再分发或改作同类市场。见仓库根目录 LICENSE。
+*/\n
 /* ==========================================================================
    DSH 插件市场 · 单一样式表
    设计语言：暖白底 + 深绿主视觉 + 酸绿 CTA（移植自概念稿）
@@ -658,6 +668,17 @@ window.__ModuleLoader__.load({
 
 /* ── 入场 ─────────────────────────────────────────────────────────────── */
 .dm-appear { animation: dm-rise .34s cubic-bezier(.2, .7, .3, 1) backwards; }
+
+/* ── 页脚署名（版权信息，请勿移除） ───────────────────────────────────── */
+.dm-footer {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 10px; padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 11px;
+}
+.dm-footer a { color: var(--muted); text-decoration: none; }
+.dm-footer a:hover { color: var(--accent); text-decoration: underline; }
+.dm-footer strong { color: var(--text); font-weight: 600; }
 
 /* ── 统一的可交互反馈：所有可点的方块都会轻微上浮 ─────────────────────── */
 .dm-mini,
@@ -2070,6 +2091,15 @@ window.__ModuleLoader__.load({
       return h('div', rootProps,
         header,
         h('div', { className: 'dm-main' }, body),
+        h('footer', { className: 'dm-footer' },
+          h('strong', null, 'DSH 插件市场'),
+          h('span', null, '·'),
+          h('a', {
+            href: 'https://github.com/xivie-a/dsh-market',
+            target: '_blank',
+            rel: 'noopener noreferrer'
+          }, 'github.com/xivie-a/dsh-market'),
+          h('span', null, '· 由 xivie-a 维护，索引与界面版权归其所有')),
         detail === null ? null : h(React.Fragment, null,
           h('div', { className: 'dm-mask', onClick: () => setSelected(undefined) }),
           detail),

@@ -6,6 +6,7 @@ root = Path(__file__).parent
 page = (root / 'concept.html').read_text(encoding='utf-8-sig')
 styles = (root / 'enhancements.css').read_text(encoding='utf-8-sig') + '\n' + (root / 'motion.css').read_text(encoding='utf-8-sig')
 styles += '\n' + (root / 'suite.css').read_text(encoding='utf-8-sig')
+styles += '\n' + (root / 'visual-hierarchy.css').read_text(encoding='utf-8-sig')
 app = (root / 'market-app.js').read_text(encoding='utf-8-sig') + '\n' + (root / 'motion.js').read_text(encoding='utf-8-sig')
 app += '\n' + (root / 'suite.js').read_text(encoding='utf-8-sig')
 page = page.replace('<section><div class="cataloghead">', '<section class="suite" id="suite" aria-label="场景套装区域"></section><section><div class="cataloghead">', 1)
