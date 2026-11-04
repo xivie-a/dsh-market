@@ -29,6 +29,11 @@ window.__ModuleLoader__.load({
       homepage: '主页',
       versionLabel: '版本',
       updated: '更新',
+      sortBy: '排序',
+      sortIndex: '推荐排序',
+      sortDownloads: '下载最多',
+      sortStars: '星数最多',
+      sortName: '按名称',
       install: '安装',
       installed: '已安装',
       update: '可更新',
@@ -72,6 +77,11 @@ window.__ModuleLoader__.load({
       homepage: 'Home',
       versionLabel: 'Versions',
       updated: 'Updated',
+      sortBy: 'Sort',
+      sortIndex: 'Recommended',
+      sortDownloads: 'Most downloaded',
+      sortStars: 'Most starred',
+      sortName: 'Name',
       install: 'Install',
       installed: 'Installed',
       update: 'Update',
@@ -100,11 +110,11 @@ window.__ModuleLoader__.load({
 
     const STYLES = `
 .dm-root { --dm-accent: var(--dsh-accent, #4d6bfe); --dm-line: var(--dsh-border, rgba(127,127,127,.22));
-  display: flex; flex-direction: column; gap: 16px; max-width: 1320px; margin: 0 auto;
+  display: flex; flex-direction: column; gap: 16px; max-width: 1280px; margin: 0 auto;
   padding: 26px 28px 56px; height: 100%; overflow: auto; box-sizing: border-box;
   background:
-    radial-gradient(1200px 320px at 12% -8%, rgba(77,107,254,.10), transparent 68%),
-    radial-gradient(900px 260px at 88% -6%, rgba(128,92,255,.08), transparent 70%); }
+    radial-gradient(1200px 340px at 10% -8%, rgba(77,107,254,.16), transparent 68%),
+    radial-gradient(900px 280px at 90% -6%, rgba(128,92,255,.12), transparent 70%); }
 .dm-hero { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .dm-hero h1 { margin: 0; font-size: 22px; font-weight: 650; letter-spacing: -.01em; display: flex; align-items: center; gap: 10px; }
 .dm-pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: rgba(77,107,254,.14); color: var(--dm-accent); }
@@ -112,7 +122,11 @@ window.__ModuleLoader__.load({
 .dm-ghost { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 9px; border: 1px solid var(--dm-line);
   background: transparent; color: inherit; cursor: pointer; font: inherit; font-size: 12.5px; transition: border-color .15s, color .15s; }
 .dm-ghost:hover { border-color: var(--dm-accent); color: var(--dm-accent); }
-.dm-search-wrap { position: relative; display: flex; align-items: center; max-width: 560px; }
+.dm-search-wrap { position: relative; display: flex; align-items: center; flex: 1 1 320px; max-width: 560px; }
+.dm-tools { display: flex; align-items: center; gap: 10px; }
+.dm-select { padding: 9px 12px; border-radius: 10px; border: 1px solid var(--dm-line); background: transparent;
+  color: inherit; font: inherit; font-size: 12.5px; cursor: pointer; }
+.dm-select:focus { outline: none; border-color: var(--dm-accent); }
 .dm-search-wrap svg { position: absolute; left: 12px; opacity: .4; pointer-events: none; }
 .dm-search { width: 100%; box-sizing: border-box; padding: 10px 12px 10px 36px; border-radius: 11px; border: 1px solid var(--dm-line);
   background: transparent; color: inherit; font: inherit; font-size: 13px; transition: border-color .15s, box-shadow .15s; }
@@ -131,9 +145,11 @@ window.__ModuleLoader__.load({
 .dm-section-head span { font-size: 12px; font-weight: 600; letter-spacing: .02em; opacity: .65; }
 .dm-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; opacity: .45; }
 .dm-featured { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 12px; }
-.dm-hero-card { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 18px;
+.dm-hero-card { position: relative; display: flex; flex-direction: row; align-items: center; gap: 16px; padding: 16px 18px; border-radius: 18px;
   border: 1px solid var(--dm-line); background: linear-gradient(135deg, rgba(77,107,254,.10), rgba(127,127,127,.04));
   overflow: hidden; transition: border-color .2s, box-shadow .2s, transform .2s; }
+.dm-hero-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 8px; position: relative; }
+.dm-hero-side { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; position: relative; }
 .dm-hero-card::after { content: ''; position: absolute; top: -90px; right: -60px; width: 240px; height: 240px; border-radius: 50%;
   background: radial-gradient(circle, rgba(77,107,254,.22), transparent 65%); pointer-events: none; }
 .dm-hero-card:hover { border-color: var(--dm-accent); box-shadow: 0 14px 34px rgba(77,107,254,.18); transform: translateY(-2px); }
@@ -141,8 +157,8 @@ window.__ModuleLoader__.load({
 .dm-hero-card:hover .dm-thumb { transform: scale(1.06); }
 .dm-hero-title { margin: 0; font-size: 17px; font-weight: 650; }
 .dm-hero-desc { margin: 0; font-size: 13px; line-height: 1.6; opacity: .75;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.dm-hero-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: auto; position: relative; }
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dm-hero-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .dm-hero-card .dm-btn { padding: 9px 20px; font-size: 13px; border-radius: 10px; }
 .dm-appear { animation: dm-rise .34s cubic-bezier(.2,.7,.3,1) both; }
 @keyframes dm-rise { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: none } }
@@ -467,6 +483,7 @@ window.__ModuleLoader__.load({
       const [catalog, setCatalog] = React.useState({ status: 'loading' })
       const [query, setQuery] = React.useState('')
       const [category, setCategory] = React.useState('')
+      const [sort, setSort] = React.useState('index')
       const [busy, setBusy] = React.useState('')
       const [notice, setNotice] = React.useState(undefined)
       const [bundles, setBundles] = React.useState(new Map())
@@ -613,16 +630,27 @@ window.__ModuleLoader__.load({
                 }
               }, t('apply')))) : null))
 
-      const tools = h('div', { className: 'dm-search-wrap' },
-        h(SearchIcon),
-        h('input', {
-          className: 'dm-search',
-          type: 'search',
-          value: query,
-          placeholder: t('search'),
-          'aria-label': t('search'),
-          onChange: (event) => setQuery(event.target.value)
-        }))
+      const tools = h('div', { className: 'dm-tools' },
+        h('div', { className: 'dm-search-wrap' },
+          h(SearchIcon),
+          h('input', {
+            className: 'dm-search',
+            type: 'search',
+            value: query,
+            placeholder: t('search'),
+            'aria-label': t('search'),
+            onChange: (event) => setQuery(event.target.value)
+          })),
+        h('select', {
+          className: 'dm-select',
+          'aria-label': t('sortBy'),
+          value: sort,
+          onChange: (event) => setSort(event.target.value)
+        },
+          h('option', { value: 'index' }, t('sortIndex')),
+          h('option', { value: 'downloads' }, t('sortDownloads')),
+          h('option', { value: 'stars' }, t('sortStars')),
+          h('option', { value: 'name' }, t('sortName'))))
 
       const chips = Object.keys(categories).length === 0 ? null : h('div', { className: 'dm-chips' },
         h('button', {
@@ -677,13 +705,15 @@ window.__ModuleLoader__.load({
             'aria-current': current, onClick: open, role: 'button', tabIndex: 0,
             onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') setSelected(entry) }
           },
-            h('div', { className: 'dm-card-top' },
-              thumb,
-              h('div', { className: 'dm-titles' },
-                h('h3', { className: 'dm-hero-title', title }, title),
-                h('code', { className: 'dm-pkg', title: entry.name }, entry.name))),
-            h('p', { className: 'dm-hero-desc' }, pick(entry.description, '')),
-            h('div', { className: 'dm-hero-foot' }, meta, action))
+            h('div', { className: 'dm-hero-main' },
+              h('div', { className: 'dm-card-top' },
+                thumb,
+                h('div', { className: 'dm-titles' },
+                  h('h3', { className: 'dm-hero-title', title }, title),
+                  h('code', { className: 'dm-pkg', title: entry.name }, entry.name))),
+              h('p', { className: 'dm-hero-desc' }, pick(entry.description, '')),
+              meta),
+            h('div', { className: 'dm-hero-side' }, action))
         }
         return h('article', {
           className: 'dm-card dm-appear', key: entry.name, style: delay,
@@ -708,7 +738,14 @@ window.__ModuleLoader__.load({
           .slice(0, 2)
         : []
       const featuredNames = new Set(featured.map((entry) => entry.name))
-      const gridEntries = filtered.filter((entry) => !featuredNames.has(entry.name))
+      const gridEntries = filtered
+        .filter((entry) => !featuredNames.has(entry.name))
+        .sort((left, right) => {
+          if (sort === 'downloads') return (sortKeyOf(right, 'downloads') ?? 0) - (sortKeyOf(left, 'downloads') ?? 0)
+          if (sort === 'stars') return (sortKeyOf(right, 'stars') ?? 0) - (sortKeyOf(left, 'stars') ?? 0)
+          if (sort === 'name') return pick(left.title, left.name).localeCompare(pick(right.title, right.name), 'zh-Hans-CN')
+          return 0
+        })
 
       let body
       if (catalog.status === 'loading' && entries.length === 0) {

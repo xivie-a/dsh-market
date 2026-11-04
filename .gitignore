@@ -3,5 +3,6 @@ dist/
 .ci/
 .plugin-market-cache/
 .deploy-key/
+preview/
 *.log
 .DS_Store
