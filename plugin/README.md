@@ -41,7 +41,7 @@ node ../scripts/deploy-local.mjs
 
 ```sh
 node ../scripts/build-preview.mjs
-# 打开 preview/index.html，支持 ?theme=dark ?layout=list ?palette=1 ?suite=1 ?select=N
+# 打开 preview/index.html，支持 ?theme=dark ?layout=list ?palette=1 ?suite=1 ?select=N ?hover=1
 ```
 
 不要直接改 `client.js` 里的那份 CSS —— 下次内联会被覆盖。
