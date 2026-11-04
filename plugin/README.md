@@ -23,18 +23,25 @@ D:\DSH\workplace\project-chajianshichang\plugin
 - **Host 半边**（`index.js`）：把索引地址补进「发现」的索引源，并提供 `/my-market` 命令（被删掉后可以加回来）。
 - **Client 半边**（`client.js`）：往 `plugins.tab` 和 `sidebar.panellist` 两个槽位注册界面，读索引、画卡片、调内置的安装流程。
 
-## 改样式
+## 改样式 / 改逻辑之后
 
 样式单独放在 [`styles.css`](styles.css)，`client.js` 里的 `const STYLES` 是它内联后的副本（DSH 只加载 `client.js` 一个文件，样式必须以字符串形式带上）。
 
-所以流程是：
+一条命令做完「内联 → 同步到安装目录 → 校验」：
 
 ```sh
-# 1. 改 styles.css
-# 2. 内联进 client.js
-node ../scripts/inline-styles.mjs
-# 3. 本地看效果（可选）
+node ../scripts/deploy-local.mjs
+# 然后重启 DSH
+```
+
+它会把文件复制到 `%USERPROFILE%\.dsh\profiles\desktop\node_modules\dsh-market-xivie\`，
+逐文件比对哈希，最后提醒你重启。可选参数：`--target <dir>` 指定安装目录、`--no-inline` 只同步、`--dry-run` 先看要做什么。
+
+想先在浏览器里看效果（不碰 DSH）：
+
+```sh
 node ../scripts/build-preview.mjs
+# 打开 preview/index.html，支持 ?theme=dark ?layout=list ?palette=1 ?suite=1 ?select=N
 ```
 
 不要直接改 `client.js` 里的那份 CSS —— 下次内联会被覆盖。
