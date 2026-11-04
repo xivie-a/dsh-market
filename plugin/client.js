@@ -659,6 +659,48 @@ window.__ModuleLoader__.load({
 /* ── 入场 ─────────────────────────────────────────────────────────────── */
 .dm-appear { animation: dm-rise .34s cubic-bezier(.2, .7, .3, 1) backwards; }
 
+/* ── 统一的可交互反馈：所有可点的方块都会轻微上浮 ─────────────────────── */
+.dm-mini,
+.dm-suite-card,
+.dm-suite-tile,
+.dm-palette-item,
+.dm-related-item,
+.dm-ghost,
+.dm-btn,
+.dm-chip,
+.dm-card {
+  transition: transform .16s cubic-bezier(.2, .7, .3, 1), box-shadow .16s ease,
+    border-color .16s ease, background .16s ease, color .16s ease;
+}
+.dm-mini:hover,
+.dm-suite-tile:hover,
+.dm-palette-item:hover,
+.dm-related-item:hover,
+.dm-ghost:hover,
+.dm-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+.dm-mini:hover,
+.dm-suite-tile:hover,
+.dm-palette-item:hover,
+.dm-related-item:hover,
+.dm-ghost:hover {
+  box-shadow: 0 8px 20px rgba(21, 59, 48, .12);
+}
+.dm-mini:active,
+.dm-suite-tile:active,
+.dm-palette-item:active,
+.dm-related-item:active,
+.dm-ghost:active,
+.dm-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dm-mini:hover, .dm-suite-tile:hover, .dm-palette-item:hover,
+  .dm-related-item:hover, .dm-ghost:hover, .dm-btn:hover:not(:disabled) { transform: none; }
+}
+
 /* ── 响应式 ───────────────────────────────────────────────────────────── */
 @media (max-width: 1100px) {
   .dm-root { padding: 26px 26px 56px; gap: 22px; }
@@ -819,15 +861,20 @@ window.__ModuleLoader__.load({
 /* 套装弹窗 */
 .dm-suite-mask { position: fixed; inset: 0; z-index: 76; background: rgba(21, 63, 50, .4); animation: dm-fade .16s ease-out; }
 .dm-suite-dialog {
-  position: fixed; z-index: 77; top: 6vh; left: 50%;
+  position: fixed; z-index: 77; top: 50%; left: 50%;
   display: flex; flex-direction: column;
-  width: min(880px, calc(100vw - 48px)); max-height: 88vh;
-  transform: translateX(-50%);
+  width: min(880px, calc(100vw - 48px)); max-height: 86vh;
+  transform: translate(-50%, -50%);
   border: 1px solid var(--line); border-radius: 20px;
   background: var(--panel);
   box-shadow: 0 30px 90px rgba(0, 0, 0, .3);
   overflow: hidden;
-  animation: dm-swap .2s ease-out;
+  animation: dm-dialog-in .26s cubic-bezier(.2, .7, .3, 1) both;
+}
+/* 动画必须带上 -50% 的位移，否则会从左边「飞」过来 */
+@keyframes dm-dialog-in {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 10px)) scale(.985); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 .dm-suite-head {
   display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
@@ -930,7 +977,7 @@ window.__ModuleLoader__.load({
 }
 @media (max-width: 720px) {
   .dm-suite-grid { grid-template-columns: minmax(0, 1fr); }
-  .dm-suite-dialog { width: 100vw; max-height: 100vh; top: 0; border-radius: 0; }
+  .dm-suite-dialog { width: 100vw; max-height: 100vh; top: 50%; border-radius: 0; }
   .dm-suite-head, .dm-suite-body, .dm-suite-plan, .dm-suite-queue { padding-inline: 16px; }
 }
 }
@@ -2096,11 +2143,12 @@ window.__ModuleLoader__.load({
                         thumbOf(item.entry),
                         h('div', { className: 'dm-suite-tile-name' },
                           h('strong', null, pick(item.entry.title, item.entry.name)),
-                          h('small', null, item.note === ''
-                            ? (item.entry.metadata?.category === undefined
-                              ? t('community')
-                              : pick(categories[item.entry.metadata.category]?.title, item.entry.metadata.category))
-                            : item.note)),
+                          h('small', null, item.note !== ''
+                            ? item.note
+                            : (pick(item.entry.description, '')
+                              || (item.entry.metadata?.category === undefined
+                                ? t('community')
+                                : pick(categories[item.entry.metadata.category]?.title, item.entry.metadata.category))))),
                         h('input', {
                           type: 'checkbox',
                           checked: on,
