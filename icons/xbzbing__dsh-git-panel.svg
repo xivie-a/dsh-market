@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-labelledby="title">
+  <title id="title">Git 工具</title>
+  <defs>
+    <!-- 青绿 → 蓝 的柔和渐变，userSpaceOnUse 让线条和节点颜色连续 -->
+    <linearGradient id="glyph" x1="38" y1="30" x2="92" y2="102" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#36C9B4"/>
+      <stop offset="1" stop-color="#4F7BFF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 分支线：主干 + 右侧分支汇入主干。平头端点伸进节点环带（环带半径 3..11），
+       线宽 8 的两侧边线在 |dx|=4 处与环外缘相交，连接处是直线，没有圆头留下的内凹；
+       端点又停在环孔（半径 3）之外，不会进孔。分支用半径 11 的圆弧转弯（内缘半径 7），
+       弯折处线宽不变 -->
+  <g fill="none" stroke="url(#glyph)" stroke-width="8" stroke-linecap="butt">
+    <path d="M44 40V88"/>
+    <path d="M84 52V56a11 11 0 0 1-11 11H55a11 11 0 0 0-11 11"/>
+  </g>
+
+  <!-- 提交节点：渐变空心圆环（环内透底，深浅色底都成立） -->
+  <g fill="none" stroke="url(#glyph)" stroke-width="8">
+    <circle cx="44" cy="34" r="7"/>
+    <circle cx="84" cy="46" r="7"/>
+    <circle cx="44" cy="94" r="7"/>
+  </g>
+</svg>
