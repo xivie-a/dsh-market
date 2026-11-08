@@ -1314,7 +1314,7 @@ window.__ModuleLoader__.load({
       })
     }
 
-    /** 当前 DSH 版本：优先读启动注入，其次问本地接口。 */
+    /** 当前 DSH 版本：启动注入 → meta → 本地接口 → 已装 bundle 版本。 */
     async function detectDshVersion() {
       const boot = globalThis.__DSH_BOOT__
       const fromBoot = boot?.version ?? boot?.app?.version ?? boot?.pkg?.version ?? boot?.runtime?.version
@@ -1334,6 +1334,19 @@ window.__ModuleLoader__.load({
         } catch {
           // 接着试下一个地址
         }
+      }
+      return undefined
+    }
+
+    /** 接口问不到时，从 DSH 自带的 bundle 版本反推（它们和运行时同版本）。 */
+    function dshVersionFromBundles(bundles) {
+      const list = Array.isArray(bundles) ? bundles : bundles?.bundles
+      if (!Array.isArray(list)) return undefined
+      const names = ['@deepseek-ai/dsh-base', '@deepseek-ai/dsh-web-app', '@deepseek-ai/dsh-desktop', '@deepseek-ai/dsh']
+      for (const name of names) {
+        const hit = list.find((item) => (item?.name ?? item?.id) === name)
+        const version = hit?.version ?? hit?.manifest?.version
+        if (typeof version === 'string' && version !== '') return version
       }
       return undefined
     }
@@ -1947,6 +1960,8 @@ window.__ModuleLoader__.load({
           const list = Array.isArray(answer) ? answer : answer?.ok ? answer.value : []
           if (Array.isArray(list)) {
             setBundles(new Map(list.map((bundle) => [bundle.name, bundle])))
+            // 兜底：拿不到启动注入的版本时，用 DSH 自带 bundle 的版本号顶上
+            setDshVersion((current) => current ?? dshVersionFromBundles(list))
           }
         } catch {
           // 没有插件管理服务时，安装状态就按索引里给的显示
