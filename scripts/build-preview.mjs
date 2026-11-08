@@ -162,6 +162,8 @@ const HARNESS = String.raw`
 
   // ?select=N 时自动点开第 N 张卡，用来截详情面板
   const params = new URLSearchParams(location.search)
+  // ?dsh=x.y.z 模拟 DSH 版本，用来验证兼容性提示
+  if (params.has('dsh')) window.__DSH_BOOT__ = { version: params.get('dsh') }
   if (params.has('debug')) {
     const box = document.createElement('div')
     box.style.cssText = 'position:fixed;z-index:9999;left:8px;top:8px;background:#c00;color:#fff;font:12px monospace;padding:4px 8px'
@@ -201,6 +203,15 @@ const HARNESS = String.raw`
       const cards = document.querySelectorAll('.dm-card')
       if (cards[index]) cards[index].click()
     }, 400)
+  }
+  // ?selectName=<关键字> 按文案打开详情，避免依赖顺序
+  if (params.has('selectName')) {
+    const needle = params.get('selectName')
+    setTimeout(() => {
+      for (const card of document.querySelectorAll('.dm-card')) {
+        if (card.textContent.includes(needle)) { card.click(); return }
+      }
+    }, 500)
   }
 `
 

@@ -75,6 +75,14 @@ window.__ModuleLoader__.load({
       suiteReady: '套装已准备好',
       onlyRunning: '正在处理…',
       pickable: '可选',
+      compatNone: '没有适配当前 DSH 的版本',
+      compatMismatch: '版本不匹配',
+      installCompat: '安装兼容版本',
+      compatDsh: '当前 DSH',
+      compatUnknown: '无法识别',
+      incompatible: '不兼容',
+      compatUse: '兼容',
+      compatNeed: '要求',
       mustPickOne: '上面这组至少要选一个，才能继续安装',
       appearance: '外观',
       prev: '上一个',
@@ -180,6 +188,14 @@ window.__ModuleLoader__.load({
       suiteReady: 'Bundle ready',
       onlyRunning: 'Working…',
       pickable: 'Optional',
+      compatNone: 'No version fits this DSH build',
+      compatMismatch: 'Version mismatch',
+      installCompat: 'Install compatible',
+      compatDsh: 'Current DSH',
+      compatUnknown: 'unknown',
+      incompatible: 'incompatible',
+      compatUse: 'fits',
+      compatNeed: 'needs',
       mustPickOne: 'Pick at least one in the group above to continue',
       appearance: 'Appearance',
       prev: 'Previous',
@@ -299,6 +315,7 @@ window.__ModuleLoader__.load({
 .dm-heading h1 { margin: 10px 0 6px; font-size: 34px; font-weight: 800; line-height: 1.25; letter-spacing: -.02em; }
 .dm-heading p { margin: 0; color: var(--muted); font-size: 13.5px; }
 .dm-total { flex: none; color: var(--muted); font-size: 12px; }
+.dm-total em { color: color-mix(in srgb, var(--muted) 78%, transparent); font-style: normal; font-variant-numeric: tabular-nums; }
 
 .dm-ghost {
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;
@@ -708,6 +725,40 @@ window.__ModuleLoader__.load({
 }
 .dm-version:first-child { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); background: var(--tint); }
 .dm-version em { flex: none; color: var(--muted); font-style: normal; }
+.dm-version.is-bad { opacity: .55; border-style: dashed; }
+.dm-version.is-bad:first-child { border-color: var(--line); background: transparent; }
+.dm-version-side { display: flex; align-items: center; gap: 10px; flex: none; }
+.dm-version-install {
+  padding: 3px 9px; border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  background: transparent; color: var(--accent);
+  font-size: 10.5px; font-weight: 600;
+  transition: background .15s, color .15s;
+}
+.dm-version-install:hover:not(:disabled) { background: var(--accent); color: #fff; }
+.dm-version-install:disabled { opacity: .4; cursor: default; }
+
+/* 卡片上的兼容角标 */
+.dm-compat {
+  margin-left: 6px; padding: 1px 6px; border-radius: 5px;
+  font-size: 9.5px; font-weight: 600; letter-spacing: .02em;
+  vertical-align: middle;
+}
+.dm-compat--bad { background: color-mix(in srgb, #c05050 12%, transparent); color: #b6463f; }
+.dm-compat--ok { background: var(--tint); color: var(--accent); }
+
+/* 详情里的不兼容提示条 */
+.dm-compat-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 11px 13px; margin: 0 0 4px;
+  border: 1px solid color-mix(in srgb, #c05050 22%, var(--line));
+  border-radius: 11px;
+  background: color-mix(in srgb, #c05050 6%, transparent);
+}
+.dm-compat-bar strong { display: block; color: #b6463f; font-size: 11.5px; font-weight: 700; }
+.dm-compat-bar span { display: block; margin-top: 2px; color: var(--muted); font-size: 10.5px; line-height: 1.45; }
+.dm-compat-bar > div { min-width: 0; flex: 1 1 auto; }
+.dm-compat-bar .dm-btn { flex: none; min-height: 32px; font-size: 11.5px; white-space: nowrap; }
 .dm-detail-foot {
   position: sticky; bottom: -24px; z-index: 2;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
@@ -1149,6 +1200,168 @@ window.__ModuleLoader__.load({
           onError: (event) => { event.currentTarget.style.display = 'none' }
         })
         : String(label).slice(0, 1).toUpperCase())
+    }
+
+    /* ── 版本兼容判断 ──────────────────────────────────────────────────────
+     * 插件用 engines.dsh 声明「需要哪个 DSH 版本」。这里实现一小段 semver：
+     * 支持精确版本、>= <= > < =、^ ~、x 通配 和 || 并列区间。
+     * 不引第三方依赖，因为插件要在 DSH 里单文件加载。
+     */
+
+    const parseVersion = (text) => {
+      const match = /^v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/u.exec(String(text).trim())
+      if (match === null) return undefined
+      return {
+        nums: [Number(match[1]), Number(match[2]), Number(match[3])],
+        pre: match[4] === undefined ? [] : match[4].split('.')
+      }
+    }
+
+    const comparePre = (left, right) => {
+      if (left.length === 0 && right.length === 0) return 0
+      if (left.length === 0) return 1   // 正式版比预发布版新
+      if (right.length === 0) return -1
+      for (let i = 0; i < Math.max(left.length, right.length); i += 1) {
+        const a = left[i]
+        const b = right[i]
+        if (a === undefined) return -1
+        if (b === undefined) return 1
+        const aNum = /^\d+$/u.test(a)
+        const bNum = /^\d+$/u.test(b)
+        if (aNum && bNum) {
+          const diff = Number(a) - Number(b)
+          if (diff !== 0) return Math.sign(diff)
+        } else if (aNum !== bNum) {
+          return aNum ? -1 : 1
+        } else if (a !== b) {
+          return a < b ? -1 : 1
+        }
+      }
+      return 0
+    }
+
+    const compareVersion = (left, right) => {
+      const a = parseVersion(left)
+      const b = parseVersion(right)
+      if (a === undefined || b === undefined) return undefined
+      for (let i = 0; i < 3; i += 1) {
+        const diff = a.nums[i] - b.nums[i]
+        if (diff !== 0) return Math.sign(diff)
+      }
+      return comparePre(a.pre, b.pre)
+    }
+
+    /** 把 ^ ~ x 展开成 >= 与 <。 */
+    const expandComparator = (operator, version) => {
+      const parsed = parseVersion(version)
+      if (parsed === undefined) return []
+      const [major, minor, patch] = parsed.nums
+      if (operator === '^') {
+        const upper = major > 0 ? `${String(major + 1)}.0.0` : minor > 0 ? `0.${String(minor + 1)}.0` : `0.0.${String(patch + 1)}`
+        return [`>=${version}`, `<${upper}`]
+      }
+      if (operator === '~') return [`>=${version}`, `<${String(major)}.${String(minor + 1)}.0`]
+      return [`${operator === '' ? '=' : operator}${version}`]
+    }
+
+    const wildcardToRange = (text, operator = '') => {
+      if (/^[xX*]$/u.test(text)) return []
+      const parts = text.split('.')
+      if (parts.some((part) => /^[xX*]$/u.test(part))) {
+        const fixed = []
+        for (const part of parts) {
+          if (/^[xX*]$/u.test(part)) break
+          fixed.push(part)
+        }
+        if (fixed.length === 0) return []
+        const lower = `${[...fixed, ...Array(3 - fixed.length).fill('0')].join('.')}`
+        const upper = [...fixed]
+        upper[upper.length - 1] = String(Number(upper[upper.length - 1]) + 1)
+        if (upper.length === 1) upper.push('0')
+        if (upper.length === 2) upper.push('0')
+        return [`${operator === '' ? '>=' : operator}${lower}`, `<${upper.join('.')}`]
+      }
+      return expandComparator(operator, text)
+    }
+
+    /** 判断某个版本号是否满足 engines.dsh 的区间写法。 */
+    function satisfiesRange(version, range) {
+      if (range === undefined || range === null) return undefined
+      const text = String(range).trim()
+      if (text === '' || text === '*' || text === 'x') return true
+      const candidates = text.split('||').map((part) => part.trim()).filter((part) => part !== '')
+      return candidates.some((candidate) => {
+        // 把 ">=0.2.0 <0.3.0" 拆成一个个比较式
+        const tokens = candidate.replace(/(>=|<=|>|<|=|\^|~)\s+/gu, '$1').split(/\s+/u).filter(Boolean)
+        return tokens.every((token) => {
+          const match = /^(>=|<=|>|<|=|\^|~)?(.+)$/u.exec(token)
+          if (match === null) return true
+          const operator = match[1] ?? ''
+          for (const comparator of wildcardToRange(match[2], operator)) {
+            if (comparator === undefined) continue
+            const inner = /^(>=|<=|>|<|=)(.+)$/u.exec(comparator)
+            if (inner === null) continue
+            const diff = compareVersion(version, inner[2])
+            if (diff === undefined) continue
+            if (inner[1] === '>=' && diff < 0) return false
+            if (inner[1] === '<=' && diff > 0) return false
+            if (inner[1] === '>' && diff <= 0) return false
+            if (inner[1] === '<' && diff >= 0) return false
+            if (inner[1] === '=' && diff !== 0) return false
+          }
+          return true
+        })
+      })
+    }
+
+    /** 当前 DSH 版本：优先读启动注入，其次问本地接口。 */
+    async function detectDshVersion() {
+      const boot = globalThis.__DSH_BOOT__
+      const fromBoot = boot?.version ?? boot?.app?.version ?? boot?.pkg?.version ?? boot?.runtime?.version
+        ?? globalThis.__DSH__?.version ?? globalThis.__DSH_APP__?.version
+      if (typeof fromBoot === 'string' && fromBoot !== '') return fromBoot
+      const meta = typeof document === 'undefined' ? null : document.querySelector('meta[name="dsh-version"]')
+      const fromMeta = meta?.getAttribute('content')
+      if (typeof fromMeta === 'string' && fromMeta !== '') return fromMeta
+      for (const path of ['/api/version', '/api/status', '/api/app']) {
+        try {
+          const response = await fetch(path, { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(4000) })
+          if (!response.ok) continue
+          const doc = await response.json()
+          const found = doc?.version ?? doc?.data?.version ?? doc?.app?.version ?? doc?.runtime?.version
+            ?? doc?.dsh?.version ?? doc?.engines?.dsh
+          if (typeof found === 'string' && found !== '') return found
+        } catch {
+          // 接着试下一个地址
+        }
+      }
+      return undefined
+    }
+
+    /**
+     * 一个插件在当前 DSH 版本下能不能装。
+     * versions 已经是「新的在前」，所以第一个满足条件的就是推荐版本。
+     */
+    function compatibilityOf(entry, dshVersion) {
+      const versions = entry.versions ?? []
+      if (dshVersion === undefined) return { known: false, versions, compatible: [], recommended: undefined }
+      const judged = versions.map((version) => ({
+        version,
+        ok: satisfiesRange(dshVersion, version.engines?.dsh ?? entry.engines?.dsh)
+      }))
+      const compatible = judged.filter((item) => item.ok !== false).map((item) => item.version)
+      const preferredVersion = entry.defaultVersion ?? versions[0]?.version
+      const preferred = versions.find((version) => version.version === preferredVersion)
+      const preferredOk = preferred === undefined
+        ? true
+        : satisfiesRange(dshVersion, preferred.engines?.dsh ?? entry.engines?.dsh) !== false
+      return {
+        known: true,
+        versions: judged,
+        compatible,
+        recommended: compatible[0],
+        defaultOk: preferredOk && compatible.length > 0
+      }
     }
 
     /** 快捷搜索用：名称、标题、简介、关键词、作者一起匹配。 */
@@ -1617,6 +1830,7 @@ window.__ModuleLoader__.load({
       const [category, setCategory] = React.useState('')
       const [sort, setSort] = React.useState('index')
       const [busy, setBusy] = React.useState('')
+      const [dshVersion, setDshVersion] = React.useState(undefined)
       const [notice, setNotice] = React.useState(undefined)
       const [bundles, setBundles] = React.useState(new Map())
       const [selected, setSelected] = React.useState(undefined)
@@ -1741,6 +1955,13 @@ window.__ModuleLoader__.load({
 
       React.useEffect(() => { void load() }, [load])
 
+      // 版本兼容判断要用当前 DSH 版本，启动时探一次
+      React.useEffect(() => {
+        let alive = true
+        void detectDshVersion().then((version) => { if (alive) setDshVersion(version) })
+        return () => { alive = false }
+      }, [])
+
       // 套装数据单独拉一次；拉不到就整块不显示
       React.useEffect(() => {
         let alive = true
@@ -1794,8 +2015,10 @@ window.__ModuleLoader__.load({
       }
 
       /** 装一个插件；失败抛错，交给调用方决定怎么提示。 */
-      async function installEntry(entry) {
-        const version = entry.versions?.find((item) => item.version === entry.defaultVersion) ?? entry.versions?.[0]
+      async function installEntry(entry, versionOverride) {
+        const version = versionOverride === undefined
+          ? entry.versions?.find((item) => item.version === entry.defaultVersion) ?? entry.versions?.[0]
+          : entry.versions?.find((item) => item.version === versionOverride)
         const target = version?.install
         if (!target?.spec) throw new Error(t('noTarget'))
         const manager = managerRef.current?.pluginManager
@@ -1856,11 +2079,11 @@ window.__ModuleLoader__.load({
         throw new Error(t('removeUnsupported'))
       }
 
-      async function install(entry) {
+      async function install(entry, versionOverride) {
         setBusy(entry.name)
         setNotice(undefined)
         try {
-          const value = await installEntry(entry)
+          const value = await installEntry(entry, versionOverride)
           setNotice({
             kind: 'ok',
             text: `${pick(entry.title, entry.name)} · ${value.application === 'restart-required' ? t('restart') : t('installedOk')}`
@@ -1923,7 +2146,9 @@ window.__ModuleLoader__.load({
           }, t('apply'))))
 
       const actions = h('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
-        h('span', { className: 'dm-total' }, `${entries.length} ${t('plugins')}`),
+        h('span', { className: 'dm-total', title: dshVersion === undefined ? t('compatUnknown') : `${t('compatDsh')} ${dshVersion}` },
+          `${entries.length} ${t('plugins')}`,
+          dshVersion === undefined ? null : h('em', null, ` · DSH ${dshVersion}`)),
         h('button', {
           className: 'dm-ghost',
           type: 'button',
@@ -2018,19 +2243,32 @@ window.__ModuleLoader__.load({
         const stars = sortKeyOf(entry, 'stars')
         const version = entry.defaultVersion ?? entry.versions?.[0]?.version
         const title = pick(entry.title, entry.name)
+        // 版本兼容：默认版本装不了但有别的能装，就直接给推荐版本
+        const compat = compatibilityOf(entry, dshVersion)
+        const fallback = compat.known && !compat.defaultOk ? compat.recommended : undefined
+        const blocked = compat.known && !settled && compat.compatible.length === 0
+        const compatBadge = !compat.known || settled
+          ? null
+          : blocked
+            ? h('span', { className: 'dm-compat dm-compat--bad', title: t('compatNone') }, t('incompatible'))
+            : fallback === undefined
+              ? null
+              : h('span', { className: 'dm-compat dm-compat--ok', title: `${t('compatUse')} v${fallback.version}` }, `${t('compatUse')} v${fallback.version}`)
         const label = busy === entry.name
           ? t('installing')
           : status === 'installed' ? t('installed')
             : status === 'update' ? t('update')
               : status === 'provided' ? t('provided')
-                : t('get')
+                : blocked ? t('incompatible')
+                  : t('get')
         const action = settled
           ? h('span', { className: 'dm-installed' }, `✓ ${t('added')}`)
           : h('button', {
             className: 'dm-btn dm-btn--primary',
             type: 'button',
-            disabled: busy !== '',
-            onClick: () => void install(entry)
+            disabled: busy !== '' || blocked,
+            title: blocked ? t('compatNone') : undefined,
+            onClick: () => void install(entry, fallback?.version)
           }, label)
         const thumb = thumbOf(entry, title)
         const categoryLabel = entry.metadata?.category === undefined
@@ -2059,7 +2297,7 @@ window.__ModuleLoader__.load({
             thumb,
             h('div', { className: 'dm-titles' },
               h('h3', { className: 'dm-title', title }, title),
-              h('div', { className: 'dm-cat' }, categoryLabel)),
+              h('div', { className: 'dm-cat' }, categoryLabel, compatBadge)),
             h('button', {
               className: 'dm-fav',
               type: 'button',
@@ -2340,21 +2578,64 @@ window.__ModuleLoader__.load({
               className: 'dm-close', type: 'button', 'aria-label': t('close'), onClick: () => setSelected(undefined)
             }, '×')),
           h('p', { className: 'dm-detail-desc' }, pick(entry.description, '')),
+          (() => {
+            const compat = compatibilityOf(entry, dshVersion)
+            if (!compat.known || compat.defaultOk) return null
+            const requirement = versions.find((version) => version.version === entry.defaultVersion)?.engines?.dsh
+              ?? entry.engines?.dsh
+            return h('div', { className: 'dm-compat-bar' },
+              h('div', null,
+                h('strong', null, compat.compatible.length === 0 ? t('compatNone') : t('compatMismatch')),
+                h('span', null, compat.compatible.length === 0
+                  ? `${t('compatDsh')} ${dshVersion}`
+                  : `${t('compatNeed')} ${requirement ?? '—'} · ${t('compatDsh')} ${dshVersion}`)),
+              compat.compatible.length === 0 ? null : h('button', {
+                className: 'dm-btn dm-btn--primary',
+                type: 'button',
+                disabled: busy !== '',
+                onClick: () => void install(entry, compat.recommended.version)
+              }, `${t('installCompat')} v${compat.recommended.version}`))
+          })(),
           h('div', { className: 'dm-detail-rows' },
             row(t('author'), entry.author),
             row(t('category'), categories[entry.metadata?.category] ? pick(categories[entry.metadata.category].title, entry.metadata.category) : undefined),
             link(t('repo'), entry.repository?.url),
             link(t('homepage'), entry.homepage),
+            row(t('compatDsh'), dshVersion === undefined ? t('compatUnknown') : dshVersion),
             row(t('versionLabel'), `${versions.length}`),
             row(t('updated'), versions[0]?.publishTimestamp
               ? new Date(versions[0].publishTimestamp * 1000).toLocaleDateString('zh-CN')
               : undefined)),
-          versions.length === 0 ? null : h('div', { className: 'dm-versions' },
-            ...versions.slice(0, 10).map((version) => h('div', { className: 'dm-version', key: version.version },
-              h('span', null, `v${version.version}`),
-              h('em', null, version.publishTimestamp
-                ? new Date(version.publishTimestamp * 1000).toLocaleDateString('zh-CN')
-                : '')))),
+          versions.length === 0 ? null : (() => {
+            const compat = compatibilityOf(entry, dshVersion)
+            const judged = compat.known
+              ? compat.versions
+              : versions.map((version) => ({ version, ok: undefined }))
+            // 兼容的版本排在前面，其余保持「新 → 旧」
+            const ordered = judged
+              .map((item, index) => ({ ...item, index }))
+              .sort((left, right) => {
+                const leftBad = left.ok === false ? 1 : 0
+                const rightBad = right.ok === false ? 1 : 0
+                return leftBad === rightBad ? left.index - right.index : leftBad - rightBad
+              })
+            return h('div', { className: 'dm-versions' },
+              ...ordered.slice(0, 10).map(({ version, ok }) => h('div', {
+                className: `dm-version${ok === false ? ' is-bad' : ''}`,
+                key: version.version
+              },
+                h('span', null, `v${version.version}${ok === false ? ` · ${t('incompatible')}` : ''}`),
+                h('span', { className: 'dm-version-side' },
+                  h('em', null, version.publishTimestamp
+                    ? new Date(version.publishTimestamp * 1000).toLocaleDateString('zh-CN')
+                    : ''),
+                  settled || ok === false ? null : h('button', {
+                    className: 'dm-version-install',
+                    type: 'button',
+                    disabled: busy !== '',
+                    onClick: () => void install(entry, version.version)
+                  }, t('install'))))))
+          })(),
           (() => {
             const related = entries
               .filter((item) => item.name !== entry.name
@@ -2386,12 +2667,22 @@ window.__ModuleLoader__.load({
                   disabled: busy !== '',
                   onClick: () => void uninstall(entry)
                 }, busy === entry.name ? t('working') : t('remove')))
-              : h('button', {
-                className: 'dm-btn dm-btn--primary',
-                type: 'button',
-                disabled: busy !== '',
-                onClick: () => void install(entry)
-              }, busy === entry.name ? t('installing') : t('install'))))
+              : (() => {
+                const compat = compatibilityOf(entry, dshVersion)
+                const fallback = compat.known && !compat.defaultOk ? compat.recommended : undefined
+                const blocked = compat.known && compat.compatible.length === 0
+                return h('button', {
+                  className: 'dm-btn dm-btn--primary',
+                  type: 'button',
+                  disabled: busy !== '' || blocked,
+                  title: blocked ? t('compatNone') : undefined,
+                  onClick: () => void install(entry, fallback?.version)
+                }, busy === entry.name
+                  ? t('installing')
+                  : blocked
+                    ? t('incompatible')
+                    : t('install'))
+              })()))
       })()
 
       // 背景预设已并入品牌主题，这里只在用户设了自定义图片时才覆盖

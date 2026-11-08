@@ -69,6 +69,7 @@
 .dm-heading h1 { margin: 10px 0 6px; font-size: 34px; font-weight: 800; line-height: 1.25; letter-spacing: -.02em; }
 .dm-heading p { margin: 0; color: var(--muted); font-size: 13.5px; }
 .dm-total { flex: none; color: var(--muted); font-size: 12px; }
+.dm-total em { color: color-mix(in srgb, var(--muted) 78%, transparent); font-style: normal; font-variant-numeric: tabular-nums; }
 
 .dm-ghost {
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;
@@ -478,6 +479,40 @@
 }
 .dm-version:first-child { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); background: var(--tint); }
 .dm-version em { flex: none; color: var(--muted); font-style: normal; }
+.dm-version.is-bad { opacity: .55; border-style: dashed; }
+.dm-version.is-bad:first-child { border-color: var(--line); background: transparent; }
+.dm-version-side { display: flex; align-items: center; gap: 10px; flex: none; }
+.dm-version-install {
+  padding: 3px 9px; border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  background: transparent; color: var(--accent);
+  font-size: 10.5px; font-weight: 600;
+  transition: background .15s, color .15s;
+}
+.dm-version-install:hover:not(:disabled) { background: var(--accent); color: #fff; }
+.dm-version-install:disabled { opacity: .4; cursor: default; }
+
+/* 卡片上的兼容角标 */
+.dm-compat {
+  margin-left: 6px; padding: 1px 6px; border-radius: 5px;
+  font-size: 9.5px; font-weight: 600; letter-spacing: .02em;
+  vertical-align: middle;
+}
+.dm-compat--bad { background: color-mix(in srgb, #c05050 12%, transparent); color: #b6463f; }
+.dm-compat--ok { background: var(--tint); color: var(--accent); }
+
+/* 详情里的不兼容提示条 */
+.dm-compat-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 11px 13px; margin: 0 0 4px;
+  border: 1px solid color-mix(in srgb, #c05050 22%, var(--line));
+  border-radius: 11px;
+  background: color-mix(in srgb, #c05050 6%, transparent);
+}
+.dm-compat-bar strong { display: block; color: #b6463f; font-size: 11.5px; font-weight: 700; }
+.dm-compat-bar span { display: block; margin-top: 2px; color: var(--muted); font-size: 10.5px; line-height: 1.45; }
+.dm-compat-bar > div { min-width: 0; flex: 1 1 auto; }
+.dm-compat-bar .dm-btn { flex: none; min-height: 32px; font-size: 11.5px; white-space: nowrap; }
 .dm-detail-foot {
   position: sticky; bottom: -24px; z-index: 2;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
