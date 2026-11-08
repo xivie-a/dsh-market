@@ -163,9 +163,6 @@ window.__ModuleLoader__.load({
       needsConfirm: '我准备好了，继续安装',
       needsDrawer: '安装前准备',
       needsInline: '还需要',
-      beforeStart: '开始之前',
-      beforeStartHint: '这些不是插件，市场装不进去，得你自己下一次；装好之后扫码一次就能一直用。',
-      requiredTag: '必装'
     }
     const en = {
       title: 'My Market',
@@ -314,9 +311,6 @@ window.__ModuleLoader__.load({
       needsConfirm: 'I have these — install',
       needsDrawer: 'Before you install',
       needsInline: 'also needs',
-      beforeStart: 'Before you start',
-      beforeStartHint: 'These are not plugins — the market cannot install them. Download once, scan once, and they keep running.',
-      requiredTag: 'required'
     }
 
     const STYLES = `
@@ -1241,35 +1235,34 @@ window.__ModuleLoader__.load({
   color: var(--accent); font-size: 10px; font-variant-numeric: tabular-nums;
 }
 .dm-suite-group-hint { color: var(--muted); font-size: 10.5px; line-height: 1.6; }
-/* 套装里的「开始之前」：市场装不了、但必须有的外部条件 */
-.dm-suite-prereq {
-  display: flex; flex-direction: column; gap: 7px;
-  margin-bottom: 14px; padding: 12px 13px;
-  border: 1px dashed color-mix(in oklab, var(--accent) 34%, transparent);
-  border-radius: 13px;
-  background: color-mix(in oklab, var(--tint) 55%, transparent);
+/* 套装里选中某项后，原地展开它「装之前还缺什么」 */
+.dm-suite-pair { display: flex; flex-direction: column; }
+.dm-suite-pair.is-open .dm-suite-tile {
+  border-bottom-color: transparent;
+  border-bottom-left-radius: 0; border-bottom-right-radius: 0;
 }
-.dm-prereq-item { display: flex; align-items: flex-start; gap: 9px; }
-.dm-prereq-dot {
-  flex: none; width: 7px; height: 7px; margin-top: 6px;
-  border-radius: 50%; background: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 16%, transparent);
+.dm-suite-needs {
+  display: flex; flex-direction: column; gap: 9px;
+  padding: 11px 14px 13px;
+  border: 1px solid color-mix(in oklab, var(--accent) 26%, var(--line));
+  border-top: 0; border-radius: 0 0 14px 14px;
+  background: color-mix(in oklab, var(--tint) 50%, var(--panel));
+  animation: dm-fade .18s ease-out;
 }
-.dm-prereq-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.dm-prereq-body strong { font-size: 12px; font-weight: 700; color: var(--text); }
-.dm-prereq-body p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
-.dm-prereq-link {
-  flex: none; align-self: center;
-  padding: 4px 9px; border-radius: 8px;
-  border: 1px solid var(--line); background: var(--panel);
-  color: var(--accent); font-size: 10.5px; font-weight: 600;
-  text-decoration: none; white-space: nowrap;
-  transition: gap .18s ease, transform .18s ease, border-color .18s ease;
+.dm-suite-needs-head {
+  display: flex; align-items: center; gap: 7px;
+  color: var(--accent); font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
 }
-.dm-prereq-link:hover {
-  transform: translateY(-1px);
-  border-color: color-mix(in oklab, var(--accent) 44%, transparent);
+.dm-suite-needs-head em {
+  padding: 1px 6px; border-radius: 5px;
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  font-size: 10px; font-style: normal; font-weight: 600;
 }
+.dm-suite-need { display: flex; align-items: flex-start; gap: 9px; }
+.dm-suite-need > .dm-gate-kind { flex: none; margin-top: 1px; }
+.dm-suite-need-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dm-suite-need-body strong { font-size: 11.5px; font-weight: 650; color: var(--text); }
+.dm-suite-need-body p { margin: 0; color: var(--muted); font-size: 10.5px; line-height: 1.6; }
 .dm-suite-warn {
   margin-top: 2px; padding: 8px 10px;
   border-radius: 9px;
@@ -1889,7 +1882,7 @@ window.__ModuleLoader__.load({
      */
     // #region suites-fallback
     const SUITES_FALLBACK = {
-  "version": 6,
+  "version": 7,
   "suites": [
     {
       "id": "big-fish",
@@ -1961,23 +1954,6 @@ window.__ModuleLoader__.load({
         {
           "name": "dsh-bilibili-summary",
           "note": "B 站视频理解：转写加关键帧，产出可引用的总结"
-        }
-      ],
-      "prereqs": [
-        {
-          "title": {
-            "zh": "NapCat.Shell",
-            "en": "NapCat.Shell"
-          },
-          "tag": {
-            "zh": "必装",
-            "en": "Required"
-          },
-          "note": {
-            "zh": "QQ 通道的协议端，市场装不了（它不是 npm 插件），去官方 Releases 下 Windows 一键包，装到 D:\\tools\\napcat 这类纯英文目录。装完填一次路径，之后扫码一次就能一直用。",
-            "en": "The protocol side of the QQ channel. It is not an npm plugin, so download the Windows bundle from Releases and put it in a plain ASCII folder such as D:\\tools\\napcat. Fill the path once, scan once, and it keeps running."
-          },
-          "url": "https://github.com/NapNeko/NapCatQQ/releases"
         }
       ]
     },
@@ -3449,6 +3425,33 @@ window.__ModuleLoader__.load({
                 h('span', null, item.required ? t('required') : ''),
                 h('span', { className: state === 'error' ? 'dm-suite-state dm-suite-state--error' : 'dm-suite-state' }, status)))
           }
+          /** 选中后原地展开：这个插件装之前还缺什么（NapCat、账号、路径…）。 */
+          const needsOfItem = (item) => {
+            const list = needsOf(item.entry)
+            if (list.length === 0) return null
+            return h('div', { className: 'dm-suite-needs' },
+              h('div', { className: 'dm-suite-needs-head' },
+                h('span', null, t('needsInline')),
+                h('em', null, needsTag(item.entry))),
+              ...list.map((need, index) => h('div', { className: 'dm-suite-need', key: String(index) },
+                h('span', { className: `dm-gate-kind dm-gate-kind--${need.kind ?? 'app'}` },
+                  need.kind === 'account' ? t('needsKindAccount') : need.kind === 'config' ? t('needsKindConfig') : t('needsKindApp')),
+                h('div', { className: 'dm-suite-need-body' },
+                  h('strong', null, need.name),
+                  need.why === undefined ? null : h('p', null, need.why),
+                  need.url === undefined ? null : h('a', {
+                    className: 'dm-gate-link', href: need.url, target: '_blank', rel: 'noreferrer noopener'
+                  }, `${t('needsOpen')} ↗`)))))
+          }
+          /** 卡片 + 选中时展开的补充说明，绑在一起免得错位。 */
+          const pairOf = (item) => {
+            const on = item.required || suitePicked.has(item.name)
+            const done = isInstalled(item.entry) || suiteJobs[item.name] === 'done'
+            const detail = on && !done ? needsOfItem(item) : null
+            return h('div', { className: `dm-suite-pair${detail === null ? '' : ' is-open'}`, key: `${item.name}-pair` },
+              tileOf(item),
+              detail)
+          }
           return h(React.Fragment, null,
             h('div', { className: 'dm-suite-mask', onClick: closeSuite }),
             h('div', {
@@ -3505,22 +3508,6 @@ window.__ModuleLoader__.load({
                         onClick: () => setSuitePicked(defaultPick(items, suite))
                       }, t('keepRequired')))),
                   // 套装里那些「市场装不了、但必须有」的东西（比如 NapCat）
-                  (suite.prereqs ?? []).length === 0 ? null : h('div', { className: 'dm-suite-prereq' },
-                    h('div', { className: 'dm-suite-group-head' },
-                      h('strong', null, t('beforeStart')),
-                      h('span', null, t('requiredTag'))),
-                    h('div', { className: 'dm-suite-group-hint' }, t('beforeStartHint')),
-                    ...(suite.prereqs ?? []).map((item, index) => h('div', { className: 'dm-prereq-item', key: `prereq-${String(index)}` },
-                      h('span', { className: 'dm-prereq-dot' }),
-                      h('div', { className: 'dm-prereq-body' },
-                        h('strong', null, pick(item.title, '')),
-                        h('p', null, pick(item.note, ''))),
-                      item.url === undefined ? null : h('a', {
-                        className: 'dm-prereq-link',
-                        href: item.url,
-                        target: '_blank',
-                        rel: 'noreferrer'
-                      }, `${t('needsOpen')} ↗`)))),
                   h('div', { className: 'dm-suite-tiles' }, ...blocks.flatMap((block) => [
                     block.group === undefined ? null : h('div', { className: 'dm-suite-group', key: `g-${block.group.id}` },
                       h('div', { className: 'dm-suite-group-head' },
@@ -3529,7 +3516,7 @@ window.__ModuleLoader__.load({
                       block.group.hint === undefined
                         ? null
                         : h('div', { className: 'dm-suite-group-hint' }, pick(block.group.hint, ''))),
-                    ...block.items.map(tileOf)
+                    ...block.items.map(pairOf)
                   ])),
                 )),
               h('div', { className: 'dm-suite-plan' },

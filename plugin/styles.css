@@ -919,35 +919,34 @@
   color: var(--accent); font-size: 10px; font-variant-numeric: tabular-nums;
 }
 .dm-suite-group-hint { color: var(--muted); font-size: 10.5px; line-height: 1.6; }
-/* 套装里的「开始之前」：市场装不了、但必须有的外部条件 */
-.dm-suite-prereq {
-  display: flex; flex-direction: column; gap: 7px;
-  margin-bottom: 14px; padding: 12px 13px;
-  border: 1px dashed color-mix(in oklab, var(--accent) 34%, transparent);
-  border-radius: 13px;
-  background: color-mix(in oklab, var(--tint) 55%, transparent);
+/* 套装里选中某项后，原地展开它「装之前还缺什么」 */
+.dm-suite-pair { display: flex; flex-direction: column; }
+.dm-suite-pair.is-open .dm-suite-tile {
+  border-bottom-color: transparent;
+  border-bottom-left-radius: 0; border-bottom-right-radius: 0;
 }
-.dm-prereq-item { display: flex; align-items: flex-start; gap: 9px; }
-.dm-prereq-dot {
-  flex: none; width: 7px; height: 7px; margin-top: 6px;
-  border-radius: 50%; background: var(--accent);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 16%, transparent);
+.dm-suite-needs {
+  display: flex; flex-direction: column; gap: 9px;
+  padding: 11px 14px 13px;
+  border: 1px solid color-mix(in oklab, var(--accent) 26%, var(--line));
+  border-top: 0; border-radius: 0 0 14px 14px;
+  background: color-mix(in oklab, var(--tint) 50%, var(--panel));
+  animation: dm-fade .18s ease-out;
 }
-.dm-prereq-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.dm-prereq-body strong { font-size: 12px; font-weight: 700; color: var(--text); }
-.dm-prereq-body p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
-.dm-prereq-link {
-  flex: none; align-self: center;
-  padding: 4px 9px; border-radius: 8px;
-  border: 1px solid var(--line); background: var(--panel);
-  color: var(--accent); font-size: 10.5px; font-weight: 600;
-  text-decoration: none; white-space: nowrap;
-  transition: gap .18s ease, transform .18s ease, border-color .18s ease;
+.dm-suite-needs-head {
+  display: flex; align-items: center; gap: 7px;
+  color: var(--accent); font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
 }
-.dm-prereq-link:hover {
-  transform: translateY(-1px);
-  border-color: color-mix(in oklab, var(--accent) 44%, transparent);
+.dm-suite-needs-head em {
+  padding: 1px 6px; border-radius: 5px;
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  font-size: 10px; font-style: normal; font-weight: 600;
 }
+.dm-suite-need { display: flex; align-items: flex-start; gap: 9px; }
+.dm-suite-need > .dm-gate-kind { flex: none; margin-top: 1px; }
+.dm-suite-need-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dm-suite-need-body strong { font-size: 11.5px; font-weight: 650; color: var(--text); }
+.dm-suite-need-body p { margin: 0; color: var(--muted); font-size: 10.5px; line-height: 1.6; }
 .dm-suite-warn {
   margin-top: 2px; padding: 8px 10px;
   border-radius: 9px;
