@@ -1,21 +1,30 @@
 {
-  "version": 3,
+  "version": 4,
   "suites": [
     {
       "id": "big-fish",
       "glyph": "◍",
       "label": "让人设活在聊天里",
-      "title": { "zh": "大肥鱼套装", "en": "Big Fish bundle" },
+      "title": {
+        "zh": "大肥鱼套装",
+        "en": "Big Fish bundle"
+      },
       "desc": {
-        "zh": "把 DSH 变成一条活在聊天软件里的大肥鱼：有人设、记得住人、能自己去 B 站翻东西。通道按你混的社区选，选一个就够。",
+        "zh": "把 DSH 变成一条活在社区里的大肥鱼：有人设、记得住人、能自己去 B 站翻东西。通道按你混的社区选，选一个就够。",
         "en": "Turn DSH into a persona living inside your chat apps: it knows who it talks to, remembers them, and can browse Bilibili on its own."
       },
       "groups": [
         {
           "id": "channel",
           "min": 1,
-          "title": { "zh": "社区通道", "en": "Chat channel" },
-          "hint": { "zh": "至少选一个 —— 你混哪个社区就选哪个，也可以都要", "en": "Pick at least one — choose where you hang out, or take several" }
+          "title": {
+            "zh": "社区通道",
+            "en": "Chat channel"
+          },
+          "hint": {
+            "zh": "至少选一个 —— QQ、微信、B站 都在这里，混哪个选哪个，也可以都要",
+            "en": "Pick at least one — QQ, WeChat or Bilibili, or take several"
+          }
         }
       ],
       "items": [
@@ -35,6 +44,11 @@
           "note": "一个包覆盖微信/飞书/钉钉/QQ/Telegram/Slack 等 10 个平台"
         },
         {
+          "name": "dsh-bilibili-plugin",
+          "note": "B 站：扫码登录后搜视频、看评论与私信、发弹幕",
+          "group": "channel"
+        },
+        {
           "name": "dsh-napcat-keeper",
           "note": "随 DSH 启动自动拉起 NapCat，省掉每次手动开机"
         },
@@ -51,12 +65,12 @@
           "note": "跨会话长期记忆，YAML 存，可按会话套预设"
         },
         {
-          "name": "dsh-bilibili-plugin",
-          "note": "扫码登录 B 站：搜索、评论、私信、粉丝、弹幕"
-        },
-        {
           "name": "dsh-pet",
           "note": "桌面上那条吃白饭的蓝色大肥鱼，纯装饰"
+        },
+        {
+          "name": "dsh-bilibili-summary",
+          "note": "B 站视频理解：转写加关键帧，产出可引用的总结"
         }
       ]
     },
@@ -64,47 +78,92 @@
       "id": "fresh-look",
       "glyph": "✳",
       "label": "每天打开的界面",
-      "title": { "zh": "界面焕新", "en": "Fresh look" },
+      "title": {
+        "zh": "界面焕新",
+        "en": "Fresh look"
+      },
       "desc": {
         "zh": "换一套主题，给侧栏和组件补上细节，让每天打开的界面顺眼一点。",
         "en": "A theme plus a few finishing touches for the sidebar and widgets."
       },
       "items": [
-        { "name": "dsh-dream-skin", "required": true, "note": "主题基础包，其余组件都基于它换色" },
-        { "name": "@linxin666/dsh-client-ui-skin-center", "note": "在一个面板里挑皮肤、预览、切换" },
-        { "name": "dsh-better-sidebar", "note": "侧栏常驻文件和任务入口" },
-        { "name": "dsh-whale-widget", "note": "悬浮挂件显示账户余额与用量" }
+        {
+          "name": "dsh-dream-skin",
+          "required": true,
+          "note": "主题基础包，其余组件都基于它换色"
+        },
+        {
+          "name": "@linxin666/dsh-client-ui-skin-center",
+          "note": "在一个面板里挑皮肤、预览、切换"
+        },
+        {
+          "name": "dsh-better-sidebar",
+          "note": "侧栏常驻文件和任务入口"
+        },
+        {
+          "name": "dsh-whale-widget",
+          "note": "悬浮挂件显示账户余额与用量"
+        }
       ]
     },
     {
       "id": "memory-search",
       "glyph": "∞",
       "label": "让上一次接得上",
-      "title": { "zh": "记忆与检索", "en": "Memory & search" },
+      "title": {
+        "zh": "记忆与检索",
+        "en": "Memory & search"
+      },
       "desc": {
         "zh": "把长对话压住、把历史搜出来，让上一次的结论能直接接到这一次。",
         "en": "Compress long sessions and search history so earlier conclusions carry over."
       },
       "items": [
-        { "name": "billion-context", "required": true, "note": "上下文压缩内核，长对话的基础" },
-        { "name": "misakanet", "note": "检索带证据评级的失败经验" },
-        { "name": "dsh-plugin-session-fulltext", "note": "跨会话全文搜索，支持中文短词" },
-        { "name": "dsh-mnemon", "note": "分层记忆，自动保存项目知识" }
+        {
+          "name": "billion-context",
+          "required": true,
+          "note": "上下文压缩内核，长对话的基础"
+        },
+        {
+          "name": "misakanet",
+          "note": "检索带证据评级的失败经验"
+        },
+        {
+          "name": "dsh-plugin-session-fulltext",
+          "note": "跨会话全文搜索，支持中文短词"
+        },
+        {
+          "name": "dsh-mnemon",
+          "note": "分层记忆，自动保存项目知识"
+        }
       ]
     },
     {
       "id": "remote-collab",
       "glyph": "⊞",
       "label": "离开这台机器",
-      "title": { "zh": "远程与协作", "en": "Remote & collaboration" },
+      "title": {
+        "zh": "远程与协作",
+        "en": "Remote & collaboration"
+      },
       "desc": {
         "zh": "在手机上接管这台机器，或者让 agent 通过 SSH 去别的机器干活。",
         "en": "Drive this machine from a phone, or let the agent work over SSH."
       },
       "items": [
-        { "name": "@linxin666/dsh-ssh", "required": true, "note": "SSH 通道，其余远程能力依赖它" },
-        { "name": "@linxin666/dsh-remote-web-ui", "note": "用局域网或隧道在手机上打开同一界面" },
-        { "name": "@linxin666/dsh-client-ui-task-board", "note": "把 agent 任务放到看板上追踪" }
+        {
+          "name": "@linxin666/dsh-ssh",
+          "required": true,
+          "note": "SSH 通道，其余远程能力依赖它"
+        },
+        {
+          "name": "@linxin666/dsh-remote-web-ui",
+          "note": "用局域网或隧道在手机上打开同一界面"
+        },
+        {
+          "name": "@linxin666/dsh-client-ui-task-board",
+          "note": "把 agent 任务放到看板上追踪"
+        }
       ]
     }
   ]

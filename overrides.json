@@ -1330,6 +1330,17 @@
         "zh": "B 站扫码登录：搜索视频、评论、私信、粉丝、弹幕。"
       },
       "category": "integrations"
+    },
+    "dsh-bilibili-summary": {
+      "title": {
+        "en": "Bilibili Summaries",
+        "zh": "B站视频理解"
+      },
+      "description": {
+        "en": "Turns a Bilibili video into a citable summary with transcript and key frames.",
+        "zh": "把 B 站视频转成可引用的总结：转写加关键帧。"
+      },
+      "category": "tools"
     }
   }
 }

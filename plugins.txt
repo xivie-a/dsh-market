@@ -110,3 +110,4 @@ dsh-plugin-wechat-agent
 dsh-napcat-keeper
 dsh-qq-persona
 dsh-bilibili-plugin
+dsh-bilibili-summary

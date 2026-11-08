@@ -1175,7 +1175,7 @@ window.__ModuleLoader__.load({
      */
     // #region suites-fallback
     const SUITES_FALLBACK = {
-  "version": 3,
+  "version": 4,
   "suites": [
     {
       "id": "big-fish",
@@ -1186,7 +1186,7 @@ window.__ModuleLoader__.load({
         "en": "Big Fish bundle"
       },
       "desc": {
-        "zh": "把 DSH 变成一条活在聊天软件里的大肥鱼：有人设、记得住人、能自己去 B 站翻东西。通道按你混的社区选，选一个就够。",
+        "zh": "把 DSH 变成一条活在社区里的大肥鱼：有人设、记得住人、能自己去 B 站翻东西。通道按你混的社区选，选一个就够。",
         "en": "Turn DSH into a persona living inside your chat apps: it knows who it talks to, remembers them, and can browse Bilibili on its own."
       },
       "groups": [
@@ -1198,8 +1198,8 @@ window.__ModuleLoader__.load({
             "en": "Chat channel"
           },
           "hint": {
-            "zh": "至少选一个 —— 你混哪个社区就选哪个，也可以都要",
-            "en": "Pick at least one — choose where you hang out, or take several"
+            "zh": "至少选一个 —— QQ、微信、B站 都在这里，混哪个选哪个，也可以都要",
+            "en": "Pick at least one — QQ, WeChat or Bilibili, or take several"
           }
         }
       ],
@@ -1220,6 +1220,11 @@ window.__ModuleLoader__.load({
           "note": "一个包覆盖微信/飞书/钉钉/QQ/Telegram/Slack 等 10 个平台"
         },
         {
+          "name": "dsh-bilibili-plugin",
+          "note": "B 站：扫码登录后搜视频、看评论与私信、发弹幕",
+          "group": "channel"
+        },
+        {
           "name": "dsh-napcat-keeper",
           "note": "随 DSH 启动自动拉起 NapCat，省掉每次手动开机"
         },
@@ -1236,12 +1241,12 @@ window.__ModuleLoader__.load({
           "note": "跨会话长期记忆，YAML 存，可按会话套预设"
         },
         {
-          "name": "dsh-bilibili-plugin",
-          "note": "扫码登录 B 站：搜索、评论、私信、粉丝、弹幕"
-        },
-        {
           "name": "dsh-pet",
           "note": "桌面上那条吃白饭的蓝色大肥鱼，纯装饰"
+        },
+        {
+          "name": "dsh-bilibili-summary",
+          "note": "B 站视频理解：转写加关键帧，产出可引用的总结"
         }
       ]
     },
