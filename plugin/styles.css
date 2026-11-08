@@ -792,6 +792,20 @@
 }
 .dm-suite-links button:disabled { opacity: .4; cursor: default; }
 .dm-suite-tiles { display: flex; flex-direction: column; gap: 8px; }
+.dm-suite-group { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
+.dm-suite-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.dm-suite-group-head strong { color: var(--accent); font-size: 11.5px; font-weight: 700; letter-spacing: .04em; }
+.dm-suite-group-head span {
+  padding: 1px 6px; border-radius: 5px; background: var(--tint);
+  color: var(--accent); font-size: 10px; font-variant-numeric: tabular-nums;
+}
+.dm-suite-group-hint { color: var(--muted); font-size: 10.5px; line-height: 1.6; }
+.dm-suite-warn {
+  margin-top: 2px; padding: 8px 10px;
+  border-radius: 9px;
+  background: color-mix(in srgb, #c05050 10%, transparent);
+  color: #b6463f; font-size: 11px; line-height: 1.6;
+}
 .dm-suite-tile {
   display: flex; flex-direction: column; gap: 8px;
   padding: 12px 14px;

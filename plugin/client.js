@@ -74,6 +74,8 @@ window.__ModuleLoader__.load({
       suiteBuilding: '正在搭建你的插件套装…',
       suiteReady: '套装已准备好',
       onlyRunning: '正在处理…',
+      pickable: '可选',
+      mustPickOne: '上面这组至少要选一个，才能继续安装',
       appearance: '外观',
       prev: '上一个',
       next: '下一个',
@@ -177,6 +179,8 @@ window.__ModuleLoader__.load({
       suiteBuilding: 'Building your bundle…',
       suiteReady: 'Bundle ready',
       onlyRunning: 'Working…',
+      pickable: 'Optional',
+      mustPickOne: 'Pick at least one in the group above to continue',
       appearance: 'Appearance',
       prev: 'Previous',
       next: 'Next',
@@ -1018,6 +1022,20 @@ window.__ModuleLoader__.load({
 }
 .dm-suite-links button:disabled { opacity: .4; cursor: default; }
 .dm-suite-tiles { display: flex; flex-direction: column; gap: 8px; }
+.dm-suite-group { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
+.dm-suite-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.dm-suite-group-head strong { color: var(--accent); font-size: 11.5px; font-weight: 700; letter-spacing: .04em; }
+.dm-suite-group-head span {
+  padding: 1px 6px; border-radius: 5px; background: var(--tint);
+  color: var(--accent); font-size: 10px; font-variant-numeric: tabular-nums;
+}
+.dm-suite-group-hint { color: var(--muted); font-size: 10.5px; line-height: 1.6; }
+.dm-suite-warn {
+  margin-top: 2px; padding: 8px 10px;
+  border-radius: 9px;
+  background: color-mix(in srgb, #c05050 10%, transparent);
+  color: #b6463f; font-size: 11px; line-height: 1.6;
+}
 .dm-suite-tile {
   display: flex; flex-direction: column; gap: 8px;
   padding: 12px 14px;
@@ -1936,13 +1954,37 @@ window.__ModuleLoader__.load({
 
       // 套装：按场景把几个插件打包，点开可以逐个或一次装齐
       const suiteOf = (id) => suites.find((suite) => suite.id === id)
-      /** 套装条目支持 "包名" 或 { name, required, note } 两种写法。 */
+      /** 条目支持 "包名" 或 { name, required, note, group }。group 里的项是「几选一」。 */
       const suiteItemsOf = (suite) => (suite?.items ?? []).map((item) => {
         const spec = typeof item === 'string' ? { name: item } : item
         const entry = entries.find((candidate) => candidate.name === spec.name)
         if (entry === undefined) return undefined
-        return { entry, name: entry.name, required: spec.required === true, note: spec.note ?? '' }
+        return {
+          entry,
+          name: entry.name,
+          required: spec.required === true,
+          note: spec.note ?? '',
+          group: spec.group ?? ''
+        }
       }).filter(Boolean)
+
+      /** 默认勾选：必需项 + 未装的可选项 + 每个分组里的第一个。 */
+      const defaultPick = (items, suite) => {
+        const picked = new Set(items.filter((item) => item.required
+          || (item.group === '' && !isInstalled(item.entry))).map((item) => item.name))
+        for (const group of suite?.groups ?? []) {
+          const first = items.find((item) => item.group === group.id && !isInstalled(item.entry))
+          if (first !== undefined) picked.add(first.name)
+        }
+        return picked
+      }
+
+      /** 分组是否都满足了「至少选 N 个」。 */
+      const missingGroups = (items, suite, picked) => (suite?.groups ?? []).filter((group) => {
+        const chosen = items.filter((item) => item.group === group.id
+          && (item.required || picked.has(item.name))).length
+        return chosen < (group.min ?? 1)
+      })
 
       const isInstalled = (entry) => bundles.get(entry.name)?.installed === true
         || entry.installation?.status === 'installed'
@@ -1978,7 +2020,7 @@ window.__ModuleLoader__.load({
             onClick: () => {
               setSuiteId(suite.id)
               setSuiteJobs({})
-              setSuitePicked(new Set(items.filter((item) => item.required || !isInstalled(item.entry)).map((item) => item.name)))
+              setSuitePicked(defaultPick(items, suite))
             }
           },
             h('span', { className: 'dm-suite-glyph' }, suite.glyph ?? '◈'),
@@ -2199,6 +2241,51 @@ window.__ModuleLoader__.load({
             })
           }
           const doneCount = items.filter((item) => isInstalled(item.entry) || suiteJobs[item.name] === 'done').length
+          const groups = suite.groups ?? []
+          const missing = missingGroups(items, suite, new Set(picked.map((item) => item.name)))
+          const canInstall = missing.length === 0 && pending.length > 0 && !suiteRunning
+          const blocks = [
+            ...groups.map((group) => ({
+              group,
+              items: items.filter((item) => item.group === group.id)
+            })),
+            { group: undefined, items: items.filter((item) => !groups.some((group) => group.id === item.group)) }
+          ].filter((block) => block.items.length > 0)
+          /** 单个插件卡片；分组和散装都用它渲染。 */
+          const tileOf = (item) => {
+            const installed = isInstalled(item.entry)
+            const state = suiteJobs[item.name]
+            const on = item.required || suitePicked.has(item.name)
+            const status = state === 'error' ? t('failed')
+              : installed || state === 'done' ? `✓ ${t('added')}`
+                : state === 'running' ? t('installing')
+                  : item.required ? `${t('required')} · ${t('autoIncluded')}`
+                    : item.group === '' ? t('optional') : t('pickable')
+            return h('label', {
+              key: item.name,
+              className: `dm-suite-tile${on ? ' is-picked' : ''}${item.required ? ' is-required' : ''}`
+            },
+              h('div', { className: 'dm-suite-tile-top' },
+                thumbOf(item.entry),
+                h('div', { className: 'dm-suite-tile-name' },
+                  h('strong', null, pick(item.entry.title, item.entry.name)),
+                  h('small', null, item.note !== ''
+                    ? item.note
+                    : (pick(item.entry.description, '')
+                      || (item.entry.metadata?.category === undefined
+                        ? t('community')
+                        : pick(categories[item.entry.metadata.category]?.title, item.entry.metadata.category))))),
+                h('input', {
+                  type: 'checkbox',
+                  checked: on,
+                  disabled: item.required || suiteRunning,
+                  'aria-label': pick(item.entry.title, item.entry.name),
+                  onChange: () => toggle(item.name)
+                })),
+              h('div', { className: 'dm-suite-tile-foot' },
+                h('span', null, item.required ? t('required') : ''),
+                h('span', { className: state === 'error' ? 'dm-suite-state dm-suite-state--error' : 'dm-suite-state' }, status)))
+          }
           return h(React.Fragment, null,
             h('div', { className: 'dm-suite-mask', onClick: closeSuite }),
             h('div', {
@@ -2227,15 +2314,19 @@ window.__ModuleLoader__.load({
                     h('button', {
                       className: 'dm-btn dm-btn--primary',
                       type: 'button',
-                      disabled: suiteRunning || pending.length === 0,
+                      disabled: !canInstall,
                       onClick: () => void installMany(picked)
                     }, suiteRunning ? t('suiteInstalling') : `${t('installSelected')} · ${pending.length}`),
-                    h('button', {
+                    // 有分组时「全部获取」会把所有通道都装上，没意义，只留按选择安装
+                    groups.length > 0 ? null : h('button', {
                       className: 'dm-btn',
                       type: 'button',
                       disabled: suiteRunning || items.every((item) => isInstalled(item.entry)),
                       onClick: () => void installMany(items)
-                    }, t('installAll')))),
+                    }, t('installAll')),
+                    missing.length === 0
+                      ? null
+                      : h('div', { className: 'dm-suite-warn' }, t('mustPickOne')))),
                 h('div', { className: 'dm-suite-picker' },
                   h('div', { className: 'dm-suite-picker-head' },
                     h('span', null, t('pickCombo')),
@@ -2248,42 +2339,19 @@ window.__ModuleLoader__.load({
                       h('button', {
                         type: 'button',
                         disabled: suiteRunning,
-                        onClick: () => setSuitePicked(new Set())
+                        onClick: () => setSuitePicked(defaultPick(items, suite))
                       }, t('keepRequired')))),
-                  h('div', { className: 'dm-suite-tiles' }, ...items.map((item) => {
-                    const installed = isInstalled(item.entry)
-                    const state = suiteJobs[item.name]
-                    const on = item.required || suitePicked.has(item.name)
-                    const status = state === 'error' ? t('failed')
-                      : installed || state === 'done' ? `✓ ${t('added')}`
-                        : state === 'running' ? t('installing')
-                          : item.required ? `${t('required')} · ${t('autoIncluded')}`
-                            : t('optional')
-                    return h('label', {
-                      key: item.name,
-                      className: `dm-suite-tile${on ? ' is-picked' : ''}${item.required ? ' is-required' : ''}`
-                    },
-                      h('div', { className: 'dm-suite-tile-top' },
-                        thumbOf(item.entry),
-                        h('div', { className: 'dm-suite-tile-name' },
-                          h('strong', null, pick(item.entry.title, item.entry.name)),
-                          h('small', null, item.note !== ''
-                            ? item.note
-                            : (pick(item.entry.description, '')
-                              || (item.entry.metadata?.category === undefined
-                                ? t('community')
-                                : pick(categories[item.entry.metadata.category]?.title, item.entry.metadata.category))))),
-                        h('input', {
-                          type: 'checkbox',
-                          checked: on,
-                          disabled: item.required || suiteRunning,
-                          'aria-label': pick(item.entry.title, item.entry.name),
-                          onChange: () => toggle(item.name)
-                        })),
-                      h('div', { className: 'dm-suite-tile-foot' },
-                        h('span', null, item.required ? '' : t('optional')),
-                        h('span', { className: state === 'error' ? 'dm-suite-state dm-suite-state--error' : 'dm-suite-state' }, status)))
-                  })))),
+                  h('div', { className: 'dm-suite-tiles' }, ...blocks.flatMap((block) => [
+                    block.group === undefined ? null : h('div', { className: 'dm-suite-group', key: `g-${block.group.id}` },
+                      h('div', { className: 'dm-suite-group-head' },
+                        h('strong', null, pick(block.group.title, block.group.id)),
+                        h('span', null, `≥ ${String(block.group.min ?? 1)}`)),
+                      block.group.hint === undefined
+                        ? null
+                        : h('div', { className: 'dm-suite-group-hint' }, pick(block.group.hint, ''))),
+                    ...block.items.map(tileOf)
+                  ])),
+                )),
               h('div', { className: 'dm-suite-plan' },
                 h('strong', null, `${t('selected')} ${picked.length} · ${t('pending')} ${pending.length}`),
                 h('span', null, t('suiteOrderHint'))),

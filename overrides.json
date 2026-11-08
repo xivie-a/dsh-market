@@ -1275,6 +1275,61 @@
         "zh": "从命令行预检、发布、测试 DSH 插件。"
       },
       "category": "development"
+    },
+    "dsh-onebot-qq": {
+      "title": {
+        "en": "QQ Channel",
+        "zh": "QQ 通道"
+      },
+      "description": {
+        "en": "OneBot 11 / NapCat channel: private and group chats, images and voice.",
+        "zh": "OneBot 11 / NapCat 通道：私聊群聊、图片语音都能收发。"
+      },
+      "category": "integrations"
+    },
+    "dsh-plugin-wechat-agent": {
+      "title": {
+        "en": "WeChat Agent",
+        "zh": "微信 Agent"
+      },
+      "description": {
+        "en": "A WeChat personal-account agent with its own persona, memory and reminders.",
+        "zh": "微信个人号 Agent：独立人设、陪聊、持久记忆、定时提醒。"
+      },
+      "category": "integrations"
+    },
+    "dsh-napcat-keeper": {
+      "title": {
+        "en": "NapCat Keeper",
+        "zh": "NapCat 保活"
+      },
+      "description": {
+        "en": "Starts NapCat together with DSH so the QQ channel is always online.",
+        "zh": "随 DSH 启动自动拉起 NapCat，QQ 通道不用每次手动开机。"
+      },
+      "category": "integrations"
+    },
+    "dsh-qq-persona": {
+      "title": {
+        "en": "QQ Persona",
+        "zh": "QQ 人设记忆"
+      },
+      "description": {
+        "en": "Profiles, affinity and mood for each person in the chat; persona lives in ~/.dsh/qq-persona and can be edited.",
+        "zh": "给每个人记画像、好感度与心情；人设存在 ~/.dsh/qq-persona，可手改。"
+      },
+      "category": "memory"
+    },
+    "dsh-bilibili-plugin": {
+      "title": {
+        "en": "Bilibili Toolkit",
+        "zh": "B站工具包"
+      },
+      "description": {
+        "en": "QR login, video search, comments, DMs, fans and danmaku for Bilibili.",
+        "zh": "B 站扫码登录：搜索视频、评论、私信、粉丝、弹幕。"
+      },
+      "category": "integrations"
     }
   }
 }

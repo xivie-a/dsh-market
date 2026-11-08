@@ -1,6 +1,65 @@
 {
-  "version": 1,
+  "version": 2,
   "suites": [
+    {
+      "id": "big-fish",
+      "glyph": "◍",
+      "label": "让人设活在聊天里",
+      "title": { "zh": "大肥鱼套装", "en": "Big Fish bundle" },
+      "desc": {
+        "zh": "把 DSH 变成一条活在聊天软件里的大肥鱼：有人设、记得住人、能自己去 B 站翻东西。通道按你混的社区选，选一个就够。",
+        "en": "Turn DSH into a persona living inside your chat apps: it knows who it talks to, remembers them, and can browse Bilibili on its own."
+      },
+      "groups": [
+        {
+          "id": "channel",
+          "min": 1,
+          "title": { "zh": "社区通道", "en": "Chat channel" },
+          "hint": { "zh": "至少选一个 —— 你混哪个社区就选哪个，也可以都要", "en": "Pick at least one — choose where you hang out, or take several" }
+        }
+      ],
+      "items": [
+        {
+          "name": "dsh-onebot-qq",
+          "group": "channel",
+          "note": "QQ 私聊与群聊，NapCat / OneBot 11，支持图片语音"
+        },
+        {
+          "name": "dsh-plugin-wechat-agent",
+          "group": "channel",
+          "note": "微信个人号，人设、陪聊、记忆、定时提醒一体"
+        },
+        {
+          "name": "@xmanrui/dsh-im",
+          "group": "channel",
+          "note": "一个包覆盖微信/飞书/钉钉/QQ/Telegram/Slack 等 10 个平台"
+        },
+        {
+          "name": "dsh-napcat-keeper",
+          "note": "随 DSH 启动自动拉起 NapCat，省掉每次手动开机"
+        },
+        {
+          "name": "dsh-qq-persona",
+          "note": "人物画像、好感度、心情；人设存在 ~/.dsh/qq-persona，可手改"
+        },
+        {
+          "name": "billion-context",
+          "note": "压缩上下文，聊一天也不会把窗口撑爆"
+        },
+        {
+          "name": "@huai_xin/dsh-memory",
+          "note": "跨会话长期记忆，YAML 存，可按会话套预设"
+        },
+        {
+          "name": "dsh-bilibili-plugin",
+          "note": "扫码登录 B 站：搜索、评论、私信、粉丝、弹幕"
+        },
+        {
+          "name": "dsh-pet",
+          "note": "桌面上那条吃白饭的蓝色大肥鱼，纯装饰"
+        }
+      ]
+    },
     {
       "id": "fresh-look",
       "glyph": "✳",
