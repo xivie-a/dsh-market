@@ -910,7 +910,30 @@
   font-size: 11.5px; text-decoration: underline; text-underline-offset: 3px;
 }
 .dm-suite-links button:disabled { opacity: .4; cursor: default; }
-.dm-suite-tiles { display: flex; flex-direction: column; gap: 8px; }
+.dm-suite-tiles { display: flex; flex-direction: column; gap: 10px; }
+/* 有分组的套装：每组一个框，标题在框里，框里才是可选项 */
+.dm-suite-block {
+  display: flex; flex-direction: column; gap: 9px;
+  padding: 11px 11px 12px;
+  border: 1px solid var(--line); border-radius: 17px;
+  background: color-mix(in oklab, var(--tint) 30%, transparent);
+}
+.dm-suite-block.is-plain { background: transparent; border-style: dashed; }
+.dm-suite-block-head { display: flex; align-items: baseline; gap: 7px; padding: 0 3px; }
+.dm-suite-block-head strong {
+  color: var(--accent); font-size: 11.5px; font-weight: 750; letter-spacing: .04em;
+}
+.dm-suite-block-head em {
+  margin-left: auto; color: var(--muted); font-size: 10px; font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+.dm-suite-block-min {
+  padding: 1px 6px; border-radius: 5px;
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  color: var(--accent); font-size: 10px; font-variant-numeric: tabular-nums;
+}
+.dm-suite-block-hint { padding: 0 3px; color: var(--muted); font-size: 10.5px; line-height: 1.6; }
+.dm-suite-block-body { display: flex; flex-direction: column; gap: 8px; }
 .dm-suite-group { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
 .dm-suite-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .dm-suite-group-head strong { color: var(--accent); font-size: 11.5px; font-weight: 700; letter-spacing: .04em; }

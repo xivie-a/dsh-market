@@ -64,6 +64,7 @@ window.__ModuleLoader__.load({
       suiteCompose: '搭配你的能力组合',
       installSelected: '安装所选',
       pickCombo: '选择你的插件组合',
+      optionalGroup: '其他',
       selectAll: '全选',
       keepRequired: '仅保留必需',
       required: '必需',
@@ -215,6 +216,7 @@ window.__ModuleLoader__.load({
       suiteCompose: 'Compose your toolset',
       installSelected: 'Install selected',
       pickCombo: 'Pick your combination',
+      optionalGroup: 'Also in this set',
       selectAll: 'Select all',
       keepRequired: 'Required only',
       required: 'Required',
@@ -1232,7 +1234,30 @@ window.__ModuleLoader__.load({
   font-size: 11.5px; text-decoration: underline; text-underline-offset: 3px;
 }
 .dm-suite-links button:disabled { opacity: .4; cursor: default; }
-.dm-suite-tiles { display: flex; flex-direction: column; gap: 8px; }
+.dm-suite-tiles { display: flex; flex-direction: column; gap: 10px; }
+/* 有分组的套装：每组一个框，标题在框里，框里才是可选项 */
+.dm-suite-block {
+  display: flex; flex-direction: column; gap: 9px;
+  padding: 11px 11px 12px;
+  border: 1px solid var(--line); border-radius: 17px;
+  background: color-mix(in oklab, var(--tint) 30%, transparent);
+}
+.dm-suite-block.is-plain { background: transparent; border-style: dashed; }
+.dm-suite-block-head { display: flex; align-items: baseline; gap: 7px; padding: 0 3px; }
+.dm-suite-block-head strong {
+  color: var(--accent); font-size: 11.5px; font-weight: 750; letter-spacing: .04em;
+}
+.dm-suite-block-head em {
+  margin-left: auto; color: var(--muted); font-size: 10px; font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+.dm-suite-block-min {
+  padding: 1px 6px; border-radius: 5px;
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  color: var(--accent); font-size: 10px; font-variant-numeric: tabular-nums;
+}
+.dm-suite-block-hint { padding: 0 3px; color: var(--muted); font-size: 10.5px; line-height: 1.6; }
+.dm-suite-block-body { display: flex; flex-direction: column; gap: 8px; }
 .dm-suite-group { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
 .dm-suite-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .dm-suite-group-head strong { color: var(--accent); font-size: 11.5px; font-weight: 700; letter-spacing: .04em; }
@@ -1894,7 +1919,7 @@ window.__ModuleLoader__.load({
      */
     // #region suites-fallback
     const SUITES_FALLBACK = {
-  "version": 7,
+  "version": 8,
   "suites": [
     {
       "id": "big-fish",
@@ -1919,6 +1944,18 @@ window.__ModuleLoader__.load({
           "hint": {
             "zh": "至少选一个 —— QQ、微信、B站 都在这里，混哪个选哪个，也可以都要",
             "en": "Pick at least one — QQ, WeChat or Bilibili, or take several"
+          }
+        },
+        {
+          "id": "memory",
+          "min": 0,
+          "title": {
+            "zh": "记忆与压缩",
+            "en": "Memory & context"
+          },
+          "hint": {
+            "zh": "让它记得住人、记得住事。不选也能跑，只是每句话都从零开始",
+            "en": "So it remembers people and threads. Optional, but without it every chat starts from scratch"
           }
         }
       ],
@@ -1949,15 +1986,18 @@ window.__ModuleLoader__.load({
         },
         {
           "name": "dsh-qq-persona",
-          "note": "人物画像、好感度、心情；人设存在 ~/.dsh/qq-persona，可手改"
+          "note": "人物画像、好感度、心情；人设存在 ~/.dsh/qq-persona，可手改",
+          "group": "memory"
         },
         {
           "name": "billion-context",
-          "note": "压缩上下文，聊一天也不会把窗口撑爆"
+          "note": "压缩上下文，聊一天也不会把窗口撑爆",
+          "group": "memory"
         },
         {
           "name": "@huai_xin/dsh-memory",
-          "note": "跨会话长期记忆，YAML 存，可按会话套预设"
+          "note": "跨会话长期记忆，YAML 存，可按会话套预设",
+          "group": "memory"
         },
         {
           "name": "dsh-pet",
@@ -3109,6 +3149,7 @@ window.__ModuleLoader__.load({
         const picked = new Set(items.filter((item) => item.required
           || (item.group === '' && !isInstalled(item.entry))).map((item) => item.name))
         for (const group of suite?.groups ?? []) {
+          // 每组先替你点第一个；「可以一个都不选」的组只是不强制，不代表默认不选
           const first = items.find((item) => item.group === group.id && !isInstalled(item.entry))
           if (first !== undefined) picked.add(first.name)
         }
@@ -3566,17 +3607,28 @@ window.__ModuleLoader__.load({
                         disabled: suiteRunning,
                         onClick: () => setSuitePicked(defaultPick(items, suite))
                       }, t('keepRequired')))),
-                  // 套装里那些「市场装不了、但必须有」的东西（比如 NapCat）
-                  h('div', { className: 'dm-suite-tiles' }, ...blocks.flatMap((block) => [
-                    block.group === undefined ? null : h('div', { className: 'dm-suite-group', key: `g-${block.group.id}` },
-                      h('div', { className: 'dm-suite-group-head' },
+                  h('div', { className: 'dm-suite-tiles' }, ...blocks.map((block) => {
+                    // 没有分组的套装就平铺；有分组时每组一个框，层级才看得见
+                    const head = block.group === undefined
+                      ? h('div', { className: 'dm-suite-block-head' },
+                        h('strong', null, t('optionalGroup')),
+                        h('em', null, `${block.items.length} ${t('plugins')}`))
+                      : h('div', { className: 'dm-suite-block-head' },
                         h('strong', null, pick(block.group.title, block.group.id)),
-                        h('span', null, `≥ ${String(block.group.min ?? 1)}`)),
-                      block.group.hint === undefined
-                        ? null
-                        : h('div', { className: 'dm-suite-group-hint' }, pick(block.group.hint, ''))),
-                    ...block.items.map(pairOf)
-                  ])),
+                        (block.group.min ?? 1) <= 0
+                          ? null
+                          : h('span', { className: 'dm-suite-block-min' }, `≥ ${String(block.group.min ?? 1)}`),
+                        h('em', null, `${block.items.length} ${t('plugins')}`))
+                    const hint = block.group?.hint === undefined
+                      ? null
+                      : h('div', { className: 'dm-suite-block-hint' }, pick(block.group.hint, ''))
+                    const body = h('div', { className: 'dm-suite-block-body' }, ...block.items.map(pairOf))
+                    if (groups.length === 0) return h('div', { className: 'dm-suite-block-body', key: 'flat' }, ...block.items.map(pairOf))
+                    return h('div', {
+                      className: `dm-suite-block${block.group === undefined ? ' is-plain' : ''}`,
+                      key: block.group === undefined ? 'rest' : `g-${block.group.id}`
+                    }, head, hint, body)
+                  })),
                 )),
               h('div', { className: 'dm-suite-plan' },
                 h('strong', null, `${t('selected')} ${picked.length} · ${t('pending')} ${pending.length}`),

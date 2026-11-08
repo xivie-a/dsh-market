@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 8,
   "suites": [
     {
       "id": "big-fish",
@@ -24,6 +24,18 @@
           "hint": {
             "zh": "至少选一个 —— QQ、微信、B站 都在这里，混哪个选哪个，也可以都要",
             "en": "Pick at least one — QQ, WeChat or Bilibili, or take several"
+          }
+        },
+        {
+          "id": "memory",
+          "min": 0,
+          "title": {
+            "zh": "记忆与压缩",
+            "en": "Memory & context"
+          },
+          "hint": {
+            "zh": "让它记得住人、记得住事。不选也能跑，只是每句话都从零开始",
+            "en": "So it remembers people and threads. Optional, but without it every chat starts from scratch"
           }
         }
       ],
@@ -54,15 +66,18 @@
         },
         {
           "name": "dsh-qq-persona",
-          "note": "人物画像、好感度、心情；人设存在 ~/.dsh/qq-persona，可手改"
+          "note": "人物画像、好感度、心情；人设存在 ~/.dsh/qq-persona，可手改",
+          "group": "memory"
         },
         {
           "name": "billion-context",
-          "note": "压缩上下文，聊一天也不会把窗口撑爆"
+          "note": "压缩上下文，聊一天也不会把窗口撑爆",
+          "group": "memory"
         },
         {
           "name": "@huai_xin/dsh-memory",
-          "note": "跨会话长期记忆，YAML 存，可按会话套预设"
+          "note": "跨会话长期记忆，YAML 存，可按会话套预设",
+          "group": "memory"
         },
         {
           "name": "dsh-pet",
