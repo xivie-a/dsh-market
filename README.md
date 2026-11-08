@@ -31,6 +31,10 @@ https://xivie-a.github.io/dsh-market/index.json
 
 详情抽屉里同样有一块「安装前准备」，装完再忘了要配什么可以回来查。
 
+套装（比如「大肥鱼套装」）里还有一类**必装但市场装不了**的东西，写在
+[suites.json](suites.json) 的 `prereqs` 里，出现在弹窗顶部的「开始之前」：
+NapCat.Shell 就属于这种 —— 它不是 npm 插件，得你自己下一次 Windows 包。
+
 数据跟索引一起发布，所以补一条也不需要重发插件：
 
 ```text

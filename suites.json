@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "suites": [
     {
       "id": "big-fish",
@@ -71,6 +71,23 @@
         {
           "name": "dsh-bilibili-summary",
           "note": "B 站视频理解：转写加关键帧，产出可引用的总结"
+        }
+      ],
+      "prereqs": [
+        {
+          "title": {
+            "zh": "NapCat.Shell",
+            "en": "NapCat.Shell"
+          },
+          "tag": {
+            "zh": "必装",
+            "en": "Required"
+          },
+          "note": {
+            "zh": "QQ 通道的协议端，市场装不了（它不是 npm 插件），去官方 Releases 下 Windows 一键包，装到 D:\\tools\\napcat 这类纯英文目录。装完填一次路径，之后扫码一次就能一直用。",
+            "en": "The protocol side of the QQ channel. It is not an npm plugin, so download the Windows bundle from Releases and put it in a plain ASCII folder such as D:\\tools\\napcat. Fill the path once, scan once, and it keeps running."
+          },
+          "url": "https://github.com/NapNeko/NapCatQQ/releases"
         }
       ]
     },

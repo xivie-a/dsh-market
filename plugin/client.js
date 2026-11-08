@@ -162,7 +162,10 @@ window.__ModuleLoader__.load({
       needsCancel: '先不装',
       needsConfirm: '我准备好了，继续安装',
       needsDrawer: '安装前准备',
-      needsInline: '还需要'
+      needsInline: '还需要',
+      beforeStart: '开始之前',
+      beforeStartHint: '这些不是插件，市场装不进去，得你自己下一次；装好之后扫码一次就能一直用。',
+      requiredTag: '必装'
     }
     const en = {
       title: 'My Market',
@@ -310,7 +313,10 @@ window.__ModuleLoader__.load({
       needsCancel: 'Not now',
       needsConfirm: 'I have these — install',
       needsDrawer: 'Before you install',
-      needsInline: 'also needs'
+      needsInline: 'also needs',
+      beforeStart: 'Before you start',
+      beforeStartHint: 'These are not plugins — the market cannot install them. Download once, scan once, and they keep running.',
+      requiredTag: 'required'
     }
 
     const STYLES = `
@@ -1235,6 +1241,35 @@ window.__ModuleLoader__.load({
   color: var(--accent); font-size: 10px; font-variant-numeric: tabular-nums;
 }
 .dm-suite-group-hint { color: var(--muted); font-size: 10.5px; line-height: 1.6; }
+/* 套装里的「开始之前」：市场装不了、但必须有的外部条件 */
+.dm-suite-prereq {
+  display: flex; flex-direction: column; gap: 7px;
+  margin-bottom: 14px; padding: 12px 13px;
+  border: 1px dashed color-mix(in oklab, var(--accent) 34%, transparent);
+  border-radius: 13px;
+  background: color-mix(in oklab, var(--tint) 55%, transparent);
+}
+.dm-prereq-item { display: flex; align-items: flex-start; gap: 9px; }
+.dm-prereq-dot {
+  flex: none; width: 7px; height: 7px; margin-top: 6px;
+  border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 16%, transparent);
+}
+.dm-prereq-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dm-prereq-body strong { font-size: 12px; font-weight: 700; color: var(--text); }
+.dm-prereq-body p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.65; }
+.dm-prereq-link {
+  flex: none; align-self: center;
+  padding: 4px 9px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--panel);
+  color: var(--accent); font-size: 10.5px; font-weight: 600;
+  text-decoration: none; white-space: nowrap;
+  transition: gap .18s ease, transform .18s ease, border-color .18s ease;
+}
+.dm-prereq-link:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in oklab, var(--accent) 44%, transparent);
+}
 .dm-suite-warn {
   margin-top: 2px; padding: 8px 10px;
   border-radius: 9px;
@@ -1854,7 +1889,7 @@ window.__ModuleLoader__.load({
      */
     // #region suites-fallback
     const SUITES_FALLBACK = {
-  "version": 5,
+  "version": 6,
   "suites": [
     {
       "id": "big-fish",
@@ -1926,6 +1961,23 @@ window.__ModuleLoader__.load({
         {
           "name": "dsh-bilibili-summary",
           "note": "B 站视频理解：转写加关键帧，产出可引用的总结"
+        }
+      ],
+      "prereqs": [
+        {
+          "title": {
+            "zh": "NapCat.Shell",
+            "en": "NapCat.Shell"
+          },
+          "tag": {
+            "zh": "必装",
+            "en": "Required"
+          },
+          "note": {
+            "zh": "QQ 通道的协议端，市场装不了（它不是 npm 插件），去官方 Releases 下 Windows 一键包，装到 D:\\tools\\napcat 这类纯英文目录。装完填一次路径，之后扫码一次就能一直用。",
+            "en": "The protocol side of the QQ channel. It is not an npm plugin, so download the Windows bundle from Releases and put it in a plain ASCII folder such as D:\\tools\\napcat. Fill the path once, scan once, and it keeps running."
+          },
+          "url": "https://github.com/NapNeko/NapCatQQ/releases"
         }
       ]
     },
@@ -3452,6 +3504,23 @@ window.__ModuleLoader__.load({
                         disabled: suiteRunning,
                         onClick: () => setSuitePicked(defaultPick(items, suite))
                       }, t('keepRequired')))),
+                  // 套装里那些「市场装不了、但必须有」的东西（比如 NapCat）
+                  (suite.prereqs ?? []).length === 0 ? null : h('div', { className: 'dm-suite-prereq' },
+                    h('div', { className: 'dm-suite-group-head' },
+                      h('strong', null, t('beforeStart')),
+                      h('span', null, t('requiredTag'))),
+                    h('div', { className: 'dm-suite-group-hint' }, t('beforeStartHint')),
+                    ...(suite.prereqs ?? []).map((item, index) => h('div', { className: 'dm-prereq-item', key: `prereq-${String(index)}` },
+                      h('span', { className: 'dm-prereq-dot' }),
+                      h('div', { className: 'dm-prereq-body' },
+                        h('strong', null, pick(item.title, '')),
+                        h('p', null, pick(item.note, ''))),
+                      item.url === undefined ? null : h('a', {
+                        className: 'dm-prereq-link',
+                        href: item.url,
+                        target: '_blank',
+                        rel: 'noreferrer'
+                      }, `${t('needsOpen')} ↗`)))),
                   h('div', { className: 'dm-suite-tiles' }, ...blocks.flatMap((block) => [
                     block.group === undefined ? null : h('div', { className: 'dm-suite-group', key: `g-${block.group.id}` },
                       h('div', { className: 'dm-suite-group-head' },
