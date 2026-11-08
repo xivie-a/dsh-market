@@ -1175,7 +1175,7 @@ window.__ModuleLoader__.load({
      */
     // #region suites-fallback
     const SUITES_FALLBACK = {
-  "version": 2,
+  "version": 3,
   "suites": [
     {
       "id": "big-fish",
@@ -1357,19 +1357,29 @@ window.__ModuleLoader__.load({
     }
 
     async function loadSuitesFile() {
+      const builtin = normalizeSuites(SUITES_FALLBACK)
       try {
-        const response = await fetch(SUITES_URL, {
-          headers: { accept: 'application/json' },
+        // 加时间戳绕开 CDN / 代理缓存，否则改完数据可能还在读旧文件
+        const response = await fetch(`${SUITES_URL}?t=${String(Date.now())}`, {
+          headers: { accept: 'application/json', 'cache-control': 'no-cache' },
+          cache: 'no-store',
           signal: AbortSignal.timeout(8000)
         })
         if (!response.ok) throw new Error(`HTTP ${String(response.status)}`)
         const doc = await response.json()
         const list = normalizeSuites(doc)
-        if (list.length > 0) return list
-        throw new Error('远端 suites.json 为空')
+        if (list.length === 0) throw new Error('远端 suites.json 为空')
+        // 远端版本比内置旧（缓存没刷），就用内置的，别把新套装吞掉
+        const remoteVersion = Number(doc?.version ?? 0)
+        const builtinVersion = Number(SUITES_FALLBACK?.version ?? 0)
+        if (list.length < builtin.length && remoteVersion < builtinVersion) {
+          console.warn(LOG, `suites 远端版本较旧（${String(remoteVersion)} < ${String(builtinVersion)}），用内置副本`)
+          return builtin
+        }
+        return list
       } catch (error) {
         console.warn(LOG, 'suites fetch failed, using built-in copy:', messageOf(error))
-        return normalizeSuites(SUITES_FALLBACK)
+        return builtin
       }
     }
 
