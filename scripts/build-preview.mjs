@@ -75,6 +75,49 @@ const HARNESS = String.raw`
   if (previewParams.has('layout')) {
     try { window.localStorage.setItem('dsh-market-xivie:layout', previewParams.get('layout')) } catch {}
   }
+  // 连接助手：?loginState=scan|online|blocked|none 模拟 NapCat 桥的 /qr-state
+  const loginState = previewParams.get('loginState')
+    ?? (previewParams.has('login') ? 'scan' : '')
+  if (loginState !== '') {
+    const fakeState = {
+      ok: true,
+      online: loginState === 'online',
+      nickname: loginState === 'online' ? '大肥鱼' : '',
+      userId: loginState === 'online' ? 10001 : 0,
+      phase: loginState === 'scan' ? 'need-scan' : loginState === 'blocked' ? 'dedupe-blocked' : loginState === 'online' ? 'online' : 'idle',
+      qr: null,
+      qrTtlSec: 120,
+      sms: { needSms: false },
+      logTail: loginState === 'blocked'
+        ? ['KILL skipped: 没有可用的进程路径前缀（先填 NapCat 目录或 procPathMatch）']
+        : []
+    }
+    const before = window.fetch
+    window.fetch = (input, init) => {
+      const url = String(input)
+      if (url.includes('/dsh-napcat-keeper/qr-state')) {
+        return Promise.resolve(new Response(JSON.stringify(fakeState), {
+          status: 200, headers: { 'content-type': 'application/json' }
+        }))
+      }
+      return before(input, init)
+    }
+    // 预览里没有真的二维码文件，用一张画的假码顶上，方便看版式
+    window.__DM_QR_MOCK__ = (() => {
+      const cells = []
+      for (let y = 0; y < 21; y += 1) {
+        for (let x = 0; x < 21; x += 1) {
+          const corner = (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13)
+          const filled = corner
+            ? (x % 6 === 0 || y % 6 === 0 || (x < 7 && y < 7 && x > 1 && y > 1 && x < 5 && y < 5) || (x > 13 && y < 7 && x > 15 && x < 19 && y > 1 && y < 5))
+            : (x * 7 + y * 13 + x * y) % 3 === 0
+          if (filled) cells.push('<rect x="' + x + '" y="' + y + '" width="1" height="1"/>')
+        }
+      }
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/><g fill="#153f32">' + cells.join('') + '</g></svg>'
+      return 'data:image/svg+xml;base64,' + btoa(svg)
+    })()
+  }
 
   // 把索引数据补成市场服务会返回的形状
   const raw = window.__INDEX__
@@ -118,7 +161,13 @@ const HARNESS = String.raw`
       }
     },
     pluginManager: {
-      listBundles: async () => ({ ok: true, value: entries.filter((entry) => entry.installation.status === 'installed').map((entry) => ({ name: entry.name, installed: true, version: entry.defaultVersion })) }),
+      listBundles: async () => {
+        const list = entries.filter((entry) => entry.installation.status === 'installed')
+          .map((entry) => ({ name: entry.name, installed: true, version: entry.defaultVersion }))
+        // 连接助手要看「装没装 NapCat 桥」，预览里按参数伪造一条
+        if (loginState !== '') list.push({ name: 'dsh-napcat-keeper', installed: true, version: '2.9.4' })
+        return { ok: true, value: list }
+      },
       inspect: async () => ({ ok: true, value: { status: 'ok' } }),
       installBundle: async () => ({ ok: true, value: { application: 'restart-required' } })
     }
@@ -196,6 +245,12 @@ const HARNESS = String.raw`
     setTimeout(() => {
       document.querySelectorAll('.dm-suite-card')[Number(params.get('suite')) || 0]?.click()
     }, 600)
+  }
+  // ?login=1 打开连接助手（配合 ?loginState=scan|online|blocked）
+  if (params.has('login')) {
+    setTimeout(() => {
+      document.querySelector('.dm-conn-btn')?.click()
+    }, 800)
   }
   if (params.has('select')) {
     const index = Number(params.get('select') ?? 2)

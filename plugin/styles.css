@@ -888,6 +888,132 @@
 .dm-btn--danger { background: transparent; color: #b6463f; border: 1px solid color-mix(in srgb, #b6463f 35%, var(--line)); }
 .dm-btn--danger:hover:not(:disabled) { background: color-mix(in srgb, #b6463f 10%, transparent); }
 
+/* 连接助手：NapCat 桥的扫码/在线状态 */
+.dm-conn-btn { gap: 6px; }
+.dm-conn-dot {
+  display: inline-block; flex: none;
+  width: 7px; height: 7px; border-radius: 99px;
+  background: var(--muted);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--muted) 14%, transparent);
+  transition: background .2s ease, box-shadow .2s ease;
+}
+.dm-conn-dot.is-on { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.dm-conn-dot.is-warn { background: #d09a3c; box-shadow: 0 0 0 3px rgba(208, 154, 60, .18); animation: dm-conn-pulse 2.2s ease-in-out infinite; }
+.dm-conn-dot.is-off { background: color-mix(in srgb, var(--muted) 65%, transparent); box-shadow: none; }
+@keyframes dm-conn-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(208, 154, 60, .16); }
+  50% { box-shadow: 0 0 0 6px rgba(208, 154, 60, .06); }
+}
+
+.dm-conn-dialog {
+  position: fixed; z-index: 77; top: 50%; left: 50%;
+  display: flex; flex-direction: column;
+  width: min(820px, calc(100vw - 48px)); max-height: 86vh;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--line); border-radius: 20px;
+  background: var(--panel);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .3);
+  overflow: hidden;
+  animation: dm-dialog-in .26s cubic-bezier(.2, .7, .3, 1) both;
+}
+.dm-conn-body {
+  display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 22px;
+  padding: 0 24px 18px; overflow-y: auto;
+}
+.dm-conn-intro { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.dm-conn-pill {
+  display: inline-flex; align-items: center; gap: 7px; align-self: flex-start;
+  padding: 5px 11px; border-radius: 99px;
+  background: var(--tint); color: var(--accent);
+  font-size: 11.5px; font-weight: 650;
+}
+.dm-conn-pill.is-warn { background: rgba(208, 154, 60, .14); color: #8a6420; }
+.dm-conn-pill.is-off { background: color-mix(in srgb, var(--muted) 12%, transparent); color: var(--muted); }
+.dm-conn-pill .dm-conn-dot { width: 6px; height: 6px; box-shadow: none; }
+.dm-conn-pill.is-warn .dm-conn-dot { animation: none; }
+.dm-conn-lead { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.75; }
+.dm-conn-ok { margin: 0; color: var(--accent); font-size: 12.5px; line-height: 1.7; }
+.dm-conn-step-title { margin-top: 2px; font-size: 12px; font-weight: 700; color: var(--text); }
+.dm-conn-steps {
+  margin: 0; padding: 0; list-style: none;
+  counter-reset: conn;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.dm-conn-steps li {
+  position: relative; padding-left: 24px;
+  color: var(--muted); font-size: 12px; line-height: 1.6;
+}
+.dm-conn-steps li::before {
+  counter-increment: conn; content: counter(conn);
+  position: absolute; left: 0; top: 1px;
+  display: grid; place-items: center;
+  width: 17px; height: 17px; border-radius: 6px;
+  background: var(--tint); color: var(--accent);
+  font-size: 10px; font-weight: 700;
+}
+.dm-conn-warn {
+  padding: 9px 11px; border-radius: 10px;
+  background: rgba(208, 154, 60, .12);
+  color: #8a6420; font-size: 11.5px; line-height: 1.65;
+}
+/* 深色下琥珀色要提亮，否则压在深底上读不清 */
+.dm-root[data-theme="dark"] .dm-conn-pill.is-warn { background: rgba(208, 154, 60, .18); color: #e9be78; }
+.dm-root[data-theme="dark"] .dm-conn-warn { background: rgba(208, 154, 60, .16); color: #e9c286; }
+.dm-conn-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.dm-conn-actions .dm-btn { min-height: 34px; }
+.dm-conn-actions .dm-btn--primary {
+  background: var(--accent); color: #fff; box-shadow: 0 6px 18px rgba(21, 59, 48, .18);
+}
+.dm-conn-actions .dm-btn--primary:hover:not(:disabled) { filter: brightness(1.06); background: var(--accent); }
+.dm-root[data-theme="dark"] .dm-conn-actions .dm-btn--primary { color: #141c19; }
+
+.dm-conn-side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.dm-conn-qr {
+  position: relative; display: grid; place-items: center;
+  min-height: 210px; padding: 12px;
+  border: 1px dashed color-mix(in srgb, var(--line) 90%, transparent);
+  border-radius: 16px; background: color-mix(in srgb, var(--panel) 92%, var(--tint));
+  overflow: hidden;
+}
+.dm-conn-qr img {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 210px; height: auto;
+  border-radius: 8px; background: #fff; padding: 6px;
+  image-rendering: pixelated;
+}
+.dm-conn-qr-empty { position: absolute; z-index: 0; max-width: 150px; color: var(--muted); font-size: 11.5px; text-align: center; line-height: 1.6; }
+.dm-conn-qr.is-on { border-style: solid; border-color: color-mix(in srgb, var(--accent) 34%, var(--line)); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); }
+.dm-conn-qr-done { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--accent); }
+.dm-conn-qr-done strong { font-size: 30px; line-height: 1; }
+.dm-conn-qr-done span { font-size: 11.5px; color: var(--muted); }
+.dm-conn-bili {
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px;
+  background: color-mix(in srgb, var(--tint) 45%, var(--panel));
+}
+.dm-conn-bili strong { display: block; font-size: 12.5px; font-weight: 700; }
+.dm-conn-bili p { margin: 4px 0 0; color: var(--muted); font-size: 11.5px; line-height: 1.65; }
+.dm-conn-foot {
+  padding: 11px 24px; border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 11px;
+}
+
+@media (max-width: 860px) {
+  .dm-conn-body { grid-template-columns: minmax(0, 1fr); }
+  .dm-conn-side { flex-direction: row; align-items: stretch; }
+  .dm-conn-qr { flex: 0 0 180px; min-height: 180px; }
+  .dm-conn-bili { flex: 1 1 auto; }
+}
+@media (max-width: 720px) {
+  .dm-conn-dialog { width: 100vw; max-height: 100vh; border-radius: 0; }
+  .dm-conn-body, .dm-conn-foot { padding-inline: 16px; }
+  .dm-conn-side { flex-direction: column; }
+  .dm-conn-qr { flex: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dm-conn-dot.is-warn { animation: none; }
+  .dm-conn-dialog { animation: none; }
+}
+
 @media (max-width: 999px) {
   .dm-suite-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dm-suite-body { grid-template-columns: minmax(0, 1fr); }

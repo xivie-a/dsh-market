@@ -127,7 +127,30 @@ window.__ModuleLoader__.load({
       refused: '当前 DSH 版本不接受这个插件',
       inspectFailed: '无法校验这个包',
       installFailed: '安装失败',
-      missingSource: '索引还没加进「发现」，先运行 /my-market 命令或在「发现 → 添加索引源」里加上它。'
+      missingSource: '索引还没加进「发现」，先运行 /my-market 命令或在「发现 → 添加索引源」里加上它。',
+      connect: '连接',
+      connectHint: '扫码 / 连线状态',
+      connectTitle: '把插件连上',
+      connectEyebrow: 'CONNECT',
+      connectIntro: '装完只是第一步。扫码登录、填好路径，这些插件才真的能干活。',
+      connOnline: '已上线',
+      connWaiting: '等你扫码',
+      connOffline: '没连上',
+      connNotRunning: 'NapCat 桥没在跑',
+      connQrWait: '二维码还没出来',
+      connRepull: '重新拉起',
+      connOpenPage: '打开扫码页',
+      connRefresh: '刷新状态',
+      connStepsTitle: '还差这三步',
+      connStep1: '装 NapCat.Shell，放到纯英文路径',
+      connStep2: 'DSH 设置 → napcat 桥，填「路径前缀」',
+      connStep3: '回来点「重新拉起」，出码就扫',
+      connBlocked: '看门狗发现重复进程，但没填路径前缀，杀不掉。填上路径就会自己恢复。',
+      connBiliTitle: 'B站工具包',
+      connBiliHint: '在 设置 → B站工具包 里扫一次码，之后我就能直接总结视频、抓字幕。',
+      connSms: '这次登录要短信验证',
+      connAutoNote: '每天第一次打开市场会提醒一次，连上之后不再打扰。',
+      connQrTip: '扫码成功后这一格会自己变绿'
     }
     const en = {
       title: 'My Market',
@@ -240,7 +263,30 @@ window.__ModuleLoader__.load({
       refused: 'This DSH version refuses the plugin',
       inspectFailed: 'Could not inspect the package',
       installFailed: 'Install failed',
-      missingSource: 'The index is not in Discover yet. Run /my-market or add it under Discover → Add index source.'
+      missingSource: 'The index is not in Discover yet. Run /my-market or add it under Discover → Add index source.',
+      connect: 'Connect',
+      connectHint: 'Scan / connection status',
+      connectTitle: 'Connect your plugins',
+      connectEyebrow: 'CONNECT',
+      connectIntro: 'Installing is step one. Scan a code or fill in a path, and these plugins actually start working.',
+      connOnline: 'Online',
+      connWaiting: 'Waiting for scan',
+      connOffline: 'Not connected',
+      connNotRunning: 'NapCat bridge is not running',
+      connQrWait: 'No QR code yet',
+      connRepull: 'Restart',
+      connOpenPage: 'Open QR page',
+      connRefresh: 'Refresh',
+      connStepsTitle: 'Three steps left',
+      connStep1: 'Install NapCat.Shell in an ASCII-only path',
+      connStep2: 'DSH Settings → napcat bridge → set the path prefix',
+      connStep3: 'Come back, hit Restart, then scan',
+      connBlocked: 'The watchdog found duplicate processes but has no path prefix, so it cannot kill them. Fill the path in and it recovers itself.',
+      connBiliTitle: 'Bilibili toolkit',
+      connBiliHint: 'Scan once in Settings → Bilibili toolkit, then I can summarize videos and pull subtitles.',
+      connSms: 'This login needs an SMS code',
+      connAutoNote: 'We remind you once a day until it is connected.',
+      connQrTip: 'This panel turns green as soon as the scan lands'
     }
 
     const STYLES = `
@@ -1134,6 +1180,132 @@ window.__ModuleLoader__.load({
 .dm-btn--danger { background: transparent; color: #b6463f; border: 1px solid color-mix(in srgb, #b6463f 35%, var(--line)); }
 .dm-btn--danger:hover:not(:disabled) { background: color-mix(in srgb, #b6463f 10%, transparent); }
 
+/* 连接助手：NapCat 桥的扫码/在线状态 */
+.dm-conn-btn { gap: 6px; }
+.dm-conn-dot {
+  display: inline-block; flex: none;
+  width: 7px; height: 7px; border-radius: 99px;
+  background: var(--muted);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--muted) 14%, transparent);
+  transition: background .2s ease, box-shadow .2s ease;
+}
+.dm-conn-dot.is-on { background: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+.dm-conn-dot.is-warn { background: #d09a3c; box-shadow: 0 0 0 3px rgba(208, 154, 60, .18); animation: dm-conn-pulse 2.2s ease-in-out infinite; }
+.dm-conn-dot.is-off { background: color-mix(in srgb, var(--muted) 65%, transparent); box-shadow: none; }
+@keyframes dm-conn-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(208, 154, 60, .16); }
+  50% { box-shadow: 0 0 0 6px rgba(208, 154, 60, .06); }
+}
+
+.dm-conn-dialog {
+  position: fixed; z-index: 77; top: 50%; left: 50%;
+  display: flex; flex-direction: column;
+  width: min(820px, calc(100vw - 48px)); max-height: 86vh;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--line); border-radius: 20px;
+  background: var(--panel);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .3);
+  overflow: hidden;
+  animation: dm-dialog-in .26s cubic-bezier(.2, .7, .3, 1) both;
+}
+.dm-conn-body {
+  display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 22px;
+  padding: 0 24px 18px; overflow-y: auto;
+}
+.dm-conn-intro { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.dm-conn-pill {
+  display: inline-flex; align-items: center; gap: 7px; align-self: flex-start;
+  padding: 5px 11px; border-radius: 99px;
+  background: var(--tint); color: var(--accent);
+  font-size: 11.5px; font-weight: 650;
+}
+.dm-conn-pill.is-warn { background: rgba(208, 154, 60, .14); color: #8a6420; }
+.dm-conn-pill.is-off { background: color-mix(in srgb, var(--muted) 12%, transparent); color: var(--muted); }
+.dm-conn-pill .dm-conn-dot { width: 6px; height: 6px; box-shadow: none; }
+.dm-conn-pill.is-warn .dm-conn-dot { animation: none; }
+.dm-conn-lead { margin: 0; color: var(--muted); font-size: 12.5px; line-height: 1.75; }
+.dm-conn-ok { margin: 0; color: var(--accent); font-size: 12.5px; line-height: 1.7; }
+.dm-conn-step-title { margin-top: 2px; font-size: 12px; font-weight: 700; color: var(--text); }
+.dm-conn-steps {
+  margin: 0; padding: 0; list-style: none;
+  counter-reset: conn;
+  display: flex; flex-direction: column; gap: 7px;
+}
+.dm-conn-steps li {
+  position: relative; padding-left: 24px;
+  color: var(--muted); font-size: 12px; line-height: 1.6;
+}
+.dm-conn-steps li::before {
+  counter-increment: conn; content: counter(conn);
+  position: absolute; left: 0; top: 1px;
+  display: grid; place-items: center;
+  width: 17px; height: 17px; border-radius: 6px;
+  background: var(--tint); color: var(--accent);
+  font-size: 10px; font-weight: 700;
+}
+.dm-conn-warn {
+  padding: 9px 11px; border-radius: 10px;
+  background: rgba(208, 154, 60, .12);
+  color: #8a6420; font-size: 11.5px; line-height: 1.65;
+}
+/* 深色下琥珀色要提亮，否则压在深底上读不清 */
+.dm-root[data-theme="dark"] .dm-conn-pill.is-warn { background: rgba(208, 154, 60, .18); color: #e9be78; }
+.dm-root[data-theme="dark"] .dm-conn-warn { background: rgba(208, 154, 60, .16); color: #e9c286; }
+.dm-conn-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.dm-conn-actions .dm-btn { min-height: 34px; }
+.dm-conn-actions .dm-btn--primary {
+  background: var(--accent); color: #fff; box-shadow: 0 6px 18px rgba(21, 59, 48, .18);
+}
+.dm-conn-actions .dm-btn--primary:hover:not(:disabled) { filter: brightness(1.06); background: var(--accent); }
+.dm-root[data-theme="dark"] .dm-conn-actions .dm-btn--primary { color: #141c19; }
+
+.dm-conn-side { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.dm-conn-qr {
+  position: relative; display: grid; place-items: center;
+  min-height: 210px; padding: 12px;
+  border: 1px dashed color-mix(in srgb, var(--line) 90%, transparent);
+  border-radius: 16px; background: color-mix(in srgb, var(--panel) 92%, var(--tint));
+  overflow: hidden;
+}
+.dm-conn-qr img {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 210px; height: auto;
+  border-radius: 8px; background: #fff; padding: 6px;
+  image-rendering: pixelated;
+}
+.dm-conn-qr-empty { position: absolute; z-index: 0; max-width: 150px; color: var(--muted); font-size: 11.5px; text-align: center; line-height: 1.6; }
+.dm-conn-qr.is-on { border-style: solid; border-color: color-mix(in srgb, var(--accent) 34%, var(--line)); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); }
+.dm-conn-qr-done { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--accent); }
+.dm-conn-qr-done strong { font-size: 30px; line-height: 1; }
+.dm-conn-qr-done span { font-size: 11.5px; color: var(--muted); }
+.dm-conn-bili {
+  padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px;
+  background: color-mix(in srgb, var(--tint) 45%, var(--panel));
+}
+.dm-conn-bili strong { display: block; font-size: 12.5px; font-weight: 700; }
+.dm-conn-bili p { margin: 4px 0 0; color: var(--muted); font-size: 11.5px; line-height: 1.65; }
+.dm-conn-foot {
+  padding: 11px 24px; border-top: 1px solid var(--line);
+  color: var(--muted); font-size: 11px;
+}
+
+@media (max-width: 860px) {
+  .dm-conn-body { grid-template-columns: minmax(0, 1fr); }
+  .dm-conn-side { flex-direction: row; align-items: stretch; }
+  .dm-conn-qr { flex: 0 0 180px; min-height: 180px; }
+  .dm-conn-bili { flex: 1 1 auto; }
+}
+@media (max-width: 720px) {
+  .dm-conn-dialog { width: 100vw; max-height: 100vh; border-radius: 0; }
+  .dm-conn-body, .dm-conn-foot { padding-inline: 16px; }
+  .dm-conn-side { flex-direction: column; }
+  .dm-conn-qr { flex: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dm-conn-dot.is-warn { animation: none; }
+  .dm-conn-dialog { animation: none; }
+}
+
 @media (max-width: 999px) {
   .dm-suite-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dm-suite-body { grid-template-columns: minmax(0, 1fr); }
@@ -1725,6 +1897,53 @@ window.__ModuleLoader__.load({
     }
 
     const LOG = '[my-market]'
+    /* ── 连接助手 ────────────────────────────────────────────────
+       有些插件装完还要扫码或填路径才真能用。这里只驱动能同源查状态的：
+       NapCat 桥把 /qr-state 挂在 DSH 自己的地址下，所以不用跨域也能读到。 */
+    const CONNECT_BUNDLE = 'dsh-napcat-keeper'
+    const CONNECT_STATE = '/dsh-napcat-keeper/qr-state'
+    const CONNECT_QR = '/dsh-napcat-keeper/qr.png'
+    const CONNECT_RESTART = '/dsh-napcat-keeper/qr-restart'
+    const CONNECT_PAGE = '/dsh-napcat-keeper/qr'
+    const CONNECT_PHASES = {
+      idle: ['待机', 'idle'],
+      launching: ['正在拉起 QQ', 'launching QQ'],
+      starting: ['正在启动', 'starting'],
+      'need-scan': ['等你扫码', 'waiting for scan'],
+      'need-scan-giveup': ['扫码超时', 'scan timed out'],
+      'reverse-wait': ['等反向连接', 'waiting for the link'],
+      online: ['已上线', 'online'],
+      dead: ['没跑起来', 'not running'],
+      'dedupe-blocked': ['进程重复，被拦下', 'blocked by duplicates']
+    }
+
+    /** 读 NapCat 桥的状态；桥没跑或读不到都算 missing，界面按「没连上」显示。 */
+    async function readConnectState() {
+      try {
+        const response = await fetch(`${CONNECT_STATE}?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { accept: 'application/json' },
+          signal: AbortSignal.timeout(4000)
+        })
+        if (!response.ok) return { status: 'missing' }
+        const value = await response.json()
+        if (value?.ok !== true) return { status: 'missing' }
+        return { status: 'ready', ...value }
+      } catch {
+        return { status: 'missing' }
+      }
+    }
+
+    /** 「重新拉起」：让看门狗重开一条链，出码后页面自己会刷新。 */
+    async function restartConnect() {
+      try {
+        await fetch(CONNECT_RESTART, { method: 'POST', signal: AbortSignal.timeout(8000) })
+        return true
+      } catch {
+        return false
+      }
+    }
+
     const messageOf = error => (error instanceof Error ? error.message : String(error))
 
     /** 给任意 Promise 加一个上限，避免界面一直停在「读取索引」。 */
@@ -1846,6 +2065,10 @@ window.__ModuleLoader__.load({
       const [dshVersion, setDshVersion] = React.useState(undefined)
       const [notice, setNotice] = React.useState(undefined)
       const [bundles, setBundles] = React.useState(new Map())
+      const [connectOpen, setConnectOpen] = React.useState(false)
+      const [connectState, setConnectState] = React.useState({ status: 'idle' })
+      const [connectStamp, setConnectStamp] = React.useState(0)
+      const [connectBusy, setConnectBusy] = React.useState(false)
       const [selected, setSelected] = React.useState(undefined)
       const [theme, setTheme] = React.useState(readTheme)
       const [slide, setSlide] = React.useState(0)
@@ -1984,6 +2207,43 @@ window.__ModuleLoader__.load({
         return () => { alive = false }
       }, [])
 
+      const hasConnector = bundles.has(CONNECT_BUNDLE)
+
+      // NapCat 桥的状态：面板开着时 3 秒一刷，平时 15 秒；页面在后台就跳过
+      React.useEffect(() => {
+        if (!hasConnector) return undefined
+        let alive = true
+        const tick = async () => {
+          if (document.visibilityState === 'hidden') return
+          const next = await readConnectState()
+          if (!alive) return
+          setConnectState(next)
+          setConnectStamp(Date.now())
+        }
+        void tick()
+        const timer = window.setInterval(() => void tick(), connectOpen ? 3000 : 15000)
+        return () => {
+          alive = false
+          window.clearInterval(timer)
+        }
+      }, [hasConnector, connectOpen])
+
+      // 装好但还没连上：每天第一次进市场自动弹一次，连上就不再打扰
+      React.useEffect(() => {
+        if (!hasConnector) return undefined
+        if (connectState.status === 'idle' || connectState.online === true) return undefined
+        const key = 'dsh-market-xivie:connect-pop'
+        const stamp = new Date().toLocaleDateString('sv-SE')
+        try {
+          if (window.localStorage.getItem(key) === stamp) return undefined
+          window.localStorage.setItem(key, stamp)
+        } catch {
+          return undefined
+        }
+        const timer = window.setTimeout(() => setConnectOpen(true), 1400)
+        return () => window.clearTimeout(timer)
+      }, [hasConnector, connectState.status, connectState.online])
+
       // 结果提示 6 秒后自动消失，也能手动关掉
       React.useEffect(() => {
         if (notice === undefined) return undefined
@@ -1998,6 +2258,14 @@ window.__ModuleLoader__.load({
         window.addEventListener('keydown', onKeyDown)
         return () => window.removeEventListener('keydown', onKeyDown)
       }, [selected])
+
+      // Esc 关闭连接助手
+      React.useEffect(() => {
+        if (!connectOpen) return undefined
+        const onKeyDown = (event) => { if (event.key === 'Escape') setConnectOpen(false) }
+        window.addEventListener('keydown', onKeyDown)
+        return () => window.removeEventListener('keydown', onKeyDown)
+      }, [connectOpen])
 
       const entries = catalog.entries ?? []
       const categories = catalog.metadata?.categories ?? {}
@@ -2160,10 +2428,19 @@ window.__ModuleLoader__.load({
             }
           }, t('apply'))))
 
+      const connectDot = connectState.status !== 'ready' ? 'is-off' : connectState.online === true ? 'is-on' : 'is-warn'
+
       const actions = h('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
         h('span', { className: 'dm-total', title: dshVersion === undefined ? t('compatUnknown') : `${t('compatDsh')} ${dshVersion}` },
           `${entries.length} ${t('plugins')}`,
           dshVersion === undefined ? null : h('em', null, ` · DSH ${dshVersion}`)),
+        hasConnector ? h('button', {
+          className: 'dm-ghost dm-conn-btn',
+          type: 'button',
+          'aria-pressed': connectOpen,
+          title: t('connectHint'),
+          onClick: () => setConnectOpen(true)
+        }, h('span', { className: `dm-conn-dot ${connectDot}` }), t('connect')) : null,
         h('button', {
           className: 'dm-ghost',
           type: 'button',
@@ -2876,6 +3153,90 @@ window.__ModuleLoader__.load({
                           : t('onlyRunning')))))
                 : null))
         })(),
+        connectOpen ? (() => {
+          const ready = connectState.status === 'ready'
+          const online = ready && connectState.online === true
+          const phase = CONNECT_PHASES[connectState.phase]
+          const blocked = ready && connectState.phase === 'dedupe-blocked'
+          const sms = connectState.sms?.needSms === true && !online
+          const label = online
+            ? [t('connOnline'), connectState.nickname || String(connectState.userId || '')].filter(Boolean).join(' · ')
+            : ready
+              ? (phase === undefined ? t('connWaiting') : pick({ zh: phase[0], en: phase[1] }, ''))
+              : t('connNotRunning')
+          const qrSrc = window.__DM_QR_MOCK__ ?? `${CONNECT_QR}?t=${connectStamp}`
+          const refresh = async () => {
+            const next = await readConnectState()
+            setConnectState(next)
+            setConnectStamp(Date.now())
+          }
+          return h(React.Fragment, null,
+            h('div', { className: 'dm-suite-mask', onClick: () => setConnectOpen(false) }),
+            h('div', {
+              className: 'dm-conn-dialog',
+              role: 'dialog',
+              'aria-modal': 'true',
+              'aria-label': t('connectTitle')
+            },
+              h('div', { className: 'dm-suite-head' },
+                h('div', null,
+                  h('span', { className: 'dm-suite-eyebrow' }, t('connectEyebrow')),
+                  h('h2', null, t('connectTitle'))),
+                h('button', {
+                  className: 'dm-close', type: 'button', 'aria-label': t('close'), onClick: () => setConnectOpen(false)
+                }, '×')),
+              h('div', { className: 'dm-conn-body' },
+                h('div', { className: 'dm-conn-intro' },
+                  h('div', { className: `dm-conn-pill${online ? ' is-on' : ready ? ' is-warn' : ' is-off'}` },
+                    h('span', { className: 'dm-conn-dot' }), label),
+                  h('p', { className: 'dm-conn-lead' }, t('connectIntro')),
+                  online
+                    ? h('p', { className: 'dm-conn-ok' }, t('connQrTip'))
+                    : h(React.Fragment, null,
+                      h('strong', { className: 'dm-conn-step-title' }, t('connStepsTitle')),
+                      h('ol', { className: 'dm-conn-steps' },
+                        h('li', null, t('connStep1')),
+                        h('li', null, t('connStep2')),
+                        h('li', null, t('connStep3')))),
+                  blocked ? h('div', { className: 'dm-conn-warn' }, t('connBlocked')) : null,
+                  sms ? h('div', { className: 'dm-conn-warn' }, t('connSms')) : null,
+                  h('div', { className: 'dm-conn-actions' },
+                    h('button', {
+                      className: 'dm-btn dm-btn--primary',
+                      type: 'button',
+                      disabled: connectBusy || !ready,
+                      onClick: async () => {
+                        setConnectBusy(true)
+                        await restartConnect()
+                        await refresh()
+                        setConnectBusy(false)
+                      }
+                    }, connectBusy ? t('working') : t('connRepull')),
+                    h('button', {
+                      className: 'dm-btn',
+                      type: 'button',
+                      onClick: () => window.open(CONNECT_PAGE, '_blank', 'noopener')
+                    }, t('connOpenPage')),
+                    h('button', { className: 'dm-btn', type: 'button', onClick: () => void refresh() }, t('connRefresh')))),
+                h('div', { className: 'dm-conn-side' },
+                  h('div', { className: `dm-conn-qr${online ? ' is-on' : ''}` },
+                    online
+                      ? h('div', { className: 'dm-conn-qr-done' },
+                        h('strong', null, '✓'),
+                        h('span', null, connectState.nickname || String(connectState.userId || '')))
+                      : h(React.Fragment, null,
+                        h('span', { className: 'dm-conn-qr-empty' }, t('connQrWait')),
+                        h('img', {
+                          key: connectStamp,
+                          src: qrSrc,
+                          alt: t('connQrWait'),
+                          onError: (event) => { event.currentTarget.style.display = 'none' }
+                        }))),
+                  h('div', { className: 'dm-conn-bili' },
+                    h('strong', null, t('connBiliTitle')),
+                    h('p', null, t('connBiliHint'))))),
+              h('div', { className: 'dm-conn-foot' }, t('connAutoNote'))))
+        })() : null,
         paletteOpen ? h(React.Fragment, null,
           h('div', { className: 'dm-palette-mask', onClick: () => setPaletteOpen(false) }),
           h('div', { className: 'dm-palette', role: 'dialog', 'aria-modal': 'true', 'aria-label': t('quickSearch') },
