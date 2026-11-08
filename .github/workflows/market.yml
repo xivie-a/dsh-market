@@ -11,6 +11,8 @@ on:
     paths:
       - plugins.txt
       - overrides.json
+      - suites.json
+      - requirements.json
       - icons/**
       - scripts/**
       - .github/workflows/market.yml
