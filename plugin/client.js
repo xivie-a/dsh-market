@@ -150,7 +150,19 @@ window.__ModuleLoader__.load({
       connBiliHint: '在 设置 → B站工具包 里扫一次码，之后我就能直接总结视频、抓字幕。',
       connSms: '这次登录要短信验证',
       connAutoNote: '每天第一次打开市场会提醒一次，连上之后不再打扰。',
-      connQrTip: '扫码成功后这一格会自己变绿'
+      connQrTip: '扫码成功后这一格会自己变绿',
+      needsTag: '需',
+      needsEyebrow: 'BEFORE YOU INSTALL',
+      needsTitle: '装之前先准备',
+      needsNote: '这些不是 npm 依赖，装完插件还得自己准备；缺了它，插件要么没反应，要么一直报错。',
+      needsKindApp: '软件',
+      needsKindAccount: '账号',
+      needsKindConfig: '设置',
+      needsOpen: '打开官网',
+      needsCancel: '先不装',
+      needsConfirm: '我准备好了，继续安装',
+      needsDrawer: '安装前准备',
+      needsInline: '还需要'
     }
     const en = {
       title: 'My Market',
@@ -286,7 +298,19 @@ window.__ModuleLoader__.load({
       connBiliHint: 'Scan once in Settings → Bilibili toolkit, then I can summarize videos and pull subtitles.',
       connSms: 'This login needs an SMS code',
       connAutoNote: 'We remind you once a day until it is connected.',
-      connQrTip: 'This panel turns green as soon as the scan lands'
+      connQrTip: 'This panel turns green as soon as the scan lands',
+      needsTag: 'needs',
+      needsEyebrow: 'BEFORE YOU INSTALL',
+      needsTitle: 'Set this up first',
+      needsNote: 'These are not npm packages. The plugin installs fine without them, then sits there doing nothing.',
+      needsKindApp: 'app',
+      needsKindAccount: 'account',
+      needsKindConfig: 'setup',
+      needsOpen: 'Open site',
+      needsCancel: 'Not now',
+      needsConfirm: 'I have these — install',
+      needsDrawer: 'Before you install',
+      needsInline: 'also needs'
     }
 
     const STYLES = `
@@ -792,6 +816,90 @@ window.__ModuleLoader__.load({
 }
 .dm-compat--bad { background: color-mix(in srgb, #c05050 12%, transparent); color: #b6463f; }
 .dm-compat--ok { background: var(--tint); color: var(--accent); }
+
+/* ==========================================================================
+   安装前提示：这些插件要靠外部软件 / 账号 / 设置才能跑
+   ========================================================================== */
+.dm-needs {
+  margin-left: 6px; padding: 1px 6px; border-radius: 5px;
+  background: color-mix(in srgb, #c08a2e 14%, transparent);
+  color: #9a6a1c;
+  font-size: 9.5px; font-weight: 600; letter-spacing: .02em;
+  vertical-align: middle; white-space: nowrap;
+}
+.dm-root[data-theme="dark"] .dm-needs { background: rgba(208, 154, 60, .18); color: #e9be78; }
+
+/* 详情抽屉里的那一块 */
+.dm-needs-box {
+  padding: 12px 13px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, #c08a2e 26%, var(--line));
+  background: color-mix(in srgb, #c08a2e 5%, transparent);
+}
+.dm-needs-title {
+  display: block; margin-bottom: 8px;
+  color: #9a6a1c; font-size: 11.5px; font-weight: 700; letter-spacing: .02em;
+}
+.dm-root[data-theme="dark"] .dm-needs-title { color: #e9be78; }
+.dm-needs-row { display: flex; align-items: flex-start; gap: 9px; padding: 6px 0; }
+.dm-needs-row + .dm-needs-row { border-top: 1px dashed color-mix(in srgb, #c08a2e 20%, var(--line)); }
+.dm-needs-body { min-width: 0; }
+.dm-needs-body strong { display: block; font-size: 12px; font-weight: 600; color: var(--text); }
+.dm-needs-body p { margin: 3px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+
+.dm-gate-kind {
+  flex: none; min-width: 34px; padding: 2px 6px; border-radius: 6px;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-align: center;
+  background: color-mix(in srgb, #c08a2e 14%, transparent); color: #9a6a1c;
+}
+.dm-gate-kind--account { background: color-mix(in srgb, #2f6fb0 12%, transparent); color: #2f6fb0; }
+.dm-gate-kind--config { background: var(--tint); color: var(--accent); }
+.dm-root[data-theme="dark"] .dm-gate-kind { background: rgba(208, 154, 60, .18); color: #e9be78; }
+.dm-root[data-theme="dark"] .dm-gate-kind--account { background: rgba(90, 150, 220, .18); color: #8fbce8; }
+.dm-root[data-theme="dark"] .dm-gate-kind--config { background: var(--tint); color: var(--accent); }
+
+.dm-gate-link {
+  display: inline-block; margin-top: 4px;
+  color: var(--accent); font-size: 11px; font-weight: 600; text-decoration: none;
+}
+.dm-gate-link:hover { text-decoration: underline; }
+
+/* 安装前的拦截弹窗：和套装弹窗同一套定位与动画，窄一点 */
+.dm-gate {
+  position: fixed; z-index: 77; top: 50%; left: 50%;
+  display: flex; flex-direction: column;
+  width: min(620px, calc(100vw - 48px)); max-height: 86vh;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--line); border-radius: 20px;
+  background: var(--panel);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .3);
+  overflow: hidden;
+  animation: dm-dialog-in .26s cubic-bezier(.2, .7, .3, 1) both;
+}
+.dm-gate .dm-suite-head { padding: 20px 22px 12px; }
+.dm-gate-note { margin: 0 22px 12px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.dm-gate-list { display: grid; gap: 12px; padding: 0 22px 18px; overflow-y: auto; }
+.dm-gate-item {
+  padding: 12px 13px; border-radius: 12px;
+  border: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 92%, var(--bg));
+}
+.dm-gate-item-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.dm-gate-item-head strong { font-size: 13px; font-weight: 600; }
+.dm-gate-tag {
+  padding: 1px 6px; border-radius: 5px;
+  background: color-mix(in srgb, #c08a2e 14%, transparent); color: #9a6a1c;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .02em;
+}
+.dm-root[data-theme="dark"] .dm-gate-tag { background: rgba(208, 154, 60, .18); color: #e9be78; }
+.dm-gate-need { display: flex; align-items: flex-start; gap: 9px; padding: 7px 0 0; }
+.dm-gate-need-body { min-width: 0; }
+.dm-gate-need-body strong { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); }
+.dm-gate-need-body p { margin: 3px 0 0; color: var(--muted); font-size: 11.5px; line-height: 1.65; }
+.dm-gate-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: auto 0 0; padding: 13px 22px;
+  border-top: 1px solid var(--line); color: var(--muted); font-size: 11px;
+}
+.dm-gate-actions { display: flex; gap: 8px; }
 
 /* 详情里的不兼容提示条 */
 .dm-compat-bar {
@@ -1564,6 +1672,179 @@ window.__ModuleLoader__.load({
       return pool.slice(0, limit)
     }
 
+    /**
+     * 安装前要准备的外部条件（NapCat、QQ 号、B站账号……）。
+     * 和索引放在同一个静态目录，改数据不用重装插件。
+     */
+    const REQUIREMENTS_URL = 'https://xivie-a.github.io/dsh-market/requirements.json'
+
+    /**
+     * 内置副本：由 scripts/inline-requirements.mjs 从 requirements.json 注入。
+     * 远端失败时用它，提示不会整块消失。
+     */
+    // #region requirements-fallback
+    const REQUIREMENTS_FALLBACK = {
+  "version": 1,
+  "note": "插件装完还要自己准备的外部条件：不是 npm 依赖，装不上或者装上没反应，多半是这里缺了东西。",
+  "items": {
+    "dsh-onebot-qq": {
+      "tag": "NapCat",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "NapCat.Shell（或任意 OneBot 11 实现）",
+          "why": "QQ 通道本身只是「接电话」的那一端，真正的 QQ 登录和收发消息由 NapCat 完成。",
+          "url": "https://github.com/NapNeko/NapCatQQ/releases"
+        },
+        {
+          "kind": "account",
+          "name": "一个 QQ 号",
+          "why": "扫码登录到 NapCat 之后，这个号的消息才会转到 DSH。"
+        },
+        {
+          "kind": "config",
+          "name": "在「设置 → NapCat 桥」填 NapCat 目录",
+          "why": "不填路径前缀，看门狗认不出进程，会一直卡在 dedupe-blocked，扫码页也不会出码。"
+        }
+      ]
+    },
+    "@zaofan/dsh-qqbot": {
+      "tag": "QQ 机器人",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "QQ 开放平台的机器人应用",
+          "why": "去 q.qq.com 建一个机器人，拿到 AppID / AppSecret；它走官方 API，不需要 NapCat。"
+        },
+        {
+          "kind": "account",
+          "name": "机器人所在的群或好友",
+          "why": "要先把这个机器人拉进群 / 加好友，它才收得到消息。"
+        },
+        {
+          "kind": "config",
+          "name": "把 OpenID 填进「允许操作的主人」",
+          "why": "不填的话发图、撤消息、群管理这些指令会被拒。"
+        }
+      ]
+    },
+    "dsh-napcat-keeper": {
+      "tag": "NapCat",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "NapCat.Shell",
+          "why": "这个插件只负责「掉线了把它拉回来」，它自己不带 QQ 协议实现。",
+          "url": "https://github.com/NapNeko/NapCatQQ/releases"
+        },
+        {
+          "kind": "account",
+          "name": "一个 QQ 号",
+          "why": "第一次要扫码，之后靠看门狗维持在线。"
+        }
+      ]
+    },
+    "@seiuna/dsh-bilibili-plugin": {
+      "tag": "B站",
+      "needs": [
+        {
+          "kind": "account",
+          "name": "B 站账号",
+          "why": "在「设置 → B站工具包」扫一次码，之后抓字幕、看视频信息都用这份登录态。"
+        }
+      ]
+    },
+    "dsh-bilibili-plugin": {
+      "tag": "B站",
+      "needs": [
+        {
+          "kind": "account",
+          "name": "B 站账号",
+          "why": "扫码登录后才能读字幕和视频信息。"
+        },
+        {
+          "kind": "config",
+          "name": "要装 0.2.0-rc.2 那版 DSH",
+          "why": "它把 DSH 版本锁死在这个预发布版，版本对不上装上也跑不起来。"
+        }
+      ]
+    },
+    "dsh-bilibili-summary": {
+      "tag": "B站",
+      "needs": [
+        {
+          "kind": "account",
+          "name": "B 站账号",
+          "why": "B 站对未登录客户端隐藏 AI 字幕，不登录就拿不到字幕，只能退回本地转写。"
+        },
+        {
+          "kind": "config",
+          "name": "没字幕的视频要本地转写",
+          "why": "第一次转写会下载语音模型，慢一点是正常的。"
+        }
+      ]
+    },
+    "dsh-qq-persona": {
+      "tag": "QQ",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "先有一个能用的 QQ 通道",
+          "why": "人设和好感度是从聊天记录里长出来的，通道不通就没有数据。"
+        }
+      ]
+    },
+    "@xmanrui/dsh-im": {
+      "tag": "IM 凭据",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "各平台自己的机器人",
+          "why": "Telegram 要 BotFather 的 token、Discord 要 Developer Portal 的 bot、Slack 要 App Manifest 生成的 token、企业微信要自建应用、WhatsApp 要手机扫码。"
+        },
+        {
+          "kind": "config",
+          "name": "在「设置 → IM机器人」逐个填凭据",
+          "why": "一个平台一条通道，不填的平台不会启动。"
+        }
+      ]
+    }
+  }
+}
+    // #endregion requirements-fallback
+
+    function normalizeRequirements(doc) {
+      const items = doc?.items
+      if (items === null || typeof items !== 'object') return new Map()
+      const map = new Map()
+      for (const [name, entry] of Object.entries(items)) {
+        const needs = Array.isArray(entry?.needs)
+          ? entry.needs.filter((item) => typeof item?.name === 'string' && item.name !== '')
+          : []
+        if (needs.length === 0) continue
+        map.set(name, { tag: typeof entry.tag === 'string' ? entry.tag : '', needs, version: Number(doc?.version ?? 0) })
+      }
+      return map
+    }
+
+    async function loadRequirementsFile() {
+      const builtin = normalizeRequirements(REQUIREMENTS_FALLBACK)
+      try {
+        const response = await fetch(`${REQUIREMENTS_URL}?t=${String(Date.now())}`, {
+          headers: { accept: 'application/json', 'cache-control': 'no-cache' },
+          cache: 'no-store',
+          signal: AbortSignal.timeout(8000)
+        })
+        if (!response.ok) throw new Error(`HTTP ${String(response.status)}`)
+        const map = normalizeRequirements(await response.json())
+        if (map.size === 0) throw new Error('远端 requirements.json 为空')
+        return map.size < builtin.size ? builtin : map
+      } catch (error) {
+        console.warn(LOG, 'requirements fetch failed, using built-in copy:', messageOf(error))
+        return builtin
+      }
+    }
+
     /** 场景套装：跟索引放在同一个静态目录里，改数据不用重装插件。 */
     const SUITES_URL = 'https://xivie-a.github.io/dsh-market/suites.json'
 
@@ -2098,6 +2379,12 @@ window.__ModuleLoader__.load({
       const [suitePicked, setSuitePicked] = React.useState(new Set())
       const [favs, setFavs] = React.useState(readFavs)
       const [favOnly, setFavOnly] = React.useState(false)
+      // 安装前要准备的东西（NapCat / QQ / B站账号…），远端优先，内置兜底
+      const [needs, setNeeds] = React.useState(() => normalizeRequirements(REQUIREMENTS_FALLBACK))
+      const [gate, setGate] = React.useState(undefined)
+      const gateBypass = React.useRef(false)
+      const needsOf = (entry) => needs.get(entry?.name)?.needs ?? []
+      const needsTag = (entry) => needs.get(entry?.name)?.tag ?? ''
       const toggleFav = (name, event) => {
         event.stopPropagation()
         const adding = !favs.has(name)
@@ -2204,6 +2491,13 @@ window.__ModuleLoader__.load({
       React.useEffect(() => {
         let alive = true
         void loadSuitesFile().then((list) => { if (alive) setSuites(list) })
+        return () => { alive = false }
+      }, [])
+
+      // 安装前提示数据；拉不到就用内置那份
+      React.useEffect(() => {
+        let alive = true
+        void loadRequirementsFile().then((map) => { if (alive) setNeeds(map) })
         return () => { alive = false }
       }, [])
 
@@ -2362,7 +2656,26 @@ window.__ModuleLoader__.load({
         throw new Error(t('removeUnsupported'))
       }
 
+      /**
+       * 装之前先拦一下：这些插件要靠外部软件 / 账号 / 设置才能跑，
+       * 不提示的话用户装完只会觉得「装了没用」。
+       * 返回 true 表示已经弹出提示，调用方应直接 return。
+       */
+      const askFirst = (rows, run) => {
+        if (rows.length === 0) return false
+        if (gateBypass.current) {
+          gateBypass.current = false
+          return false
+        }
+        setGate({ rows, run })
+        return true
+      }
+      const gateRowsFor = (list) => list
+        .map((entry) => ({ entry, needs: needsOf(entry), tag: needsTag(entry) }))
+        .filter((row) => row.needs.length > 0)
+
       async function install(entry, versionOverride) {
+        if (askFirst(gateRowsFor([entry]), () => void install(entry, versionOverride))) return
         setBusy(entry.name)
         setNotice(undefined)
         try {
@@ -2546,6 +2859,14 @@ window.__ModuleLoader__.load({
             : fallback === undefined
               ? null
               : h('span', { className: 'dm-compat dm-compat--ok', title: `${t('compatUse')} v${fallback.version}` }, `${t('compatUse')} v${fallback.version}`)
+        // 装之前要准备外部东西的插件，卡片上先透个口风
+        const needTag = needsTag(entry)
+        const needsBadge = needTag === '' || settled
+          ? null
+          : h('span', {
+            className: 'dm-needs',
+            title: needsOf(entry).map((need) => need.name).join(' / ')
+          }, `${t('needsTag')} ${needTag}`)
         const label = busy === entry.name
           ? t('installing')
           : status === 'installed' ? t('installed')
@@ -2589,7 +2910,7 @@ window.__ModuleLoader__.load({
             thumb,
             h('div', { className: 'dm-titles' },
               h('h3', { className: 'dm-title', title }, title),
-              h('div', { className: 'dm-cat' }, categoryLabel, compatBadge)),
+              h('div', { className: 'dm-cat' }, categoryLabel, compatBadge, needsBadge)),
             h('button', {
               className: 'dm-fav',
               type: 'button',
@@ -2716,6 +3037,7 @@ window.__ModuleLoader__.load({
 
       const installMany = async (list) => {
         if (suiteRunning) return
+        if (askFirst(gateRowsFor(list.map((item) => item.entry)), () => void installMany(list))) return
         setSuiteRunning(true)
         const pending = list.filter((item) => !isInstalled(item.entry))
         for (const item of pending) {
@@ -2870,6 +3192,17 @@ window.__ModuleLoader__.load({
               className: 'dm-close', type: 'button', 'aria-label': t('close'), onClick: () => setSelected(undefined)
             }, '×')),
           h('p', { className: 'dm-detail-desc' }, pick(entry.description, '')),
+          needsOf(entry).length === 0 ? null : h('div', { className: 'dm-needs-box' },
+            h('strong', { className: 'dm-needs-title' }, t('needsDrawer')),
+            ...needsOf(entry).map((need, index) => h('div', { className: 'dm-needs-row', key: String(index) },
+              h('span', { className: `dm-gate-kind dm-gate-kind--${need.kind ?? 'app'}` },
+                need.kind === 'account' ? t('needsKindAccount') : need.kind === 'config' ? t('needsKindConfig') : t('needsKindApp')),
+              h('div', { className: 'dm-needs-body' },
+                h('strong', null, need.name),
+                need.why === undefined ? null : h('p', null, need.why),
+                need.url === undefined ? null : h('a', {
+                  className: 'dm-gate-link', href: need.url, target: '_blank', rel: 'noreferrer noopener'
+                }, `${t('needsOpen')} ↗`))))),
           (() => {
             const compat = compatibilityOf(entry, dshVersion)
             if (!compat.known || compat.defaultOk) return null
@@ -3274,6 +3607,52 @@ window.__ModuleLoader__.load({
               h('span', null, h('kbd', null, 'Enter'), ' ', t('paletteOpen')),
               h('span', null, h('kbd', null, 'Esc'), ' ', t('paletteClose')))))
           : null,
+        gate === undefined ? null : h('div', {
+          className: 'dm-suite-mask',
+          onClick: (event) => { if (event.target === event.currentTarget) setGate(undefined) }
+        },
+        h('div', { className: 'dm-dialog dm-gate', role: 'dialog', 'aria-modal': 'true' },
+          h('div', { className: 'dm-suite-head' },
+            h('div', null,
+              h('span', { className: 'dm-suite-eyebrow' }, t('needsEyebrow')),
+              h('h2', null, t('needsTitle'))),
+            h('button', {
+              className: 'dm-close', type: 'button', 'aria-label': t('close'), onClick: () => setGate(undefined)
+            }, '×')),
+          h('p', { className: 'dm-gate-note' }, t('needsNote')),
+          h('div', { className: 'dm-gate-list' }, ...gate.rows.map((row) => h('div', { className: 'dm-gate-item', key: row.entry.name },
+            h('div', { className: 'dm-gate-item-head' },
+              thumbOf(row.entry, pick(row.entry.title, row.entry.name)),
+              h('strong', null, pick(row.entry.title, row.entry.name)),
+              row.tag === '' ? null : h('span', { className: 'dm-gate-tag' }, row.tag)),
+            ...row.needs.map((need, index) => h('div', { className: 'dm-gate-need', key: `${row.entry.name}:${String(index)}` },
+              h('span', { className: `dm-gate-kind dm-gate-kind--${need.kind ?? 'app'}` },
+                need.kind === 'account' ? t('needsKindAccount') : need.kind === 'config' ? t('needsKindConfig') : t('needsKindApp')),
+              h('div', { className: 'dm-gate-need-body' },
+                h('strong', null, need.name),
+                need.why === undefined ? null : h('p', null, need.why),
+                need.url === undefined ? null : h('a', {
+                  className: 'dm-gate-link',
+                  href: need.url,
+                  target: '_blank',
+                  rel: 'noreferrer noopener'
+                }, `${t('needsOpen')} ↗`)))))),
+          h('div', { className: 'dm-gate-foot' },
+            h('span', null, gate.rows.length > 1 ? `${gate.rows.length} ${t('plugins')}` : ''),
+            h('div', { className: 'dm-gate-actions' },
+              h('button', {
+                className: 'dm-btn', type: 'button', onClick: () => setGate(undefined)
+              }, t('needsCancel')),
+              h('button', {
+                className: 'dm-btn dm-btn--primary',
+                type: 'button',
+                onClick: () => {
+                  const run = gate.run
+                  gateBypass.current = true
+                  setGate(undefined)
+                  if (run !== undefined) run()
+                }
+              }, t('needsConfirm'))))))),
         notice === undefined ? null : h('div', { className: `dm-toast dm-toast--${notice.kind}`, role: 'status' },
           h('span', null, notice.text),
           h('button', {

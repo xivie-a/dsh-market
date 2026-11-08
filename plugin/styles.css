@@ -501,6 +501,90 @@
 .dm-compat--bad { background: color-mix(in srgb, #c05050 12%, transparent); color: #b6463f; }
 .dm-compat--ok { background: var(--tint); color: var(--accent); }
 
+/* ==========================================================================
+   安装前提示：这些插件要靠外部软件 / 账号 / 设置才能跑
+   ========================================================================== */
+.dm-needs {
+  margin-left: 6px; padding: 1px 6px; border-radius: 5px;
+  background: color-mix(in srgb, #c08a2e 14%, transparent);
+  color: #9a6a1c;
+  font-size: 9.5px; font-weight: 600; letter-spacing: .02em;
+  vertical-align: middle; white-space: nowrap;
+}
+.dm-root[data-theme="dark"] .dm-needs { background: rgba(208, 154, 60, .18); color: #e9be78; }
+
+/* 详情抽屉里的那一块 */
+.dm-needs-box {
+  padding: 12px 13px; border-radius: 12px;
+  border: 1px solid color-mix(in srgb, #c08a2e 26%, var(--line));
+  background: color-mix(in srgb, #c08a2e 5%, transparent);
+}
+.dm-needs-title {
+  display: block; margin-bottom: 8px;
+  color: #9a6a1c; font-size: 11.5px; font-weight: 700; letter-spacing: .02em;
+}
+.dm-root[data-theme="dark"] .dm-needs-title { color: #e9be78; }
+.dm-needs-row { display: flex; align-items: flex-start; gap: 9px; padding: 6px 0; }
+.dm-needs-row + .dm-needs-row { border-top: 1px dashed color-mix(in srgb, #c08a2e 20%, var(--line)); }
+.dm-needs-body { min-width: 0; }
+.dm-needs-body strong { display: block; font-size: 12px; font-weight: 600; color: var(--text); }
+.dm-needs-body p { margin: 3px 0 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+
+.dm-gate-kind {
+  flex: none; min-width: 34px; padding: 2px 6px; border-radius: 6px;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .04em; text-align: center;
+  background: color-mix(in srgb, #c08a2e 14%, transparent); color: #9a6a1c;
+}
+.dm-gate-kind--account { background: color-mix(in srgb, #2f6fb0 12%, transparent); color: #2f6fb0; }
+.dm-gate-kind--config { background: var(--tint); color: var(--accent); }
+.dm-root[data-theme="dark"] .dm-gate-kind { background: rgba(208, 154, 60, .18); color: #e9be78; }
+.dm-root[data-theme="dark"] .dm-gate-kind--account { background: rgba(90, 150, 220, .18); color: #8fbce8; }
+.dm-root[data-theme="dark"] .dm-gate-kind--config { background: var(--tint); color: var(--accent); }
+
+.dm-gate-link {
+  display: inline-block; margin-top: 4px;
+  color: var(--accent); font-size: 11px; font-weight: 600; text-decoration: none;
+}
+.dm-gate-link:hover { text-decoration: underline; }
+
+/* 安装前的拦截弹窗：和套装弹窗同一套定位与动画，窄一点 */
+.dm-gate {
+  position: fixed; z-index: 77; top: 50%; left: 50%;
+  display: flex; flex-direction: column;
+  width: min(620px, calc(100vw - 48px)); max-height: 86vh;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--line); border-radius: 20px;
+  background: var(--panel);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .3);
+  overflow: hidden;
+  animation: dm-dialog-in .26s cubic-bezier(.2, .7, .3, 1) both;
+}
+.dm-gate .dm-suite-head { padding: 20px 22px 12px; }
+.dm-gate-note { margin: 0 22px 12px; color: var(--muted); font-size: 12px; line-height: 1.7; }
+.dm-gate-list { display: grid; gap: 12px; padding: 0 22px 18px; overflow-y: auto; }
+.dm-gate-item {
+  padding: 12px 13px; border-radius: 12px;
+  border: 1px solid var(--line); background: color-mix(in srgb, var(--panel) 92%, var(--bg));
+}
+.dm-gate-item-head { display: flex; align-items: center; gap: 9px; margin-bottom: 8px; }
+.dm-gate-item-head strong { font-size: 13px; font-weight: 600; }
+.dm-gate-tag {
+  padding: 1px 6px; border-radius: 5px;
+  background: color-mix(in srgb, #c08a2e 14%, transparent); color: #9a6a1c;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .02em;
+}
+.dm-root[data-theme="dark"] .dm-gate-tag { background: rgba(208, 154, 60, .18); color: #e9be78; }
+.dm-gate-need { display: flex; align-items: flex-start; gap: 9px; padding: 7px 0 0; }
+.dm-gate-need-body { min-width: 0; }
+.dm-gate-need-body strong { display: block; font-size: 12.5px; font-weight: 600; color: var(--text); }
+.dm-gate-need-body p { margin: 3px 0 0; color: var(--muted); font-size: 11.5px; line-height: 1.65; }
+.dm-gate-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: auto 0 0; padding: 13px 22px;
+  border-top: 1px solid var(--line); color: var(--muted); font-size: 11px;
+}
+.dm-gate-actions { display: flex; gap: 8px; }
+
 /* 详情里的不兼容提示条 */
 .dm-compat-bar {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;

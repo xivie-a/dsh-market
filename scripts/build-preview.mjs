@@ -260,6 +260,15 @@ const HARNESS = String.raw`
     }, 400)
   }
   // ?selectName=<关键字> 按文案打开详情，避免依赖顺序
+  if (params.has('q')) {
+    setTimeout(() => {
+      const input = document.querySelector('.dm-search')
+      if (input === null) return
+      const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
+      setter?.call(input, params.get('q'))
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+    }, 500)
+  }
   if (params.has('selectName')) {
     const needle = params.get('selectName')
     setTimeout(() => {
@@ -267,6 +276,24 @@ const HARNESS = String.raw`
         if (card.textContent.includes(needle)) { card.click(); return }
       }
     }, 500)
+  }
+  // ?gate=<关键字> 点某张卡的安装按钮，抓「装之前先准备」弹窗
+  if (params.has('gate')) {
+    const needle = params.get('gate')
+    setTimeout(() => {
+      for (const card of document.querySelectorAll('.dm-card')) {
+        if (!card.textContent.includes(needle)) continue
+        const button = card.querySelector('.dm-btn--primary')
+        document.title = 'GATE:found,btn=' + String(Boolean(button))
+        button?.click()
+        return
+      }
+      document.title = 'GATE:nocard'
+    }, 600)
+    setTimeout(() => {
+      document.title += ' open=' + String(document.querySelectorAll('.dm-gate').length)
+        + ' dialog=' + String(document.querySelectorAll('[role=dialog]').length)
+    }, 1600)
   }
 `
 

@@ -43,6 +43,8 @@ jobs:
           if [ -d icons ]; then cp -r icons dist/; fi
           # 场景套装：和市场插件一起发布，改 suites.json 不用重装插件
           if [ -f suites.json ]; then cp suites.json dist/; fi
+          # 安装前准备：同上，改 requirements.json 即时生效
+          if [ -f requirements.json ]; then cp requirements.json dist/; fi
           EXTRA=""
           if [ -f overrides.json ]; then EXTRA="--overrides overrides.json"; fi
           # 改这里的标题 / 描述 / 排序键

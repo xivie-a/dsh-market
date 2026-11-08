@@ -1,0 +1,128 @@
+{
+  "version": 1,
+  "note": "插件装完还要自己准备的外部条件：不是 npm 依赖，装不上或者装上没反应，多半是这里缺了东西。",
+  "items": {
+    "dsh-onebot-qq": {
+      "tag": "NapCat",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "NapCat.Shell（或任意 OneBot 11 实现）",
+          "why": "QQ 通道本身只是「接电话」的那一端，真正的 QQ 登录和收发消息由 NapCat 完成。",
+          "url": "https://github.com/NapNeko/NapCatQQ/releases"
+        },
+        {
+          "kind": "account",
+          "name": "一个 QQ 号",
+          "why": "扫码登录到 NapCat 之后，这个号的消息才会转到 DSH。"
+        },
+        {
+          "kind": "config",
+          "name": "在「设置 → NapCat 桥」填 NapCat 目录",
+          "why": "不填路径前缀，看门狗认不出进程，会一直卡在 dedupe-blocked，扫码页也不会出码。"
+        }
+      ]
+    },
+    "@zaofan/dsh-qqbot": {
+      "tag": "QQ 机器人",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "QQ 开放平台的机器人应用",
+          "why": "去 q.qq.com 建一个机器人，拿到 AppID / AppSecret；它走官方 API，不需要 NapCat。"
+        },
+        {
+          "kind": "account",
+          "name": "机器人所在的群或好友",
+          "why": "要先把这个机器人拉进群 / 加好友，它才收得到消息。"
+        },
+        {
+          "kind": "config",
+          "name": "把 OpenID 填进「允许操作的主人」",
+          "why": "不填的话发图、撤消息、群管理这些指令会被拒。"
+        }
+      ]
+    },
+    "dsh-napcat-keeper": {
+      "tag": "NapCat",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "NapCat.Shell",
+          "why": "这个插件只负责「掉线了把它拉回来」，它自己不带 QQ 协议实现。",
+          "url": "https://github.com/NapNeko/NapCatQQ/releases"
+        },
+        {
+          "kind": "account",
+          "name": "一个 QQ 号",
+          "why": "第一次要扫码，之后靠看门狗维持在线。"
+        }
+      ]
+    },
+    "@seiuna/dsh-bilibili-plugin": {
+      "tag": "B站",
+      "needs": [
+        {
+          "kind": "account",
+          "name": "B 站账号",
+          "why": "在「设置 → B站工具包」扫一次码，之后抓字幕、看视频信息都用这份登录态。"
+        }
+      ]
+    },
+    "dsh-bilibili-plugin": {
+      "tag": "B站",
+      "needs": [
+        {
+          "kind": "account",
+          "name": "B 站账号",
+          "why": "扫码登录后才能读字幕和视频信息。"
+        },
+        {
+          "kind": "config",
+          "name": "要装 0.2.0-rc.2 那版 DSH",
+          "why": "它把 DSH 版本锁死在这个预发布版，版本对不上装上也跑不起来。"
+        }
+      ]
+    },
+    "dsh-bilibili-summary": {
+      "tag": "B站",
+      "needs": [
+        {
+          "kind": "account",
+          "name": "B 站账号",
+          "why": "B 站对未登录客户端隐藏 AI 字幕，不登录就拿不到字幕，只能退回本地转写。"
+        },
+        {
+          "kind": "config",
+          "name": "没字幕的视频要本地转写",
+          "why": "第一次转写会下载语音模型，慢一点是正常的。"
+        }
+      ]
+    },
+    "dsh-qq-persona": {
+      "tag": "QQ",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "先有一个能用的 QQ 通道",
+          "why": "人设和好感度是从聊天记录里长出来的，通道不通就没有数据。"
+        }
+      ]
+    },
+    "@xmanrui/dsh-im": {
+      "tag": "IM 凭据",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "各平台自己的机器人",
+          "why": "Telegram 要 BotFather 的 token、Discord 要 Developer Portal 的 bot、Slack 要 App Manifest 生成的 token、企业微信要自建应用、WhatsApp 要手机扫码。"
+        },
+        {
+          "kind": "config",
+          "name": "在「设置 → IM机器人」逐个填凭据",
+          "why": "一个平台一条通道，不填的平台不会启动。"
+        }
+      ]
+    }
+  }
+}
