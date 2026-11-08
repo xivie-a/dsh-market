@@ -976,6 +976,13 @@
 .dm-suite-need-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .dm-suite-need-body strong { font-size: 11.5px; font-weight: 650; color: var(--text); }
 .dm-suite-need-body p { margin: 0; color: var(--muted); font-size: 10.5px; line-height: 1.6; }
+/* 「发布页」这类次要出口，贴着说明文字走 */
+.dm-need-alt {
+  align-self: flex-start; margin-top: 1px;
+  font-size: 10.5px; color: var(--muted) !important;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.dm-need-alt:hover { color: var(--accent) !important; }
 .dm-suite-warn {
   margin-top: 2px; padding: 8px 10px;
   border-radius: 9px;
@@ -1096,6 +1103,21 @@
   padding: 9px 11px; border-radius: 10px;
   background: rgba(208, 154, 60, .12);
   color: #8a6420; font-size: 11.5px; line-height: 1.65;
+}
+/* 「下载 NapCat 一键包」：比正文重一点，但不抢主按钮 */
+.dm-conn-dl {
+  display: inline-flex; align-items: center; gap: 4px;
+  align-self: flex-start;
+  margin-top: 2px; padding: 6px 11px;
+  border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 999px;
+  color: var(--accent); font-size: 11.5px; font-weight: 600;
+  text-decoration: none;
+  transition: background .18s ease, border-color .18s ease;
+}
+.dm-conn-dl:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-style: solid;
 }
 /* 深色下琥珀色要提亮，否则压在深底上读不清 */
 .dm-root[data-theme="dark"] .dm-conn-pill.is-warn { background: rgba(208, 154, 60, .18); color: #e9be78; }

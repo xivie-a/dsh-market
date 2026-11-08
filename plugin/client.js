@@ -147,6 +147,7 @@ window.__ModuleLoader__.load({
       connStep2: 'DSH 设置 → napcat 桥，填「路径前缀」',
       connStep3: '回来点「重新拉起」，出码就扫',
       connBlocked: '看门狗发现重复进程，但没填路径前缀，杀不掉。填上路径就会自己恢复。',
+      connGetNapcat: '下载 NapCat 一键包',
       connBiliTitle: 'B站工具包',
       connBiliHint: '在 设置 → B站工具包 里扫一次码，之后我就能直接总结视频、抓字幕。',
       connSms: '这次登录要短信验证',
@@ -166,7 +167,8 @@ window.__ModuleLoader__.load({
       needsInline: '还需要',
       download: '下载',
       downloadHint: '装好后自动打开下载页',
-      downloadOn: '装插件时一并打开下载页'
+      downloadOn: '装插件时一并打开下载页',
+      releasePage: '发布页'
     }
     const en = {
       title: 'My Market',
@@ -299,6 +301,7 @@ window.__ModuleLoader__.load({
       connStep2: 'DSH Settings → napcat bridge → set the path prefix',
       connStep3: 'Come back, hit Restart, then scan',
       connBlocked: 'The watchdog found duplicate processes but has no path prefix, so it cannot kill them. Fill the path in and it recovers itself.',
+      connGetNapcat: 'Get the NapCat one-click zip',
       connBiliTitle: 'Bilibili toolkit',
       connBiliHint: 'Scan once in Settings → Bilibili toolkit, then I can summarize videos and pull subtitles.',
       connSms: 'This login needs an SMS code',
@@ -318,7 +321,8 @@ window.__ModuleLoader__.load({
       needsInline: 'also needs',
       download: 'Download',
       downloadHint: 'opens the download page when installing',
-      downloadOn: 'open the download page when installing'
+      downloadOn: 'open the download page when installing',
+      releasePage: 'releases'
     }
 
     const STYLES = `
@@ -1300,6 +1304,13 @@ window.__ModuleLoader__.load({
 .dm-suite-need-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .dm-suite-need-body strong { font-size: 11.5px; font-weight: 650; color: var(--text); }
 .dm-suite-need-body p { margin: 0; color: var(--muted); font-size: 10.5px; line-height: 1.6; }
+/* 「发布页」这类次要出口，贴着说明文字走 */
+.dm-need-alt {
+  align-self: flex-start; margin-top: 1px;
+  font-size: 10.5px; color: var(--muted) !important;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.dm-need-alt:hover { color: var(--accent) !important; }
 .dm-suite-warn {
   margin-top: 2px; padding: 8px 10px;
   border-radius: 9px;
@@ -1420,6 +1431,21 @@ window.__ModuleLoader__.load({
   padding: 9px 11px; border-radius: 10px;
   background: rgba(208, 154, 60, .12);
   color: #8a6420; font-size: 11.5px; line-height: 1.65;
+}
+/* 「下载 NapCat 一键包」：比正文重一点，但不抢主按钮 */
+.dm-conn-dl {
+  display: inline-flex; align-items: center; gap: 4px;
+  align-self: flex-start;
+  margin-top: 2px; padding: 6px 11px;
+  border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 999px;
+  color: var(--accent); font-size: 11.5px; font-weight: 600;
+  text-decoration: none;
+  transition: background .18s ease, border-color .18s ease;
+}
+.dm-conn-dl:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-style: solid;
 }
 /* 深色下琥珀色要提亮，否则压在深底上读不清 */
 .dm-root[data-theme="dark"] .dm-conn-pill.is-warn { background: rgba(208, 154, 60, .18); color: #e9be78; }
@@ -1757,8 +1783,9 @@ window.__ModuleLoader__.load({
       "needs": [
         {
           "kind": "app",
-          "name": "NapCat.Shell（或任意 OneBot 11 实现）",
-          "why": "QQ 通道本身只是「接电话」的那一端，真正的 QQ 登录和收发消息由 NapCat 完成。",
+          "name": "NapCat.Shell 一键包（971 KB）",
+          "why": "点「下载」直接拿 OneKey 那个包，解压后双击，它自己会把本体下完。要挑版本再去发布页。",
+          "download": "https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.Windows.OneKey.zip",
           "url": "https://github.com/NapNeko/NapCatQQ/releases"
         },
         {
@@ -1798,8 +1825,9 @@ window.__ModuleLoader__.load({
       "needs": [
         {
           "kind": "app",
-          "name": "NapCat.Shell",
-          "why": "这个插件只负责「掉线了把它拉回来」，它自己不带 QQ 协议实现。",
+          "name": "NapCat.Shell 一键包（971 KB）",
+          "why": "这个插件只负责「掉线了把它拉回来」，它自己不带 QQ 协议实现，NapCat 得你这边装。",
+          "download": "https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.Windows.OneKey.zip",
           "url": "https://github.com/NapNeko/NapCatQQ/releases"
         },
         {
@@ -2795,13 +2823,19 @@ window.__ModuleLoader__.load({
           need.kind === 'account' ? t('needsKindAccount') : need.kind === 'config' ? t('needsKindConfig') : t('needsKindApp')),
         h('div', { className: 'dm-suite-need-body' },
           h('strong', null, need.name),
-          need.why === undefined ? null : h('p', null, need.why)),
-        need.url === undefined ? null : h('a', {
+          need.why === undefined ? null : h('p', null, need.why),
+          need.download === undefined || need.url === undefined ? null : h('a', {
+            className: 'dm-gate-link dm-need-alt',
+            href: need.url,
+            target: '_blank',
+            rel: 'noreferrer noopener'
+          }, `${t('releasePage')} ↗`)),
+        need.url === undefined && need.download === undefined ? null : h('a', {
           className: 'dm-gate-link dm-need-dl',
-          href: need.url,
+          href: need.download ?? need.url,
           target: '_blank',
           rel: 'noreferrer noopener'
-        }, `${t('download')} ↗`))
+        }, `${need.download === undefined ? t('needsOpen') : t('download')} ↗`))
 
       async function install(entry, versionOverride) {
         if (askFirst(gateRowsFor([entry]), () => void install(entry, versionOverride))) return
@@ -3332,9 +3366,18 @@ window.__ModuleLoader__.load({
               h('div', { className: 'dm-needs-body' },
                 h('strong', null, need.name),
                 need.why === undefined ? null : h('p', null, need.why),
-                need.url === undefined ? null : h('a', {
-                  className: 'dm-gate-link', href: need.url, target: '_blank', rel: 'noreferrer noopener'
-                }, `${t('needsOpen')} ↗`))))),
+                need.download === undefined || need.url === undefined ? null : h('a', {
+                  className: 'dm-gate-link dm-need-alt',
+                  href: need.url,
+                  target: '_blank',
+                  rel: 'noreferrer noopener'
+                }, `${t('releasePage')} ↗`),
+                need.url === undefined && need.download === undefined ? null : h('a', {
+                  className: 'dm-gate-link',
+                  href: need.download ?? need.url,
+                  target: '_blank',
+                  rel: 'noreferrer noopener'
+                }, `${need.download === undefined ? t('needsOpen') : t('download')} ↗`))))),
           (() => {
             const compat = compatibilityOf(entry, dshVersion)
             if (!compat.known || compat.defaultOk) return null
@@ -3665,6 +3708,8 @@ window.__ModuleLoader__.load({
               ? (phase === undefined ? t('connWaiting') : pick({ zh: phase[0], en: phase[1] }, ''))
               : t('connNotRunning')
           const qrSrc = window.__DM_QR_MOCK__ ?? `${CONNECT_QR}?t=${connectStamp}`
+          const napcatHref = (needs.get(CONNECT_BUNDLE)?.needs ?? [])
+            .find((need) => (need.kind ?? 'app') === 'app' && need.download !== undefined)?.download
           const refresh = async () => {
             const next = await readConnectState()
             setConnectState(next)
@@ -3699,6 +3744,12 @@ window.__ModuleLoader__.load({
                         h('li', null, t('connStep2')),
                         h('li', null, t('connStep3')))),
                   blocked ? h('div', { className: 'dm-conn-warn' }, t('connBlocked')) : null,
+                  online || napcatHref === undefined ? null : h('a', {
+                    className: 'dm-conn-dl',
+                    href: napcatHref,
+                    target: '_blank',
+                    rel: 'noreferrer noopener'
+                  }, `${t('connGetNapcat')} ↗`),
                   sms ? h('div', { className: 'dm-conn-warn' }, t('connSms')) : null,
                   h('div', { className: 'dm-conn-actions' },
                     h('button', {

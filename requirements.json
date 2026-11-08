@@ -7,8 +7,9 @@
       "needs": [
         {
           "kind": "app",
-          "name": "NapCat.Shell（或任意 OneBot 11 实现）",
-          "why": "QQ 通道本身只是「接电话」的那一端，真正的 QQ 登录和收发消息由 NapCat 完成。",
+          "name": "NapCat.Shell 一键包（971 KB）",
+          "why": "点「下载」直接拿 OneKey 那个包，解压后双击，它自己会把本体下完。要挑版本再去发布页。",
+          "download": "https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.Windows.OneKey.zip",
           "url": "https://github.com/NapNeko/NapCatQQ/releases"
         },
         {
@@ -48,8 +49,9 @@
       "needs": [
         {
           "kind": "app",
-          "name": "NapCat.Shell",
-          "why": "这个插件只负责「掉线了把它拉回来」，它自己不带 QQ 协议实现。",
+          "name": "NapCat.Shell 一键包（971 KB）",
+          "why": "这个插件只负责「掉线了把它拉回来」，它自己不带 QQ 协议实现，NapCat 得你这边装。",
+          "download": "https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.Windows.OneKey.zip",
           "url": "https://github.com/NapNeko/NapCatQQ/releases"
         },
         {
