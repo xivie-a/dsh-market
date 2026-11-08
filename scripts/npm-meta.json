@@ -676,5 +676,11 @@
     "description": "Bilibili video understanding for DeepSeek Harness: sign in once by QR code, pull a video's AI/CC subtitle track, and summarize it into a self-contained HTML document.",
     "icon": "no-icon-field",
     "iconDetail": "no-icon-field"
+  },
+  "@seiuna/dsh-bilibili-plugin": {
+    "version": "1.0.4",
+    "description": "Bilibili plugin for DeepSeek Harness (DSH)",
+    "icon": "no-icon-field",
+    "iconDetail": "no-icon-field"
   }
 }

@@ -1326,10 +1326,13 @@
         "zh": "B站工具包"
       },
       "description": {
-        "en": "QR login, video search, comments, DMs, fans and danmaku for Bilibili.",
-        "zh": "B 站扫码登录：搜索视频、评论、私信、粉丝、弹幕。"
+        "en": "Bilibili toolkit. Pins dsh-tools to 0.2.0-rc.2 — install only if your DSH matches.",
+        "zh": "B 站工具包。peer 锁死在 0.2.0-rc.2，只在 DSH 版本匹配时能装。"
       },
-      "category": "integrations"
+      "category": "integrations",
+      "labels": [
+        "caution"
+      ]
     },
     "dsh-bilibili-summary": {
       "title": {
@@ -1341,6 +1344,20 @@
         "zh": "把 B 站视频转成可引用的总结：转写加关键帧。"
       },
       "category": "tools"
+    },
+    "@seiuna/dsh-bilibili-plugin": {
+      "title": {
+        "en": "Bilibili (Seiuna)",
+        "zh": "B站接入"
+      },
+      "description": {
+        "en": "Scan-to-login Bilibili: video, comments and messages, with a settings page in the GUI.",
+        "zh": "扫码登录 B 站：视频、评论与私信，界面里自带设置页。"
+      },
+      "category": "integrations",
+      "labels": [
+        "new"
+      ]
     }
   }
 }

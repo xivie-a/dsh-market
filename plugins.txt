@@ -111,3 +111,4 @@ dsh-napcat-keeper
 dsh-qq-persona
 dsh-bilibili-plugin
 dsh-bilibili-summary
+@seiuna/dsh-bilibili-plugin

@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "suites": [
     {
       "id": "big-fish",
@@ -44,9 +44,9 @@
           "note": "一个包覆盖微信/飞书/钉钉/QQ/Telegram/Slack 等 10 个平台"
         },
         {
-          "name": "dsh-bilibili-plugin",
-          "note": "B 站：扫码登录后搜视频、看评论与私信、发弹幕",
-          "group": "channel"
+          "name": "@seiuna/dsh-bilibili-plugin",
+          "group": "channel",
+          "note": "B 站：扫码登录后看视频、评论与私信，兼容性好"
         },
         {
           "name": "dsh-napcat-keeper",
