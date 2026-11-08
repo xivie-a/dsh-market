@@ -55,6 +55,7 @@ async function main() {
   // 1. 内联样式
   if (options.inline && !options.dryRun) {
     execFileSync(process.execPath, [join(root, 'scripts', 'inline-styles.mjs')], { stdio: 'inherit' })
+    execFileSync(process.execPath, [join(root, 'scripts', 'inline-suites.mjs')], { stdio: 'inherit' })
   }
 
   // 2. 只同步运行时会用到的文件（styles.css 已内联，不必复制）

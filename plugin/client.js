@@ -1169,27 +1169,207 @@ window.__ModuleLoader__.load({
     /** 场景套装：跟索引放在同一个静态目录里，改数据不用重装插件。 */
     const SUITES_URL = 'https://xivie-a.github.io/dsh-market/suites.json'
 
+    /**
+     * 内置副本：由 scripts/inline-suites.mjs 从 suites.json 注入。
+     * 远端拉不到（离线、CSP 拦截跨域请求）时用它，保证套装不会整块消失。
+     */
+    // #region suites-fallback
+    const SUITES_FALLBACK = {
+  "version": 2,
+  "suites": [
+    {
+      "id": "big-fish",
+      "glyph": "◍",
+      "label": "让人设活在聊天里",
+      "title": {
+        "zh": "大肥鱼套装",
+        "en": "Big Fish bundle"
+      },
+      "desc": {
+        "zh": "把 DSH 变成一条活在聊天软件里的大肥鱼：有人设、记得住人、能自己去 B 站翻东西。通道按你混的社区选，选一个就够。",
+        "en": "Turn DSH into a persona living inside your chat apps: it knows who it talks to, remembers them, and can browse Bilibili on its own."
+      },
+      "groups": [
+        {
+          "id": "channel",
+          "min": 1,
+          "title": {
+            "zh": "社区通道",
+            "en": "Chat channel"
+          },
+          "hint": {
+            "zh": "至少选一个 —— 你混哪个社区就选哪个，也可以都要",
+            "en": "Pick at least one — choose where you hang out, or take several"
+          }
+        }
+      ],
+      "items": [
+        {
+          "name": "dsh-onebot-qq",
+          "group": "channel",
+          "note": "QQ 私聊与群聊，NapCat / OneBot 11，支持图片语音"
+        },
+        {
+          "name": "dsh-plugin-wechat-agent",
+          "group": "channel",
+          "note": "微信个人号，人设、陪聊、记忆、定时提醒一体"
+        },
+        {
+          "name": "@xmanrui/dsh-im",
+          "group": "channel",
+          "note": "一个包覆盖微信/飞书/钉钉/QQ/Telegram/Slack 等 10 个平台"
+        },
+        {
+          "name": "dsh-napcat-keeper",
+          "note": "随 DSH 启动自动拉起 NapCat，省掉每次手动开机"
+        },
+        {
+          "name": "dsh-qq-persona",
+          "note": "人物画像、好感度、心情；人设存在 ~/.dsh/qq-persona，可手改"
+        },
+        {
+          "name": "billion-context",
+          "note": "压缩上下文，聊一天也不会把窗口撑爆"
+        },
+        {
+          "name": "@huai_xin/dsh-memory",
+          "note": "跨会话长期记忆，YAML 存，可按会话套预设"
+        },
+        {
+          "name": "dsh-bilibili-plugin",
+          "note": "扫码登录 B 站：搜索、评论、私信、粉丝、弹幕"
+        },
+        {
+          "name": "dsh-pet",
+          "note": "桌面上那条吃白饭的蓝色大肥鱼，纯装饰"
+        }
+      ]
+    },
+    {
+      "id": "fresh-look",
+      "glyph": "✳",
+      "label": "每天打开的界面",
+      "title": {
+        "zh": "界面焕新",
+        "en": "Fresh look"
+      },
+      "desc": {
+        "zh": "换一套主题，给侧栏和组件补上细节，让每天打开的界面顺眼一点。",
+        "en": "A theme plus a few finishing touches for the sidebar and widgets."
+      },
+      "items": [
+        {
+          "name": "dsh-dream-skin",
+          "required": true,
+          "note": "主题基础包，其余组件都基于它换色"
+        },
+        {
+          "name": "@linxin666/dsh-client-ui-skin-center",
+          "note": "在一个面板里挑皮肤、预览、切换"
+        },
+        {
+          "name": "dsh-better-sidebar",
+          "note": "侧栏常驻文件和任务入口"
+        },
+        {
+          "name": "dsh-whale-widget",
+          "note": "悬浮挂件显示账户余额与用量"
+        }
+      ]
+    },
+    {
+      "id": "memory-search",
+      "glyph": "∞",
+      "label": "让上一次接得上",
+      "title": {
+        "zh": "记忆与检索",
+        "en": "Memory & search"
+      },
+      "desc": {
+        "zh": "把长对话压住、把历史搜出来，让上一次的结论能直接接到这一次。",
+        "en": "Compress long sessions and search history so earlier conclusions carry over."
+      },
+      "items": [
+        {
+          "name": "billion-context",
+          "required": true,
+          "note": "上下文压缩内核，长对话的基础"
+        },
+        {
+          "name": "misakanet",
+          "note": "检索带证据评级的失败经验"
+        },
+        {
+          "name": "dsh-plugin-session-fulltext",
+          "note": "跨会话全文搜索，支持中文短词"
+        },
+        {
+          "name": "dsh-mnemon",
+          "note": "分层记忆，自动保存项目知识"
+        }
+      ]
+    },
+    {
+      "id": "remote-collab",
+      "glyph": "⊞",
+      "label": "离开这台机器",
+      "title": {
+        "zh": "远程与协作",
+        "en": "Remote & collaboration"
+      },
+      "desc": {
+        "zh": "在手机上接管这台机器，或者让 agent 通过 SSH 去别的机器干活。",
+        "en": "Drive this machine from a phone, or let the agent work over SSH."
+      },
+      "items": [
+        {
+          "name": "@linxin666/dsh-ssh",
+          "required": true,
+          "note": "SSH 通道，其余远程能力依赖它"
+        },
+        {
+          "name": "@linxin666/dsh-remote-web-ui",
+          "note": "用局域网或隧道在手机上打开同一界面"
+        },
+        {
+          "name": "@linxin666/dsh-client-ui-task-board",
+          "note": "把 agent 任务放到看板上追踪"
+        }
+      ]
+    }
+  ]
+}
+    // #endregion suites-fallback
+
+    /** 统一成内部形状：支持 items / 旧版 plugins 两种写法。 */
+    function normalizeSuites(doc) {
+      if (!Array.isArray(doc?.suites)) return []
+      return doc.suites
+        .map((suite) => {
+          const items = Array.isArray(suite?.items)
+            ? suite.items
+            : Array.isArray(suite?.plugins)
+              ? suite.plugins.map((name) => ({ name }))
+              : []
+          return { ...suite, items }
+        })
+        .filter((suite) => suite.items.length > 1)
+    }
+
     async function loadSuitesFile() {
       try {
         const response = await fetch(SUITES_URL, {
           headers: { accept: 'application/json' },
           signal: AbortSignal.timeout(8000)
         })
-        if (!response.ok) return []
+        if (!response.ok) throw new Error(`HTTP ${String(response.status)}`)
         const doc = await response.json()
-        if (!Array.isArray(doc?.suites)) return []
-        return doc.suites
-          .map((suite) => {
-            const items = Array.isArray(suite?.items)
-              ? suite.items
-              : Array.isArray(suite?.plugins)
-                ? suite.plugins.map((name) => ({ name }))
-                : []
-            return { ...suite, items }
-          })
-          .filter((suite) => suite.items.length > 1)
-      } catch {
-        return []
+        const list = normalizeSuites(doc)
+        if (list.length > 0) return list
+        throw new Error('远端 suites.json 为空')
+      } catch (error) {
+        console.warn(LOG, 'suites fetch failed, using built-in copy:', messageOf(error))
+        return normalizeSuites(SUITES_FALLBACK)
       }
     }
 

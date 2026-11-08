@@ -59,7 +59,7 @@ const HARNESS = String.raw`
   const realFetch = window.fetch.bind(window)
   window.fetch = (input, init) => {
     const url = String(input)
-    if (url.includes('suites.json') && window.__SUITES__) {
+    if (url.includes('suites.json') && window.__SUITES__ && !new URLSearchParams(location.search).has('nosuites')) {
       return Promise.resolve(new Response(JSON.stringify(window.__SUITES__), {
         status: 200, headers: { 'content-type': 'application/json' }
       }))
