@@ -944,6 +944,12 @@
 }
 .dm-suite-need { display: flex; align-items: flex-start; gap: 9px; }
 .dm-suite-need > .dm-gate-kind { flex: none; margin-top: 1px; }
+/* 需要下载的软件：默认勾上，装插件时顺手打开下载页 */
+.dm-need-check {
+  flex: none; width: 13px; height: 13px; margin: 2px 0 0;
+  accent-color: var(--accent); cursor: pointer;
+}
+.dm-need-dl { flex: none; margin: 0 0 0 auto; align-self: flex-start; white-space: nowrap; }
 .dm-suite-need-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .dm-suite-need-body strong { font-size: 11.5px; font-weight: 650; color: var(--text); }
 .dm-suite-need-body p { margin: 0; color: var(--muted); font-size: 10.5px; line-height: 1.6; }

@@ -163,6 +163,9 @@ window.__ModuleLoader__.load({
       needsConfirm: '我准备好了，继续安装',
       needsDrawer: '安装前准备',
       needsInline: '还需要',
+      download: '下载',
+      downloadHint: '装好后自动打开下载页',
+      downloadOn: '装插件时一并打开下载页'
     }
     const en = {
       title: 'My Market',
@@ -311,6 +314,9 @@ window.__ModuleLoader__.load({
       needsConfirm: 'I have these — install',
       needsDrawer: 'Before you install',
       needsInline: 'also needs',
+      download: 'Download',
+      downloadHint: 'opens the download page when installing',
+      downloadOn: 'open the download page when installing'
     }
 
     const STYLES = `
@@ -1260,6 +1266,12 @@ window.__ModuleLoader__.load({
 }
 .dm-suite-need { display: flex; align-items: flex-start; gap: 9px; }
 .dm-suite-need > .dm-gate-kind { flex: none; margin-top: 1px; }
+/* 需要下载的软件：默认勾上，装插件时顺手打开下载页 */
+.dm-need-check {
+  flex: none; width: 13px; height: 13px; margin: 2px 0 0;
+  accent-color: var(--accent); cursor: pointer;
+}
+.dm-need-dl { flex: none; margin: 0 0 0 auto; align-self: flex-start; white-space: nowrap; }
 .dm-suite-need-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .dm-suite-need-body strong { font-size: 11.5px; font-weight: 650; color: var(--text); }
 .dm-suite-need-body p { margin: 0; color: var(--muted); font-size: 10.5px; line-height: 1.6; }
@@ -2411,6 +2423,9 @@ window.__ModuleLoader__.load({
       const [needs, setNeeds] = React.useState(() => normalizeRequirements(REQUIREMENTS_FALLBACK))
       const [gate, setGate] = React.useState(undefined)
       const gateBypass = React.useRef(false)
+      // 需要下载的软件默认勾选；ackedApps 记下这次会话里已经看过提示的插件
+      const [prepApps, setPrepApps] = React.useState({})
+      const ackedApps = React.useRef(new Set())
       const needsOf = (entry) => needs.get(entry?.name)?.needs ?? []
       const needsTag = (entry) => needs.get(entry?.name)?.tag ?? ''
       const toggleFav = (name, event) => {
@@ -2700,10 +2715,57 @@ window.__ModuleLoader__.load({
       }
       const gateRowsFor = (list) => list
         .map((entry) => ({ entry, needs: needsOf(entry), tag: needsTag(entry) }))
-        .filter((row) => row.needs.length > 0)
+        .filter((row) => row.needs.length > 0 && !ackedApps.current.has(row.entry.name))
+      /** 需要下载的软件默认勾上；取消勾选就只提示、不代开页面。 */
+      const prepOn = (name, index) => prepApps[`${name}#${String(index)}`] !== false
+      const togglePrep = (name, index) => {
+        const key = `${name}#${String(index)}`
+        setPrepApps((prev) => ({ ...prev, [key]: prev[key] === false }))
+      }
+      /** 勾着的一并打开下载页，同一个网址只开一次。 */
+      const queueDownloads = (list) => {
+        const urls = new Set()
+        for (const entry of list) {
+          needsOf(entry).forEach((need, index) => {
+            if ((need.kind ?? 'app') !== 'app') return
+            if (need.url === undefined) return
+            if (!prepOn(entry.name, index)) return
+            urls.add(`${entry.name}#${String(index)}|${need.url}`)
+          })
+        }
+        for (const item of urls) {
+          const url = item.slice(item.indexOf('|') + 1)
+          try {
+            window.open(url, '_blank', 'noopener,noreferrer')
+          } catch {
+            // 弹窗被拦就算了，详情里还有链接
+          }
+        }
+      }
+      /** 一条「还缺什么」：软件类带勾选框和下载按钮。 */
+      const needRow = (entry, need, index, key) => h('div', { className: 'dm-suite-need', key }, 
+        (need.kind ?? 'app') !== 'app' ? null : h('input', {
+          type: 'checkbox',
+          className: 'dm-need-check',
+          checked: prepOn(entry.name, index),
+          onChange: () => togglePrep(entry.name, index),
+          'aria-label': `${need.name} · ${t('downloadHint')}`
+        }),
+        h('span', { className: `dm-gate-kind dm-gate-kind--${need.kind ?? 'app'}` },
+          need.kind === 'account' ? t('needsKindAccount') : need.kind === 'config' ? t('needsKindConfig') : t('needsKindApp')),
+        h('div', { className: 'dm-suite-need-body' },
+          h('strong', null, need.name),
+          need.why === undefined ? null : h('p', null, need.why)),
+        need.url === undefined ? null : h('a', {
+          className: 'dm-gate-link dm-need-dl',
+          href: need.url,
+          target: '_blank',
+          rel: 'noreferrer noopener'
+        }, `${t('download')} ↗`))
 
       async function install(entry, versionOverride) {
         if (askFirst(gateRowsFor([entry]), () => void install(entry, versionOverride))) return
+        queueDownloads([entry])
         setBusy(entry.name)
         setNotice(undefined)
         try {
@@ -3066,6 +3128,7 @@ window.__ModuleLoader__.load({
       const installMany = async (list) => {
         if (suiteRunning) return
         if (askFirst(gateRowsFor(list.map((item) => item.entry)), () => void installMany(list))) return
+        queueDownloads(list.map((item) => item.entry))
         setSuiteRunning(true)
         const pending = list.filter((item) => !isInstalled(item.entry))
         for (const item of pending) {
@@ -3433,15 +3496,7 @@ window.__ModuleLoader__.load({
               h('div', { className: 'dm-suite-needs-head' },
                 h('span', null, t('needsInline')),
                 h('em', null, needsTag(item.entry))),
-              ...list.map((need, index) => h('div', { className: 'dm-suite-need', key: String(index) },
-                h('span', { className: `dm-gate-kind dm-gate-kind--${need.kind ?? 'app'}` },
-                  need.kind === 'account' ? t('needsKindAccount') : need.kind === 'config' ? t('needsKindConfig') : t('needsKindApp')),
-                h('div', { className: 'dm-suite-need-body' },
-                  h('strong', null, need.name),
-                  need.why === undefined ? null : h('p', null, need.why),
-                  need.url === undefined ? null : h('a', {
-                    className: 'dm-gate-link', href: need.url, target: '_blank', rel: 'noreferrer noopener'
-                  }, `${t('needsOpen')} ↗`)))))
+              ...list.map((need, index) => needRow(item.entry, need, index, String(index))))
           }
           /** 卡片 + 选中时展开的补充说明，绑在一起免得错位。 */
           const pairOf = (item) => {
@@ -3481,7 +3536,11 @@ window.__ModuleLoader__.load({
                       className: 'dm-btn dm-btn--primary',
                       type: 'button',
                       disabled: !canInstall,
-                      onClick: () => void installMany(picked)
+                      // 展开面板里已经逐条讲过了，这里不再弹一次确认
+                      onClick: () => {
+                        for (const item of picked) ackedApps.current.add(item.name)
+                        void installMany(picked)
+                      }
                     }, suiteRunning ? t('suiteInstalling') : `${t('installSelected')} · ${pending.length}`),
                     // 有分组时「全部获取」会把所有通道都装上，没意义，只留按选择安装
                     groups.length > 0 ? null : h('button', {
@@ -3682,17 +3741,24 @@ window.__ModuleLoader__.load({
               h('strong', null, pick(row.entry.title, row.entry.name)),
               row.tag === '' ? null : h('span', { className: 'dm-gate-tag' }, row.tag)),
             ...row.needs.map((need, index) => h('div', { className: 'dm-gate-need', key: `${row.entry.name}:${String(index)}` },
-              h('span', { className: `dm-gate-kind dm-gate-kind--${need.kind ?? 'app'}` },
+              (need.kind ?? 'app') !== 'app' ? null : h('input', {
+                type: 'checkbox',
+                className: 'dm-need-check',
+                checked: prepOn(row.entry.name, index),
+                onChange: () => togglePrep(row.entry.name, index),
+                'aria-label': `${need.name} · ${t('downloadHint')}`
+              }),
+              h('span', { className: 'dm-gate-kind dm-gate-kind--' + (need.kind ?? 'app') },
                 need.kind === 'account' ? t('needsKindAccount') : need.kind === 'config' ? t('needsKindConfig') : t('needsKindApp')),
               h('div', { className: 'dm-gate-need-body' },
                 h('strong', null, need.name),
-                need.why === undefined ? null : h('p', null, need.why),
-                need.url === undefined ? null : h('a', {
-                  className: 'dm-gate-link',
-                  href: need.url,
-                  target: '_blank',
-                  rel: 'noreferrer noopener'
-                }, `${t('needsOpen')} ↗`)))))),
+                need.why === undefined ? null : h('p', null, need.why)),
+              need.url === undefined ? null : h('a', {
+                className: 'dm-gate-link dm-need-dl',
+                href: need.url,
+                target: '_blank',
+                rel: 'noreferrer noopener'
+              }, `${t('download')} ↗`))))),
           h('div', { className: 'dm-gate-foot' },
             h('span', null, gate.rows.length > 1 ? `${gate.rows.length} ${t('plugins')}` : ''),
             h('div', { className: 'dm-gate-actions' },
