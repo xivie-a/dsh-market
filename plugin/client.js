@@ -2041,8 +2041,8 @@ window.__ModuleLoader__.load({
           "kind": "account",
           "name": "B 站账号",
           "why": {
-            "zh": "在任意会话的标题栏右侧点「登录 B站」胶囊，扫码一次；之后抓字幕、看视频信息都用这份登录态。",
-            "en": "Open any conversation, click the \"Login Bilibili\" pill on the right of the header and scan once."
+            "zh": "在市场里点开「连接」→「B站登录」，扫码一次就行；之后抓字幕、看视频信息都用这份登录态。",
+            "en": "In the market open Connect → Bilibili sign-in and scan once; video info and subtitles then use that session."
           }
         }
       ]
@@ -2069,8 +2069,8 @@ window.__ModuleLoader__.load({
           "kind": "account",
           "name": "B 站账号",
           "why": {
-            "zh": "B 站对未登录客户端隐藏 AI 字幕；先在会话标题栏的「登录 B站」胶囊扫码，否则只能退回本地转写。",
-            "en": "Bilibili hides AI subtitles from signed-out clients. Scan via the header pill first."
+            "zh": "B 站对未登录客户端隐藏 AI 字幕；先在市场「连接」→「B站登录」扫一次码，否则只能退回本地转写。",
+            "en": "Bilibili hides AI subtitles from signed-out clients; sign in from the market first, or fall back to local transcription."
           }
         },
         {
