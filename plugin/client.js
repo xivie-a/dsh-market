@@ -166,6 +166,7 @@ window.__ModuleLoader__.load({
       biliLockedHint: '账号是加密存的，输入本地密码解锁。',
       biliReadyHint: '已登录，之后用得上 B站 的插件都能直接干活了。',
       biliMissingHint: '没找到「B站接入」在跑。先在市场里装上它，再回来点这里。',
+      biliStuckHint: '插件装好了，但它的接口没挂上——上游把挂载名写成了 dsh-bilibili-plugin，而包里是 @seiuna/dsh-bilibili-plugin。修好之后重启 DSH 就行。',
       biliErrorHint: '接口没通。确认插件装好并重启过 DSH，再试一次。',
       biliExpiredHint: '二维码两分钟就过期，换一张再扫。',
       biliDone: '完成',
@@ -339,6 +340,7 @@ window.__ModuleLoader__.load({
       biliLockedHint: 'The account is stored encrypted. Enter the local password to unlock.',
       biliReadyHint: 'Signed in — every Bilibili plugin can work now.',
       biliMissingHint: 'The Bilibili plugin is not running. Install it from the market first.',
+      biliStuckHint: 'Installed, but its API never mounted: the upstream patch uses dsh-bilibili-plugin while the package is @seiuna/dsh-bilibili-plugin. Fix the name and restart DSH.',
       biliErrorHint: 'The API did not answer. Make sure the plugin is installed and DSH restarted.',
       biliExpiredHint: 'Codes expire in two minutes. Grab a new one.',
       biliDone: 'Done',
@@ -4336,7 +4338,7 @@ window.__ModuleLoader__.load({
                     }, t('biliScanNow'))) : null,
                   bili.phase === 'loading' ? h('p', { className: 'dm-bili-lead' }, biliPhaseText('loading')) : null,
                   bili.phase === 'missing' ? h(React.Fragment, null,
-                    h('p', { className: 'dm-bili-lead' }, t('biliMissingHint')),
+                    h('p', { className: 'dm-bili-lead' }, biliInstalled ? t('biliStuckHint') : t('biliMissingHint')),
                     h('button', {
                       className: 'dm-btn', type: 'button', onClick: () => void biliProbe()
                     }, t('connRefresh'))) : null,
