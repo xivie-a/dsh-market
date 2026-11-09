@@ -2004,7 +2004,7 @@ window.__ModuleLoader__.load({
      */
     // #region suites-fallback
     const SUITES_FALLBACK = {
-  "version": 8,
+  "version": 9,
   "suites": [
     {
       "id": "big-fish",
@@ -2041,6 +2041,19 @@ window.__ModuleLoader__.load({
           "hint": {
             "zh": "让它记得住人、记得住事。不选也能跑，只是每句话都从零开始",
             "en": "So it remembers people and threads. Optional, but without it every chat starts from scratch"
+          }
+        },
+        {
+          "id": "video",
+          "min": 0,
+          "preselect": false,
+          "title": {
+            "zh": "看片与分镜",
+            "en": "Video & storyboards"
+          },
+          "hint": {
+            "zh": "让它看得懂视频：长片切成几张分镜图、陪你同步看片。要自备 ffmpeg，不需要就别勾",
+            "en": "So it can read a video: long films cut into storyboards, or watching along with you. Needs ffmpeg"
           }
         }
       ],
@@ -2091,6 +2104,24 @@ window.__ModuleLoader__.load({
         {
           "name": "dsh-bilibili-summary",
           "note": "B 站视频理解：转写加关键帧，产出可引用的总结"
+        },
+        {
+          "name": "dsh-video-storyboard",
+          "required": false,
+          "group": "video",
+          "note": {
+            "zh": "把长视频压成几张分镜图，一个镜头一格，带时间点",
+            "en": "Pack a long video into a few storyboard images, one cell per shot"
+          }
+        },
+        {
+          "name": "dsh-watch-together",
+          "required": false,
+          "group": "video",
+          "note": {
+            "zh": "跟着真实播放位置一起看片，悬浮窗里能出声",
+            "en": "Watch along in sync with real playback, with a talking floating window"
+          }
         }
       ]
     },
@@ -3136,7 +3167,7 @@ window.__ModuleLoader__.load({
           h('div', { className: 'dm-card-top' },
             thumb,
             h('div', { className: 'dm-titles' },
-              h('h3', { className: 'dm-title', title }, title),
+              h('h3', { className: 'dm-title', title: `${title} · ${entry.name}` }, title),
               h('div', { className: 'dm-cat' }, categoryLabel, compatBadge, needsBadge)),
             h('button', {
               className: 'dm-fav',
@@ -3236,7 +3267,7 @@ window.__ModuleLoader__.load({
           entry,
           name: entry.name,
           required: spec.required === true,
-          note: spec.note ?? '',
+          note: pick(spec.note, ''),
           group: spec.group ?? ''
         }
       }).filter(Boolean)
@@ -3246,7 +3277,8 @@ window.__ModuleLoader__.load({
         const picked = new Set(items.filter((item) => item.required
           || (item.group === '' && !isInstalled(item.entry))).map((item) => item.name))
         for (const group of suite?.groups ?? []) {
-          // 每组先替你点第一个；「可以一个都不选」的组只是不强制，不代表默认不选
+          // 每组先替你点第一个；preselect:false 的组除外（比如要自备 ffmpeg 的那组）
+          if (group.preselect === false) continue
           const first = items.find((item) => item.group === group.id && !isInstalled(item.entry))
           if (first !== undefined) picked.add(first.name)
         }

@@ -907,8 +907,8 @@
     },
     "dsh-see-now": {
       "title": {
-        "en": "See now",
-        "zh": "看一眼屏幕"
+        "en": "See Now",
+        "zh": "See Now · 看屏幕"
       },
       "description": {
         "en": "Lets the agent watch your screen live: frames are scored by how much changed and only the different ones get packed into an image, so a still screen costs almost nothing.",
@@ -1368,7 +1368,7 @@
     "dsh-watch-together": {
       "title": {
         "en": "Watch together",
-        "zh": "一起看片"
+        "zh": "陪看"
       },
       "description": {
         "en": "Watch a video with the agent in sync with your real playback: each segment arrives as one storyboard frame plus its subtitles, and the floating window can talk back.",
