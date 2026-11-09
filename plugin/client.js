@@ -85,6 +85,10 @@ window.__ModuleLoader__.load({
       incompatible: '不兼容',
       compatUse: '兼容',
       compatNeed: '要求',
+      checkFail: '这版装不上',
+      checkWarn: '体检有提醒',
+      checkLine: '加载检查',
+      checkOk: '体检通过',
       mustPickOne: '上面这组至少要选一个，才能继续安装',
       appearance: '外观',
       prev: '上一个',
@@ -259,6 +263,10 @@ window.__ModuleLoader__.load({
       incompatible: 'incompatible',
       compatUse: 'fits',
       compatNeed: 'needs',
+      checkFail: "won't load",
+      checkWarn: 'Load check has notes',
+      checkLine: 'Load check',
+      checkOk: 'Load check passed',
       mustPickOne: 'Pick at least one in the group above to continue',
       appearance: 'Appearance',
       prev: 'Previous',
@@ -965,6 +973,23 @@ window.__ModuleLoader__.load({
 .dm-compat-bar span { display: block; margin-top: 2px; color: var(--muted); font-size: 10.5px; line-height: 1.45; }
 .dm-compat-bar > div { min-width: 0; flex: 1 1 auto; }
 .dm-compat-bar .dm-btn { flex: none; min-height: 32px; font-size: 11.5px; white-space: nowrap; }
+
+/* 发布前体检的结论条：和兼容条长得像，但 warn 用中性色，只有真装不上才红 */
+.dm-check {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 11px 13px; margin: 0 0 4px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--tint) 55%, transparent);
+}
+.dm-check strong { display: block; color: var(--accent); font-size: 11.5px; font-weight: 700; }
+.dm-check span { display: block; margin-top: 2px; color: var(--muted); font-size: 10.5px; line-height: 1.45; }
+.dm-check > div { min-width: 0; flex: 1 1 auto; }
+.dm-check--bad {
+  border-color: color-mix(in srgb, #c05050 26%, var(--line));
+  background: color-mix(in srgb, #c05050 8%, transparent);
+}
+.dm-check--bad strong { color: #b6463f; }
 .dm-detail-foot {
   position: sticky; bottom: -24px; z-index: 2;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
@@ -1945,6 +1970,37 @@ window.__ModuleLoader__.load({
         recommended: compatible[0],
         defaultOk: preferredOk && compatible.length > 0
       }
+    }
+
+    /**
+     * 发布前体检的结论（索引里的 metadata.check），只对「体检过的那个版本」有效：
+     * 索引的 latest 换了、体检没跟上，就当没有结论，绝不拿旧结论吓人。
+     */
+    function checkOf(entry) {
+      const check = entry?.metadata?.check
+      if (check === null || typeof check !== 'object') return undefined
+      if (check.version !== entry.defaultVersion) return undefined
+      if (check.status !== 'ok' && check.status !== 'warn' && check.status !== 'fail') return undefined
+      return check
+    }
+
+    const CHECK_REASONS = {
+      'no-dsh-engine': { zh: '作者没声明支持哪些 DSH 版本', en: 'The author did not declare which DSH versions it supports' },
+      'patch-mount': { zh: '挂载名写错了，DSH 找不到这个模块，装了也不会生效', en: 'The bundle patch names a module DSH cannot resolve, so it never mounts' },
+      'patch-missing': { zh: '声明了 patch 文件，但包里没有', en: 'The declared patch file is missing from the package' },
+      'client-missing': { zh: '声明了界面半边，但包里没有', en: 'The declared web half is missing from the package' },
+      'client-duplicate': { zh: '同一个客户端 id 注册了两次，会让网页启动失败', en: 'The same client id registers twice, which breaks web boot' },
+      'client-id-collision': { zh: '界面注册的 id 跟别的插件撞了', en: 'Its client id collides with another plugin' }
+    }
+
+    function checkReasonText(reason) {
+      const known = CHECK_REASONS[reason?.code]
+      if (known !== undefined) return pick(known, '')
+      return typeof reason?.detail === 'string' ? reason.detail : ''
+    }
+
+    function checkSummary(check) {
+      return (check?.reasons ?? []).map(checkReasonText).filter((text) => text !== '').join('；')
     }
 
     /** 快捷搜索用：名称、标题、简介、关键词、作者一起匹配。 */
@@ -3496,14 +3552,20 @@ window.__ModuleLoader__.load({
         // 版本兼容：默认版本装不了但有别的能装，就直接给推荐版本
         const compat = compatibilityOf(entry, dshVersion)
         const fallback = compat.known && !compat.defaultOk ? compat.recommended : undefined
-        const blocked = compat.known && !settled && compat.compatible.length === 0
+        // 体检说这版装不上，就不给装：装完用不了，比装不上更让人窝火
+        const check = settled ? undefined : checkOf(entry)
+        const checkBad = check?.status === 'fail'
+        const checkText = checkBad ? checkSummary(check) : ''
+        const blocked = (compat.known && !settled && compat.compatible.length === 0) || checkBad
         const compatBadge = !compat.known || settled
           ? null
-          : blocked
-            ? h('span', { className: 'dm-compat dm-compat--bad', title: t('compatNone') }, t('incompatible'))
-            : fallback === undefined
-              ? null
-              : h('span', { className: 'dm-compat dm-compat--ok', title: `${t('compatUse')} v${fallback.version}` }, `${t('compatUse')} v${fallback.version}`)
+          : checkBad
+            ? h('span', { className: 'dm-compat dm-compat--bad', title: checkText }, t('checkFail'))
+            : blocked
+              ? h('span', { className: 'dm-compat dm-compat--bad', title: t('compatNone') }, t('incompatible'))
+              : fallback === undefined
+                ? null
+                : h('span', { className: 'dm-compat dm-compat--ok', title: `${t('compatUse')} v${fallback.version}` }, `${t('compatUse')} v${fallback.version}`)
         // 装之前要准备外部东西的插件，卡片上先透个口风
         const needTag = needsTag(entry)
         const needsBadge = needTag === '' || settled
@@ -3517,7 +3579,7 @@ window.__ModuleLoader__.load({
           : status === 'installed' ? t('installed')
             : status === 'update' ? t('update')
               : status === 'provided' ? t('provided')
-                : blocked ? t('incompatible')
+                : blocked ? (checkBad ? t('checkFail') : t('incompatible'))
                   : t('get')
         const action = settled
           ? h('span', { className: 'dm-installed' }, `✓ ${t('added')}`)
@@ -3525,7 +3587,7 @@ window.__ModuleLoader__.load({
             className: 'dm-btn dm-btn--primary',
             type: 'button',
             disabled: busy !== '' || blocked,
-            title: blocked ? t('compatNone') : undefined,
+            title: blocked ? (checkBad ? checkText : t('compatNone')) : undefined,
             onClick: () => void install(entry, fallback?.version)
           }, label)
         const thumb = thumbOf(entry, title)
@@ -3879,6 +3941,17 @@ window.__ModuleLoader__.load({
                 onClick: () => void install(entry, compat.recommended.version)
               }, `${t('installCompat')} v${compat.recommended.version}`))
           })(),
+          (() => {
+            // 发布前体检的结论：装之前就把话说清楚，别等装完用不了
+            const check = checkOf(entry)
+            if (check === undefined || check.status === 'ok') return null
+            const summary = checkSummary(check)
+            const bad = check.status === 'fail'
+            return h('div', { className: `dm-check${bad ? ' dm-check--bad' : ''}` },
+              h('div', null,
+                h('strong', null, bad ? t('checkFail') : t('checkWarn')),
+                h('span', null, summary === '' ? `${t('checkLine')} · v${check.version}` : summary)))
+          })(),
           h('div', { className: 'dm-detail-rows' },
             row(t('author'), entry.author),
             row(t('category'), categories[entry.metadata?.category] ? pick(categories[entry.metadata.category].title, entry.metadata.category) : undefined),
@@ -3903,21 +3976,26 @@ window.__ModuleLoader__.load({
                 return leftBad === rightBad ? left.index - right.index : leftBad - rightBad
               })
             return h('div', { className: 'dm-versions' },
-              ...ordered.slice(0, 10).map(({ version, ok }) => h('div', {
-                className: `dm-version${ok === false ? ' is-bad' : ''}`,
-                key: version.version
-              },
-                h('span', null, `v${version.version}${ok === false ? ` · ${t('incompatible')}` : ''}`),
-                h('span', { className: 'dm-version-side' },
-                  h('em', null, version.publishTimestamp
-                    ? new Date(version.publishTimestamp * 1000).toLocaleDateString('zh-CN')
-                    : ''),
-                  settled || ok === false ? null : h('button', {
-                    className: 'dm-version-install',
-                    type: 'button',
-                    disabled: busy !== '',
-                    onClick: () => void install(entry, version.version)
-                  }, t('install'))))))
+              ...ordered.slice(0, 10).map(({ version, ok }) => {
+                // 体检点名的是哪个版本，版本列表里也把它标掉，别让人从这儿绕过去
+                const verdict = checkOf(entry)
+                const checked = verdict?.status === 'fail' && verdict.version === version.version
+                return h('div', {
+                  className: `dm-version${ok === false || checked ? ' is-bad' : ''}`,
+                  key: version.version
+                },
+                  h('span', null, `v${version.version}${ok === false ? ` · ${t('incompatible')}` : checked ? ` · ${t('checkFail')}` : ''}`),
+                  h('span', { className: 'dm-version-side' },
+                    h('em', null, version.publishTimestamp
+                      ? new Date(version.publishTimestamp * 1000).toLocaleDateString('zh-CN')
+                      : ''),
+                    settled || ok === false || checked ? null : h('button', {
+                      className: 'dm-version-install',
+                      type: 'button',
+                      disabled: busy !== '',
+                      onClick: () => void install(entry, version.version)
+                    }, t('install'))))
+              }))
           })(),
           (() => {
             const related = entries
@@ -3960,17 +4038,20 @@ window.__ModuleLoader__.load({
               : (() => {
                 const compat = compatibilityOf(entry, dshVersion)
                 const fallback = compat.known && !compat.defaultOk ? compat.recommended : undefined
-                const blocked = compat.known && compat.compatible.length === 0
+                // 体检没过的是「最新版」；有兼容的旧版本可以装时就不拦
+                const check = checkOf(entry)
+                const checkBad = check?.status === 'fail' && fallback === undefined
+                const blocked = (compat.known && compat.compatible.length === 0) || checkBad
                 return h('button', {
                   className: 'dm-btn dm-btn--primary',
                   type: 'button',
                   disabled: busy !== '' || blocked,
-                  title: blocked ? t('compatNone') : undefined,
+                  title: blocked ? (checkBad ? checkSummary(check) : t('compatNone')) : undefined,
                   onClick: () => void install(entry, fallback?.version)
                 }, busy === entry.name
                   ? t('installing')
                   : blocked
-                    ? t('incompatible')
+                    ? (checkBad ? t('checkFail') : t('incompatible'))
                     : t('install'))
               })()))
       })()

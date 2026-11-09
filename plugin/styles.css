@@ -597,6 +597,23 @@
 .dm-compat-bar span { display: block; margin-top: 2px; color: var(--muted); font-size: 10.5px; line-height: 1.45; }
 .dm-compat-bar > div { min-width: 0; flex: 1 1 auto; }
 .dm-compat-bar .dm-btn { flex: none; min-height: 32px; font-size: 11.5px; white-space: nowrap; }
+
+/* 发布前体检的结论条：和兼容条长得像，但 warn 用中性色，只有真装不上才红 */
+.dm-check {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 11px 13px; margin: 0 0 4px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--tint) 55%, transparent);
+}
+.dm-check strong { display: block; color: var(--accent); font-size: 11.5px; font-weight: 700; }
+.dm-check span { display: block; margin-top: 2px; color: var(--muted); font-size: 10.5px; line-height: 1.45; }
+.dm-check > div { min-width: 0; flex: 1 1 auto; }
+.dm-check--bad {
+  border-color: color-mix(in srgb, #c05050 26%, var(--line));
+  background: color-mix(in srgb, #c05050 8%, transparent);
+}
+.dm-check--bad strong { color: #b6463f; }
 .dm-detail-foot {
   position: sticky; bottom: -24px; z-index: 2;
   display: flex; align-items: center; justify-content: space-between; gap: 16px;

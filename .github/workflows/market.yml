@@ -36,6 +36,14 @@ jobs:
         with:
           node-version: 22
 
+      - name: 发布前体检
+        # 每个包从 npm 拉下来看：挂载名解析不解析得到、声明的文件在不在、
+        # 有没有声明支持哪些 DSH 版本。结论会写进索引，界面在装之前就告诉用户。
+        run: |
+          node scripts/audit-bundles.mjs \
+            --input plugins.txt \
+            --json dist/audit.json
+
       - name: 生成索引
         # token 只用于读 GitHub API 拿 star；不加会被 Actions 共用出口 IP 限流
         env:
@@ -49,6 +57,8 @@ jobs:
           if [ -f requirements.json ]; then cp requirements.json dist/; fi
           EXTRA=""
           if [ -f overrides.json ]; then EXTRA="--overrides overrides.json"; fi
+          AUDIT=""
+          if [ -f dist/audit.json ]; then AUDIT="--audit dist/audit.json"; fi
           # 改这里的标题 / 描述 / 排序键
           node scripts/build-index.mjs \
             --input plugins.txt \
@@ -57,7 +67,8 @@ jobs:
             --description "社区插件索引，每条人工审核后收录" \
             --downloads \
             --stars \
-            $EXTRA
+            $EXTRA \
+            $AUDIT
 
       - name: 发布前校验
         run: |

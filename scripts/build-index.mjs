@@ -26,6 +26,7 @@ const HELP = `用法: node scripts/build-index.mjs --input <plugins.txt> --outpu
   --title <text>        市场标题（必填）
   --description <text>  市场描述
   --overrides <file>    人工覆盖：标题、描述、分类、图标等
+  --audit <file>        体检结论（scripts/audit-bundles.mjs 输出），写进每个最新版本的 check 字段
   --downloads           抓 npm 近 30 天下载量，作为可排序的 sortKey
   --stars               抓 GitHub star 数，作为可排序的 sortKey
   --max-versions <n>    每个插件最多保留最近的 n 个版本（默认 50，0 表示不限）
@@ -58,6 +59,7 @@ function parseArgs(argv) {
       case '--title': options.title = next(); break
       case '--description': options.description = next(); break
       case '--overrides': options.overrides = next(); break
+      case '--audit': options.audit = next(); break
       case '--registry': options.registry = next(); break
       case '--index-url': options.indexUrl = next(); break
       case '--timeout-ms': options.timeoutMs = Number(next()); break
@@ -281,6 +283,19 @@ async function entryFor(name, doc, context) {
       context.warn(`${name}: 下载量读取失败（${error instanceof Error ? error.message : String(error)}）`)
     }
   }
+  // 体检结论放在 metadata 里：这是索引留给市场的扩展位（sortKeys 也在这儿），
+  // DSH 的市场服务会原样带出来；挂在版本对象上的自定义字段过不了它的解析。
+  const audited = context.audit?.get(name)
+  if (audited !== undefined && audited.status !== undefined && audited.version === versions[0].version) {
+    metadata.check = {
+      version: audited.version,
+      status: audited.status,
+      ...(audited.engine === undefined ? {} : { engine: audited.engine }),
+      reasons: (audited.reasons ?? [])
+        .filter((reason) => reason.code !== 'error')
+        .map((reason) => ({ code: reason.code, detail: reason.detail })),
+    }
+  }
   const repository = override.repository ?? repositoryOf(latest.repository)
   if (context.stars) {
     try {
@@ -317,6 +332,21 @@ async function readOverrides(path) {
   return { metadata: {}, plugins: parsed }
 }
 
+/** 体检结论：包名 → {version, status, reasons, engine}。没有体检文件就是没有结论。 */
+async function readAudit(path) {
+  if (path === undefined) return undefined
+  const parsed = JSON.parse(await readFile(resolve(path), 'utf8'))
+  const rows = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.rows) ? parsed.rows : undefined
+  if (rows === undefined) throw new Error('体检文件必须是数组，或者带 rows 数组的对象')
+  const map = new Map()
+  for (const row of rows) {
+    if (row === null || typeof row !== 'object') continue
+    if (typeof row.name !== 'string' || typeof row.version !== 'string') continue
+    map.set(row.name, row)
+  }
+  return map
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2))
   if (options.help) {
@@ -326,11 +356,13 @@ async function main() {
   const outputDir = dirname(resolve(options.output))
   await mkdir(outputDir, { recursive: true })
   const overrides = await readOverrides(options.overrides)
+  const audit = await readAudit(options.audit)
   const names = readList(await readFile(resolve(options.input), 'utf8'))
   if (names.length === 0) throw new Error(`${options.input} 里没有包名`)
 
   const context = {
     overrides: overrides.plugins,
+    audit,
     outputDir,
     timeoutMs: options.timeoutMs,
     downloads: options.downloads,

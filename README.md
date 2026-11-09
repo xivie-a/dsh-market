@@ -56,6 +56,36 @@ https://xivie-a.github.io/dsh-market/requirements.json
 https://xivie-a.github.io/dsh-market/index.json
 ```
 
+## 上架前的加载检查
+
+除了「版本对不对」，还有一个更要命的问题：**有些包装上了根本不会生效，甚至会把 DSH 拦在启动之前**。
+所以每次重建索引，都会先把每个包从 npm 拉下来体检一遍，结论写进索引，装之前就告诉你：
+
+| 结论 | 什么情况 | 市场怎么做 |
+|---|---|---|
+| 通过 | 挂载名解析得到、声明的文件都在 | 正常显示 |
+| 有提醒 | 没写 `engines.dsh`，谁也不知道它支持哪些版本 | 详情页标「体检有提醒」，照常能装 |
+| 装不上 | 挂载名写错（装了不生效）、声明的 patch 或界面文件缺失 | 详情页标「这版装不上」，按钮置灰，版本列表里那一条也不给装 |
+
+写成这条路是踩过坑的：`@seiuna/dsh-bilibili-plugin@1.0.4` 的 patch 把挂载名写成了裸名
+`dsh-bilibili-plugin`，DSH 解析不到 → 它一直安安静静地不生效。有人（我）手动把名字改对之后，
+DSH 真的去加载它，而它自己那版加载不了，于是开机直接 `web boot: 1 entry did not activate`，
+整台机器进不去。从那以后市场的规矩是：
+
+- **不替用户改别人的插件文件**，只在索引里给结论；
+- 万一还是被某个插件拦住了，市场会在下次启动时读 `crash-*-web-boot.log`，
+  把日志点名的那一个从启用列表里摘掉（等于在插件页点了「停用」，可以一键恢复），
+  绝不留一个「必须手动禁用全部插件才能进来」的局面。
+
+写插件的人可以顺手自查：
+
+```bash
+node scripts/audit-bundles.mjs --input plugins.txt --json dist/audit.json
+node scripts/selftest-host.mjs      # 市场自己的两条保命逻辑
+```
+
+目前 115 个包里，**81 个没声明 `engines.dsh`** —— 这不是市场能替作者补的，只能标出来。
+
 ## 提交插件
 
 **前提**：你的包已经发布到 npm，且 `package.json` 里声明了 `dsh.bundle`。
