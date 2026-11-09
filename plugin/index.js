@@ -182,7 +182,7 @@ function rewriteMountName(text, packageName, mountName) {
   const next = lines.map((line) => {
     const match = /^(\s*(?:-\s*)?name:\s*)(['"]?)([^'"#\s]+)\2(\s*(?:#.*)?)$/.exec(line)
     if (match === null) return line
-    const [, head, quote, value, tail] = match
+    const [, head, , value, tail] = match
     const fixed = value === bare
       ? mountName
       : value.startsWith(`${bare}/`)
@@ -190,7 +190,8 @@ function rewriteMountName(text, packageName, mountName) {
         : undefined
     if (fixed === undefined || fixed === value) return line
     changed.push({ from: value, to: fixed })
-    return `${head}${quote}${fixed}${quote}${tail}`
+    // 一律加引号：YAML 的裸标量不能以 `@` 开头，写成 name: @a/b 会直接解析失败。
+    return `${head}'${fixed.replaceAll("'", "''")}'${tail}`
   })
 
   return { text: next.join('\n'), changed }
@@ -263,10 +264,100 @@ function describe(row) {
     : `${row.package}: 想改成 ${what}，但它这一版加载不了（${row.error}），没动`
 }
 
+/* ---------- 开机保护：被某个插件锁在门外时，把它关掉，让用户永远进得来 ---------- */
+
+/** DSH 自己写的那行，例如 `@seiuna/dsh-bilibili-plugin: import failed (see console ...)`。 */
+const CRASH_LINE = /^([@\w./-]+):\s*import failed/mu
+
+function desktopLogsDirs() {
+  const appData = typeof process.env.APPDATA === 'string' && process.env.APPDATA !== ''
+    ? process.env.APPDATA
+    : join(homedir(), 'AppData', 'Roaming')
+  return [join(appData, '@deepseek-ai', 'dsh-desktop', 'logs')]
+}
+
+async function crashFiles(dir) {
+  const names = await readdir(dir).catch(() => [])
+  return names.filter((name) => name.startsWith('crash-') && name.endsWith('-web-boot.log')).sort()
+}
+
+/** 从 profile 的 bundles 里摘掉一个包 —— 等于在插件页点「停用」，UI 里能一键恢复。 */
+async function disableBundle(profile, packageName) {
+  const file = join(profile, 'package.json')
+  const before = await readFile(file, 'utf8')
+  const parsed = JSON.parse(before)
+  const bundles = parsed?.dsh?.profile?.bundles
+  if (!Array.isArray(bundles) || !bundles.includes(packageName)) return 'not-listed'
+  parsed.dsh.profile.bundles = bundles.filter((item) => item !== packageName)
+  const backup = `${file}.dsh-market.bak`
+  if (!(await exists(backup))) await writeFile(backup, before, 'utf8')
+  await writeFile(file, `${JSON.stringify(parsed, null, 2)}\n`, 'utf8')
+  return 'disabled'
+}
+
+/**
+ * 上一次开机失败时，DSH 会在崩溃日志里点名是哪个 entry 没激活。
+ * 这里只认那一行，不猜：点名的包从 bundles 里摘掉，下次开机就能进来。
+ * 不动别人的代码文件，用户也可以在插件页把它重新打开。
+ */
+export async function guardBoot(root) {
+  if (root === undefined) return []
+  const profile = dirname(root)
+  if (!(await exists(join(profile, 'package.json')))) return []
+
+  const stateFile = join(profile, '.dsh-market', 'boot-guard.json')
+  const state = (await readJson(stateFile)) ?? {}
+  const handled = new Set(Array.isArray(state.handled) ? state.handled : [])
+  const rows = []
+
+  for (const dir of desktopLogsDirs()) {
+    for (const file of await crashFiles(dir)) {
+      if (handled.has(file)) continue
+      const text = await readFile(join(dir, file), 'utf8').catch(() => '')
+      handled.add(file)
+      const match = CRASH_LINE.exec(text)
+      if (match === null) continue
+      const packageName = match[1]
+      // 自家的核心包不归市场管。
+      if (packageName.startsWith('@deepseek-ai/')) continue
+      const status = await disableBundle(profile, packageName).catch(() => 'failed')
+      rows.push({ package: packageName, crash: file, status })
+    }
+  }
+
+  if (rows.length === 0) return rows
+  try {
+    await mkdir(join(profile, '.dsh-market'), { recursive: true })
+    await writeFile(
+      stateFile,
+      `${JSON.stringify({ handled: [...handled], rows: [...(state.rows ?? []), ...rows] }, null, 2)}\n`,
+      'utf8',
+    )
+  } catch {
+    // 记不下来不影响已经做出的处置。
+  }
+  return rows
+}
+
 export function apply(ctx, config = {}) {
   const url = typeof config?.indexUrl === 'string' && config.indexUrl !== '' ? config.indexUrl : INDEX_URL
   const logger = ctx.logger?.('dsh-market-xivie') ?? ctx.logger
   const warn = (what) => (error) => logger?.warn?.(`dsh-market-xivie: ${what}: ${error?.message ?? String(error)}`)
+
+  // 先看上一次是不是被谁拦在门外：是的话先把它关掉，这一开机就能进去。
+  const guardSafely = () => Promise.resolve()
+    .then(async () => {
+      const rows = await guardBoot(await findProfileNodeModules(ctx))
+      for (const row of rows) {
+        logger?.warn?.(
+          `dsh-market-xivie: 上次开机被 ${row.package} 拦住了（${row.status}），已把它停用，重启就能进；想再试可以在插件页重新打开`,
+        )
+      }
+      return rows
+    })
+    .catch(warn('检查上次开机失败原因时出错'))
+
+  void guardSafely()
 
   // 开机先跑一次：用户按提示重启时，白名单里的包已经是对的。
   const healOnce = async () => {
