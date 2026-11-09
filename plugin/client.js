@@ -151,6 +151,7 @@ window.__ModuleLoader__.load({
       connGetNapcat: '下载 NapCat 一键包',
       connBiliTitle: 'B站工具包',
       connBiliHint: '扫一次码就行。市场里直接能扫，不用去找插件自己的入口。',
+      connOnlyBili: '这台机器没装 NapCat 桥，QQ 通道那套用不上。下面是能在这里直接做的事。',
       biliLogin: 'B站登录',
       biliIntro: '装好只是第一步。扫一次码，之后总结视频、抓字幕这些才能真正读到你的权限。',
       biliScanNow: '扫码登录',
@@ -323,6 +324,7 @@ window.__ModuleLoader__.load({
       connGetNapcat: 'Get the NapCat one-click zip',
       connBiliTitle: 'Bilibili toolkit',
       connBiliHint: 'One scan is enough — you can do it right here in the market.',
+      connOnlyBili: 'No NapCat bridge on this machine, so the QQ side does not apply. Here is what you can do right here.',
       biliLogin: 'Bilibili sign-in',
       biliIntro: 'Installing is only half. Scan once so video summaries and subtitles can read your permissions.',
       biliScanNow: 'Scan to sign in',
@@ -1705,6 +1707,11 @@ window.__ModuleLoader__.load({
 .dm-bili-steps li::marker { color: var(--accent); }
 
 .dm-bili-lock { font-size: 26px; line-height: 1; filter: grayscale(0.2); }
+
+/* 只有 B站、没有 NapCat 时收成一栏，别留一大块空白 */
+.dm-conn-body.is-slim { grid-template-columns: minmax(0, 1fr); }
+.dm-conn-body.is-slim .dm-conn-side { flex-direction: row; }
+.dm-conn-body.is-slim .dm-conn-bili { flex: 1 1 auto; }
 `
 
     /** 本地化文本 → 字符串；优先中文，其次英文，其次第一个。 */
@@ -2150,8 +2157,21 @@ window.__ModuleLoader__.load({
       if (items === null || typeof items !== 'object') return new Map()
       const map = new Map()
       for (const [name, entry] of Object.entries(items)) {
+        // 名称和原因允许写成 { zh, en }，这里统一压成当前语言的字符串，
+        // 否则 React 遇到对象会直接抛 #31 把整个面板卸载掉
+        const asText = (value) => (typeof value === 'string'
+          ? value
+          : value !== null && typeof value === 'object'
+            ? pick(value, '')
+            : '')
         const needs = Array.isArray(entry?.needs)
-          ? entry.needs.filter((item) => typeof item?.name === 'string' && item.name !== '')
+          ? entry.needs
+            .map((item) => ({
+              ...item,
+              name: asText(item?.name),
+              why: asText(item?.why)
+            }))
+            .filter((item) => item.name !== '')
           : []
         if (needs.length === 0) continue
         map.set(name, { tag: typeof entry.tag === 'string' ? entry.tag : '', needs, version: Number(doc?.version ?? 0) })
@@ -3064,7 +3084,8 @@ window.__ModuleLoader__.load({
         return () => { alive = false }
       }, [])
 
-      const hasConnector = bundles.has(CONNECT_BUNDLE)
+      const hasNapcat = bundles.has(CONNECT_BUNDLE)
+      const hasConnector = hasNapcat || biliInstalled
 
       // NapCat 桥的状态：面板开着时 3 秒一刷，平时 15 秒；页面在后台就跳过
       React.useEffect(() => {
@@ -3921,6 +3942,13 @@ window.__ModuleLoader__.load({
             settled
               ? h(React.Fragment, null,
                 h('span', { className: 'dm-installed' }, `✓ ${t('installed')}`),
+                entry.name === BILI_BUNDLE
+                  ? h('button', {
+                    className: 'dm-btn',
+                    type: 'button',
+                    onClick: () => setBiliOpen(true)
+                  }, t('biliLogin'))
+                  : null,
                 h('button', {
                   className: 'dm-btn dm-btn--danger',
                   type: 'button',
@@ -4197,8 +4225,9 @@ window.__ModuleLoader__.load({
                 h('button', {
                   className: 'dm-close', type: 'button', 'aria-label': t('close'), onClick: () => setConnectOpen(false)
                 }, '×')),
-              h('div', { className: 'dm-conn-body' },
+              h('div', { className: `dm-conn-body${hasNapcat ? '' : ' is-slim'}` },
                 h('div', { className: 'dm-conn-intro' },
+                  hasNapcat ? h(React.Fragment, null,
                   h('div', { className: `dm-conn-pill${online ? ' is-on' : ready ? ' is-warn' : ' is-off'}` },
                     h('span', { className: 'dm-conn-dot' }), label),
                   h('p', { className: 'dm-conn-lead' }, t('connectIntro')),
@@ -4235,9 +4264,10 @@ window.__ModuleLoader__.load({
                       type: 'button',
                       onClick: () => window.open(CONNECT_PAGE, '_blank', 'noopener')
                     }, t('connOpenPage')),
-                    h('button', { className: 'dm-btn', type: 'button', onClick: () => void refresh() }, t('connRefresh')))),
+                    h('button', { className: 'dm-btn', type: 'button', onClick: () => void refresh() }, t('connRefresh'))))
+                    : h('p', { className: 'dm-conn-lead' }, t('connOnlyBili'))),
                 h('div', { className: 'dm-conn-side' },
-                  h('div', { className: `dm-conn-qr${online ? ' is-on' : ''}` },
+                  hasNapcat ? h('div', { className: `dm-conn-qr${online ? ' is-on' : ''}` },
                     online
                       ? h('div', { className: 'dm-conn-qr-done' },
                         h('strong', null, '✓'),
@@ -4249,7 +4279,7 @@ window.__ModuleLoader__.load({
                           src: qrSrc,
                           alt: t('connQrWait'),
                           onError: (event) => { event.currentTarget.style.display = 'none' }
-                        }))),
+                        }))) : null,
                   h('div', { className: 'dm-conn-bili' },
                     h('strong', null, t('connBiliTitle')),
                     h('p', null, t('connBiliHint')),

@@ -198,7 +198,7 @@ const HARNESS = String.raw`
     if (biliState !== null) {
       list.push({ name: '@seiuna/dsh-bilibili-plugin', installed: true, version: '1.0.4' })
       // 「连接」按钮只在装了 NapCat 桥时出现，预览里补一条
-      if (!list.some((item) => item.name === 'dsh-napcat-keeper')) list.push({ name: 'dsh-napcat-keeper', installed: true, version: '2.9.4' })
+      if (!params.has('noNapcat') && !list.some((item) => item.name === 'dsh-napcat-keeper')) list.push({ name: 'dsh-napcat-keeper', installed: true, version: '2.9.4' })
     }
         return { ok: true, value: list }
       },
