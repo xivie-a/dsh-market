@@ -246,6 +246,12 @@ const HARNESS = String.raw`
       document.querySelectorAll('.dm-suite-card')[Number(params.get('suite')) || 0]?.click()
     }, 600)
   }
+  // ?suite=0&apply=1 打开套装后再点「安装所选」，用来看队列状态
+  if (params.has('apply')) {
+    setTimeout(() => {
+      document.querySelector('.dm-suite-actions .dm-btn--primary')?.click()
+    }, 1400)
+  }
   // ?login=1 打开连接助手（配合 ?loginState=scan|online|blocked）
   if (params.has('login')) {
     setTimeout(() => {

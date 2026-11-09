@@ -893,25 +893,31 @@
     },
     "dsh-video-storyboard": {
       "title": {
-        "en": "Video Storyboard",
+        "en": "Video storyboard",
         "zh": "视频分镜"
       },
       "description": {
-        "en": "Cuts a video into citable storyboard frames, one per shot.",
-        "zh": "把视频切成可引用的分镜图，一个镜头一张。"
+        "en": "Turn a long video into a few storyboard images the agent can actually read: one frame per shot, numbered and time-stamped, so it can quote a moment instead of guessing.",
+        "zh": "把长视频压成几张分镜图：一个镜头一格，带编号和时间点，模型能直接指着某一格说话，而不是猜画面。"
       },
-      "category": "tools"
+      "category": "knowledge",
+      "labels": [
+        "new"
+      ]
     },
     "dsh-see-now": {
       "title": {
-        "en": "See Now",
-        "zh": "实时看屏"
+        "en": "See now",
+        "zh": "看一眼屏幕"
       },
       "description": {
-        "en": "Lets DSH watch a live screen or camera feed and score every frame.",
-        "zh": "让 DSH 看实时屏幕或摄像头画面，逐帧打分。"
+        "en": "Lets the agent watch your screen live: frames are scored by how much changed and only the different ones get packed into an image, so a still screen costs almost nothing.",
+        "zh": "让模型实时看见你的屏幕：按变化量挑帧，只把「画面变了」的那几帧拼成一张图，画面不动就几乎不花 token。"
       },
-      "category": "tools"
+      "category": "tools",
+      "labels": [
+        "new"
+      ]
     },
     "dsh-computer-use-win": {
       "title": {
@@ -1355,6 +1361,20 @@
         "zh": "扫码登录 B 站：视频、评论与私信，界面里自带设置页。"
       },
       "category": "integrations",
+      "labels": [
+        "new"
+      ]
+    },
+    "dsh-watch-together": {
+      "title": {
+        "en": "Watch together",
+        "zh": "一起看片"
+      },
+      "description": {
+        "en": "Watch a video with the agent in sync with your real playback: each segment arrives as one storyboard frame plus its subtitles, and the floating window can talk back.",
+        "zh": "和模型一起看片：跟着真实播放位置走，每段结束前送来一张分镜图加台词，悬浮窗里它还能出声回你。"
+      },
+      "category": "workflow",
       "labels": [
         "new"
       ]

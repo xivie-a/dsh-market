@@ -1025,12 +1025,24 @@
 .dm-suite-queue-head strong { font-size: 12.5px; font-weight: 650; }
 .dm-suite-meter { height: 4px; border-radius: 99px; background: var(--tint); overflow: hidden; }
 .dm-suite-meter span { display: block; height: 100%; border-radius: 99px; background: var(--accent); transition: width .3s ease; }
-.dm-suite-job { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--muted); }
+.dm-suite-job { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 11.5px; color: var(--muted); }
 .dm-suite-job-icon { width: 16px; text-align: center; }
 .dm-suite-job[data-state="done"] .dm-suite-job-icon { color: var(--accent); }
+.dm-suite-job[data-state="restart"] .dm-suite-job-icon { color: #b07d22; }
+.dm-suite-job[data-state="restart"] .dm-suite-job-status { color: #8a6420; }
 .dm-suite-job[data-state="error"] .dm-suite-job-icon { color: #c05050; }
+.dm-suite-job[data-state="error"] .dm-suite-job-status { color: #b6463f; }
 .dm-suite-job-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dm-suite-job-status { flex: none; }
+/* 真失败时把原因摊开，否则只看到「失败」两个字没法排查 */
+.dm-suite-job-note {
+  flex: 1 0 100%;
+  margin: -2px 0 2px 24px;
+  color: color-mix(in srgb, #c05050 78%, var(--muted));
+  font-size: 10.5px; line-height: 1.55;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .dm-suite-state { flex: none; color: var(--muted); font-size: 11px; white-space: nowrap; }
 .dm-suite-state--error { color: #c05050; }
 .dm-btn--danger { background: transparent; color: #b6463f; border: 1px solid color-mix(in srgb, #b6463f 35%, var(--line)); }

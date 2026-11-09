@@ -75,6 +75,7 @@ window.__ModuleLoader__.load({
       suiteBuilding: '正在搭建你的插件套装…',
       suiteReady: '套装已准备好',
       onlyRunning: '正在处理…',
+      restartShort: '重启生效',
       pickable: '可选',
       compatNone: '没有适配当前 DSH 的版本',
       compatMismatch: '版本不匹配',
@@ -229,6 +230,7 @@ window.__ModuleLoader__.load({
       suiteBuilding: 'Building your bundle…',
       suiteReady: 'Bundle ready',
       onlyRunning: 'Working…',
+      restartShort: 'Restart to apply',
       pickable: 'Optional',
       compatNone: 'No version fits this DSH build',
       compatMismatch: 'Version mismatch',
@@ -1353,12 +1355,24 @@ window.__ModuleLoader__.load({
 .dm-suite-queue-head strong { font-size: 12.5px; font-weight: 650; }
 .dm-suite-meter { height: 4px; border-radius: 99px; background: var(--tint); overflow: hidden; }
 .dm-suite-meter span { display: block; height: 100%; border-radius: 99px; background: var(--accent); transition: width .3s ease; }
-.dm-suite-job { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--muted); }
+.dm-suite-job { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 11.5px; color: var(--muted); }
 .dm-suite-job-icon { width: 16px; text-align: center; }
 .dm-suite-job[data-state="done"] .dm-suite-job-icon { color: var(--accent); }
+.dm-suite-job[data-state="restart"] .dm-suite-job-icon { color: #b07d22; }
+.dm-suite-job[data-state="restart"] .dm-suite-job-status { color: #8a6420; }
 .dm-suite-job[data-state="error"] .dm-suite-job-icon { color: #c05050; }
+.dm-suite-job[data-state="error"] .dm-suite-job-status { color: #b6463f; }
 .dm-suite-job-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dm-suite-job-status { flex: none; }
+/* 真失败时把原因摊开，否则只看到「失败」两个字没法排查 */
+.dm-suite-job-note {
+  flex: 1 0 100%;
+  margin: -2px 0 2px 24px;
+  color: color-mix(in srgb, #c05050 78%, var(--muted));
+  font-size: 10.5px; line-height: 1.55;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .dm-suite-state { flex: none; color: var(--muted); font-size: 11px; white-space: nowrap; }
 .dm-suite-state--error { color: #c05050; }
 .dm-btn--danger { background: transparent; color: #b6463f; border: 1px solid color-mix(in srgb, #b6463f 35%, var(--line)); }
@@ -1899,6 +1913,49 @@ window.__ModuleLoader__.load({
           "kind": "config",
           "name": "在「设置 → IM机器人」逐个填凭据",
           "why": "一个平台一条通道，不填的平台不会启动。"
+        }
+      ]
+    },
+    "dsh-video-storyboard": {
+      "tag": "ffmpeg",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "ffmpeg + ffprobe",
+          "why": "抽帧、读时长全靠它，没有的话第一步就报错。装完要重启 DSH 才会用上，也可以在设置里填路径。",
+          "url": "https://ffmpeg.org/download.html"
+        },
+        {
+          "kind": "config",
+          "name": "贴 B站 / YouTube 链接才需要 yt-dlp",
+          "why": "本地文件不用装。跑 pip install --user -U yt-dlp 就行。"
+        }
+      ]
+    },
+    "dsh-see-now": {
+      "tag": "ffmpeg",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "ffmpeg（只在喂视频文件 / 直播源时需要）",
+          "why": "直接看屏幕不用它；插件会自己按 DSH_FFMPEG_PATH、~/.dsh/tools/ffmpeg/bin 这些位置找。",
+          "url": "https://ffmpeg.org/download.html"
+        }
+      ]
+    },
+    "dsh-watch-together": {
+      "tag": "ffmpeg",
+      "needs": [
+        {
+          "kind": "app",
+          "name": "ffmpeg",
+          "why": "出分镜图要用它；没装时能看能写台词，但出不了图。",
+          "url": "https://ffmpeg.org/download.html"
+        },
+        {
+          "kind": "config",
+          "name": "浏览器扩展 + 调试端口",
+          "why": "陪看要从浏览器读真实播放位置和字幕，不装扩展就只能退化成纯音频。"
         }
       ]
     }
@@ -2724,6 +2781,12 @@ window.__ModuleLoader__.load({
         if (!result?.ok) throw new Error(result?.error?.message ?? t('installFailed'))
         const value = result.value ?? {}
         if (value.application === 'failed') {
+          // 装是装上了，只是没当场加载起来（DSH 要重启才会挂新 bundle）。
+          // 这种情况报「失败」会让人以为插件坏了，改判成「重启生效」。
+          const listed = await manager.listBundles?.()
+          const list = Array.isArray(listed) ? listed : listed?.ok ? listed.value : []
+          const landed = Array.isArray(list) && list.some((bundle) => bundle.name === entry.name)
+          if (landed) return { ...value, application: 'restart-required' }
           const pending = Array.isArray(value.pendingBuilds) && value.pendingBuilds.length > 0
           throw new Error(pending ? t('needsApproval') : (value.error?.message ?? t('installFailed')))
         }
@@ -2846,7 +2909,7 @@ window.__ModuleLoader__.load({
           const value = await installEntry(entry, versionOverride)
           setNotice({
             kind: 'ok',
-            text: `${pick(entry.title, entry.name)} · ${value.application === 'restart-required' ? t('restart') : t('installedOk')}`
+            text: `${pick(entry.title, entry.name)} · ${value.application === 'restart-required' || value.application === 'reload-required' ? t('restart') : t('installedOk')}`
           })
           await load()
         } catch (error) {
@@ -3209,8 +3272,9 @@ window.__ModuleLoader__.load({
         for (const item of pending) {
           setSuiteJobs((current) => ({ ...current, [item.name]: 'running' }))
           try {
-            await installEntry(item.entry)
-            setSuiteJobs((current) => ({ ...current, [item.name]: 'done' }))
+            const value = await installEntry(item.entry)
+            const later = value?.application === 'restart-required' || value?.application === 'reload-required'
+            setSuiteJobs((current) => ({ ...current, [item.name]: later ? 'restart' : 'done' }))
           } catch (error) {
             setSuiteJobs((current) => ({ ...current, [item.name]: 'error', [`${item.name}:error`]: messageOf(error) }))
           }
@@ -3526,7 +3590,9 @@ window.__ModuleLoader__.load({
               return next
             })
           }
-          const doneCount = items.filter((item) => isInstalled(item.entry) || suiteJobs[item.name] === 'done').length
+          const doneCount = items.filter((item) => isInstalled(item.entry)
+          || suiteJobs[item.name] === 'done'
+          || suiteJobs[item.name] === 'restart').length
           const groups = suite.groups ?? []
           const missing = missingGroups(items, suite, new Set(picked.map((item) => item.name)))
           const canInstall = missing.length === 0 && pending.length > 0 && !suiteRunning
@@ -3683,17 +3749,22 @@ window.__ModuleLoader__.load({
                     h('span', null, `${doneCount} / ${items.length}`)),
                   h('div', { className: 'dm-suite-meter' },
                     h('span', { style: { width: `${items.length === 0 ? 0 : Math.round(doneCount / items.length * 100)}%` } })),
-                  ...items.filter((item) => suiteJobs[item.name] !== undefined).map((item) => h('div', {
-                    key: item.name,
-                    className: 'dm-suite-job',
-                    'data-state': suiteJobs[item.name]
-                  },
-                    h('span', { className: 'dm-suite-job-icon' }, suiteJobs[item.name] === 'done' ? '✓' : suiteJobs[item.name] === 'error' ? '!' : '◌'),
-                    h('span', { className: 'dm-suite-job-name' }, pick(item.entry.title, item.entry.name)),
-                    h('span', { className: 'dm-suite-job-status' },
-                      suiteJobs[item.name] === 'done' ? t('added')
-                        : suiteJobs[item.name] === 'error' ? t('failed')
-                          : t('onlyRunning')))))
+                  ...items.filter((item) => suiteJobs[item.name] !== undefined).map((item) => {
+                    const state = suiteJobs[item.name]
+                    const reason = suiteJobs[`${item.name}:error`]
+                    return h('div', { key: item.name, className: 'dm-suite-job', 'data-state': state },
+                      h('span', { className: 'dm-suite-job-icon' },
+                        state === 'done' ? '✓' : state === 'restart' ? '↻' : state === 'error' ? '!' : '◌'),
+                      h('span', { className: 'dm-suite-job-name' }, pick(item.entry.title, item.entry.name)),
+                      h('span', { className: 'dm-suite-job-status' },
+                        state === 'done' ? t('added')
+                          : state === 'restart' ? t('restartShort')
+                            : state === 'error' ? t('failed')
+                              : t('onlyRunning')),
+                      state === 'error' && reason !== undefined
+                        ? h('span', { className: 'dm-suite-job-note', title: reason }, reason)
+                        : null)
+                  }))
                 : null))
         })(),
         connectOpen ? (() => {
