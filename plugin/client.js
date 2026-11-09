@@ -150,7 +150,7 @@ window.__ModuleLoader__.load({
       connBlocked: '看门狗发现重复进程，但没填路径前缀，杀不掉。填上路径就会自己恢复。',
       connGetNapcat: '下载 NapCat 一键包',
       connBiliTitle: 'B站工具包',
-      connBiliHint: '在 设置 → B站工具包 里扫一次码，之后我就能直接总结视频、抓字幕。',
+      connBiliHint: '在任意会话的标题栏右侧点「登录 B站」扫一次码，之后我就能直接总结视频、抓字幕。',
       connSms: '这次登录要短信验证',
       connAutoNote: '每天第一次打开市场会提醒一次，连上之后不再打扰。',
       connQrTip: '扫码成功后这一格会自己变绿',
@@ -305,7 +305,7 @@ window.__ModuleLoader__.load({
       connBlocked: 'The watchdog found duplicate processes but has no path prefix, so it cannot kill them. Fill the path in and it recovers itself.',
       connGetNapcat: 'Get the NapCat one-click zip',
       connBiliTitle: 'Bilibili toolkit',
-      connBiliHint: 'Scan once in Settings → Bilibili toolkit, then I can summarize videos and pull subtitles.',
+      connBiliHint: 'Click the “Login Bilibili” pill in any conversation header and scan once, then I can summarize videos and pull subtitles.',
       connSms: 'This login needs an SMS code',
       connAutoNote: 'We remind you once a day until it is connected.',
       connQrTip: 'This panel turns green as soon as the scan lands',
@@ -1857,7 +1857,10 @@ window.__ModuleLoader__.load({
         {
           "kind": "account",
           "name": "B 站账号",
-          "why": "在「设置 → B站工具包」扫一次码，之后抓字幕、看视频信息都用这份登录态。"
+          "why": {
+            "zh": "在任意会话的标题栏右侧点「登录 B站」胶囊，扫码一次；之后抓字幕、看视频信息都用这份登录态。",
+            "en": "Open any conversation, click the \"Login Bilibili\" pill on the right of the header and scan once."
+          }
         }
       ]
     },
@@ -1882,7 +1885,10 @@ window.__ModuleLoader__.load({
         {
           "kind": "account",
           "name": "B 站账号",
-          "why": "B 站对未登录客户端隐藏 AI 字幕，不登录就拿不到字幕，只能退回本地转写。"
+          "why": {
+            "zh": "B 站对未登录客户端隐藏 AI 字幕；先在会话标题栏的「登录 B站」胶囊扫码，否则只能退回本地转写。",
+            "en": "Bilibili hides AI subtitles from signed-out clients. Scan via the header pill first."
+          }
         },
         {
           "kind": "config",
