@@ -150,7 +150,24 @@ window.__ModuleLoader__.load({
       connBlocked: '看门狗发现重复进程，但没填路径前缀，杀不掉。填上路径就会自己恢复。',
       connGetNapcat: '下载 NapCat 一键包',
       connBiliTitle: 'B站工具包',
-      connBiliHint: '在任意会话的标题栏右侧点「登录 B站」扫一次码，之后我就能直接总结视频、抓字幕。',
+      connBiliHint: '扫一次码就行。市场里直接能扫，不用去找插件自己的入口。',
+      biliLogin: 'B站登录',
+      biliIntro: '装好只是第一步。扫一次码，之后总结视频、抓字幕这些才能真正读到你的权限。',
+      biliScanNow: '扫码登录',
+      biliScanTip: '用 B站 App 扫这张码，扫完在手机上点确认。',
+      biliRefreshCode: '换一张',
+      biliPwdTitle: '设一个本地密码',
+      biliPwdHint: '登录凭证会用它加密后再存到这台机器上，以后解锁用。忘了只能重新扫码。',
+      biliPwdOne: '密码',
+      biliPwdTwo: '再输一次',
+      biliSave: '保存',
+      biliUnlock: '解锁',
+      biliLockedHint: '账号是加密存的，输入本地密码解锁。',
+      biliReadyHint: '已登录，之后用得上 B站 的插件都能直接干活了。',
+      biliMissingHint: '没找到「B站接入」在跑。先在市场里装上它，再回来点这里。',
+      biliErrorHint: '接口没通。确认插件装好并重启过 DSH，再试一次。',
+      biliExpiredHint: '二维码两分钟就过期，换一张再扫。',
+      biliDone: '完成',
       connSms: '这次登录要短信验证',
       connAutoNote: '每天第一次打开市场会提醒一次，连上之后不再打扰。',
       connQrTip: '扫码成功后这一格会自己变绿',
@@ -305,7 +322,24 @@ window.__ModuleLoader__.load({
       connBlocked: 'The watchdog found duplicate processes but has no path prefix, so it cannot kill them. Fill the path in and it recovers itself.',
       connGetNapcat: 'Get the NapCat one-click zip',
       connBiliTitle: 'Bilibili toolkit',
-      connBiliHint: 'Click the “Login Bilibili” pill in any conversation header and scan once, then I can summarize videos and pull subtitles.',
+      connBiliHint: 'One scan is enough — you can do it right here in the market.',
+      biliLogin: 'Bilibili sign-in',
+      biliIntro: 'Installing is only half. Scan once so video summaries and subtitles can read your permissions.',
+      biliScanNow: 'Scan to sign in',
+      biliScanTip: 'Open the Bilibili app, scan this code, then confirm on your phone.',
+      biliRefreshCode: 'New code',
+      biliPwdTitle: 'Set a local password',
+      biliPwdHint: 'The credential is encrypted with it and stored on this machine. Lose it and you scan again.',
+      biliPwdOne: 'Password',
+      biliPwdTwo: 'Repeat',
+      biliSave: 'Save',
+      biliUnlock: 'Unlock',
+      biliLockedHint: 'The account is stored encrypted. Enter the local password to unlock.',
+      biliReadyHint: 'Signed in — every Bilibili plugin can work now.',
+      biliMissingHint: 'The Bilibili plugin is not running. Install it from the market first.',
+      biliErrorHint: 'The API did not answer. Make sure the plugin is installed and DSH restarted.',
+      biliExpiredHint: 'Codes expire in two minutes. Grab a new one.',
+      biliDone: 'Done',
       connSms: 'This login needs an SMS code',
       connAutoNote: 'We remind you once a day until it is connected.',
       connQrTip: 'This panel turns green as soon as the scan lands',
@@ -1528,7 +1562,149 @@ window.__ModuleLoader__.load({
   .dm-suite-dialog { width: 100vw; max-height: 100vh; top: 50%; border-radius: 0; }
   .dm-suite-head, .dm-suite-body, .dm-suite-plan, .dm-suite-queue { padding-inline: 16px; }
 }
+
+
+/* ── B站登录 ──────────────────────────────────────────────── */
+.dm-bili-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 84;
+  background: rgba(21, 63, 50, 0.42);
+  animation: dm-fade 0.16s ease-out;
 }
+
+.dm-bili-dialog {
+  position: fixed;
+  z-index: 85;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(720px, calc(100vw - 48px));
+  max-height: 86vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 0 30px 80px rgba(15, 25, 20, 0.24);
+  overflow: hidden;
+  animation: dm-dialog-in 0.26s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.dm-bili-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 22px;
+  padding: 18px 22px 22px;
+  overflow-y: auto;
+}
+
+.dm-bili-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.dm-bili-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  align-self: flex-start;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.dm-bili-lead {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.62;
+  color: var(--muted);
+}
+
+.dm-bili-side { display: flex; }
+
+.dm-bili-qr {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  min-height: 210px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in oklab, var(--tint) 34%, transparent);
+}
+
+.dm-bili-qr img {
+  width: 190px;
+  height: 190px;
+  padding: 6px;
+  border-radius: 10px;
+  background: #fff;
+  object-fit: contain;
+}
+
+.dm-bili-qr.is-on strong { font-size: 34px; line-height: 1; color: var(--accent); }
+.dm-bili-qr.is-on span { font-size: 13px; color: var(--text); }
+.dm-bili-qr.is-idle span { font-size: 12px; color: var(--muted); }
+
+.dm-bili-main > .dm-btn,
+.dm-bili-form > .dm-btn {
+  align-self: flex-start;
+}
+
+.dm-bili-form {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  max-width: 320px;
+}
+
+.dm-bili-form-title { font-size: 13px; }
+
+.dm-bili-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.dm-bili-input:focus { outline: 2px solid color-mix(in oklab, var(--accent) 45%, transparent); outline-offset: 1px; }
+
+.dm-bili-error { font-size: 12px; color: #b6463f; }
+.dm-bili-note { font-size: 12px; color: var(--accent); }
+
+.dm-bili-user { display: flex; align-items: center; gap: 10px; }
+.dm-bili-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+
+@media (max-width: 760px) {
+  .dm-bili-body { grid-template-columns: minmax(0, 1fr); }
+  .dm-bili-side { order: -1; }
+}
+
+
+.dm-bili-steps {
+  margin: 2px 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.dm-bili-steps li::marker { color: var(--accent); }
+
+.dm-bili-lock { font-size: 26px; line-height: 1; filter: grayscale(0.2); }
 `
 
     /** 本地化文本 → 字符串；优先中文，其次英文，其次第一个。 */
@@ -2427,6 +2603,61 @@ window.__ModuleLoader__.load({
       }
     }
 
+    /* ── B站登录 ──────────────────────────────────────────────────
+       @seiuna/dsh-bilibili-plugin 把登录入口放在会话标题栏，有的版本挂不上。
+       它自己的 HTTP API 就挂在同源 /api/bilibili 下，所以在市场里也能直接走完扫码。 */
+    const BILI_BUNDLE = '@seiuna/dsh-bilibili-plugin'
+    const BILI_API = '/api/bilibili'
+    const BILI_STEP = {
+      loading: ['正在申请二维码', 'Requesting a code'],
+      idle: ['还没登录', 'Not signed in'],
+      scan: ['扫码登录', 'Scan to sign in'],
+      scanned: ['已扫码，等手机确认', 'Scanned — confirm on your phone'],
+      expired: ['二维码过期了', 'That code expired'],
+      password: ['设一个本地密码', 'Set a local password'],
+      ready: ['已登录', 'Signed in'],
+      locked: ['账号已加密', 'Account is locked'],
+      missing: ['没找到 B站插件', 'Bilibili plugin not found'],
+      error: ['出了点问题', 'Something went wrong']
+    }
+
+    /** 阶段文案：和 CONNECT_PHASES 一样走 pick，省得再引一份语言判断 */
+    const biliPhaseText = (phase) => {
+      const row = BILI_STEP[phase]
+      return row === undefined ? '' : pick({ zh: row[0], en: row[1] }, '')
+    }
+
+    /** 统一包一层：插件没装、接口没挂上都返回 {missing:true}，界面就能给一句人话。 */
+    async function biliCall(path, init) {
+      try {
+        const response = await fetch(`${BILI_API}${path}`, {
+          credentials: 'same-origin',
+          signal: AbortSignal.timeout(9000),
+          ...init
+        })
+        if (response.status === 404 || response.status === 401) return { missing: true }
+        const value = await response.json()
+        if (value === null || typeof value !== 'object') return { missing: true }
+        return value
+      } catch {
+        return { missing: true }
+      }
+    }
+
+    const biliStatus = () => biliCall('/auth/status')
+    const biliGenerate = () => biliCall('/auth/qrcode/generate', { method: 'POST' })
+    const biliPoll = key => biliCall(`/auth/qrcode/poll?key=${encodeURIComponent(key)}`)
+    const biliSecure = (tempToken, password) => biliCall('/vault/setup-pwd', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ tempToken, password, remember: true })
+    })
+    const biliUnlock = password => biliCall('/vault/unlock', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ password, remember: true })
+    })
+
     const messageOf = error => (error instanceof Error ? error.message : String(error))
 
     /** 给任意 Promise 加一个上限，避免界面一直停在「读取索引」。 */
@@ -2588,6 +2819,133 @@ window.__ModuleLoader__.load({
       // 需要下载的软件默认勾选；ackedApps 记下这次会话里已经看过提示的插件
       const [prepApps, setPrepApps] = React.useState({})
       const ackedApps = React.useRef(new Set())
+      // B站登录：在市场里把扫码、设密码这两步走完，不用去找插件自己的入口
+      const biliInstalled = bundles.has(BILI_BUNDLE)
+      const [biliOpen, setBiliOpen] = React.useState(false)
+      const [bili, setBili] = React.useState({ phase: 'idle' })
+      const [biliPwd, setBiliPwd] = React.useState({ one: '', two: '', error: '', busy: false })
+      const biliRegister = React.useRef({})
+      /** 打开面板时先问一句：已登录 / 已加密待解锁 / 还没登录 / 插件不在 */
+      const biliProbe = async () => {
+        const doc = await biliStatus()
+        if (doc.missing === true) {
+          setBili({ phase: 'missing' })
+          return
+        }
+        const user = doc.user ?? doc.accountSummary ?? undefined
+        if (doc.hasVault === true && doc.isUnlocked === true && user !== undefined) {
+          setBili({ phase: 'ready', user })
+          return
+        }
+        if (doc.hasVault === true && doc.isUnlocked !== true) {
+          setBili({ phase: 'locked', user })
+          return
+        }
+        setBili({ phase: 'idle' })
+      }
+
+      const biliStart = async () => {
+        setBili({ phase: 'loading' })
+        setBiliPwd({ one: '', two: '', error: '', busy: false })
+        const doc = await biliGenerate()
+        if (doc.missing === true) {
+          setBili({ phase: 'missing' })
+          return
+        }
+        if (typeof doc.qrcodeKey !== 'string' || doc.qrcodeKey === '') {
+          setBili({ phase: 'error' })
+          return
+        }
+        setBili({ phase: 'scan', key: doc.qrcodeKey, img: doc.qrcodeDataUrl })
+      }
+
+      const biliSubmitPassword = async (event) => {
+        event?.preventDefault?.()
+        const token = biliRegister.current.tempToken
+        const one = biliPwd.one.trim()
+        if (token === undefined) return
+        if (one.length < 6) {
+          setBiliPwd((current) => ({ ...current, error: pick({ zh: '至少 6 位', en: 'At least 6 characters' }, '') }))
+          return
+        }
+        if (one !== biliPwd.two.trim()) {
+          setBiliPwd((current) => ({ ...current, error: pick({ zh: '两次输入不一样', en: 'The two do not match' }, '') }))
+          return
+        }
+        setBiliPwd((current) => ({ ...current, busy: true, error: '' }))
+        const doc = await biliSecure(token, one)
+        if (doc.missing === true || doc.ok === false) {
+          setBiliPwd((current) => ({ ...current, busy: false, error: pick({ zh: '保存失败，再试一次', en: 'Could not save, try again' }, '') }))
+          return
+        }
+        setBiliPwd({ one: '', two: '', error: '', busy: false })
+        biliRegister.current = {}
+        await biliProbe()
+      }
+
+      const biliSubmitUnlock = async (event) => {
+        event?.preventDefault?.()
+        const one = biliPwd.one.trim()
+        if (one === '') return
+        setBiliPwd((current) => ({ ...current, busy: true, error: '' }))
+        const doc = await biliUnlock(one)
+        if (doc.missing === true || doc.ok === false) {
+          setBiliPwd((current) => ({ ...current, busy: false, error: pick({ zh: '密码不对', en: 'Wrong password' }, '') }))
+          return
+        }
+        setBiliPwd({ one: '', two: '', error: '', busy: false })
+        await biliProbe()
+      }
+
+      /** 扫码期间每 2 秒问一次；扫上就停，过期就停，拿到 tempToken 就转去设密码 */
+      React.useEffect(() => {
+        if (biliOpen !== true || bili.phase !== 'scan') return undefined
+        let stopped = false
+        const timer = window.setInterval(async () => {
+          if (stopped) return
+          const doc = await biliPoll(bili.key)
+          if (stopped || doc.missing === true) return
+          if (doc.status === 'success') {
+            window.clearInterval(timer)
+            if (typeof doc.tempToken === 'string' && doc.tempToken !== '') {
+              biliRegister.current = { tempToken: doc.tempToken }
+              setBili({ phase: 'password', user: doc.user })
+            } else {
+              await biliProbe()
+            }
+            return
+          }
+          if (doc.status === 'expired' || doc.status === 'error') {
+            window.clearInterval(timer)
+            setBili({ phase: doc.status === 'expired' ? 'expired' : 'error' })
+            return
+          }
+          if (doc.status === 'scanned') setBili((current) => (current.phase === 'scan' ? { ...current, scanned: true } : current))
+        }, 2000)
+        return () => {
+          stopped = true
+          window.clearInterval(timer)
+        }
+      }, [biliOpen, bili.phase, bili.key])
+
+      React.useEffect(() => {
+        if (biliOpen !== true) return undefined
+        void biliProbe()
+        return undefined
+      }, [biliOpen])
+
+      React.useEffect(() => {
+        if (biliOpen !== true) return undefined
+        const onKey = (event) => {
+          if (event.key === 'Escape') {
+            setBiliOpen(false)
+            setBili({ phase: 'idle' })
+          }
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+      }, [biliOpen])
+
       const needsOf = (entry) => needs.get(entry?.name)?.needs ?? []
       const needsTag = (entry) => needs.get(entry?.name)?.tag ?? ''
       const toggleFav = (name, event) => {
@@ -3894,8 +4252,121 @@ window.__ModuleLoader__.load({
                         }))),
                   h('div', { className: 'dm-conn-bili' },
                     h('strong', null, t('connBiliTitle')),
-                    h('p', null, t('connBiliHint'))))),
+                    h('p', null, t('connBiliHint')),
+                    biliInstalled
+                      ? h('button', {
+                        className: 'dm-btn', type: 'button', onClick: () => setBiliOpen(true)
+                      }, t('biliLogin'))
+                      : null))),
               h('div', { className: 'dm-conn-foot' }, t('connAutoNote'))))
+        })() : null,
+        biliOpen ? (() => {
+          const step = { get phase() { return biliPhaseText(bili.phase) } }
+          const close = () => {
+            setBiliOpen(false)
+            setBili({ phase: 'idle' })
+            setBiliPwd({ one: '', two: '', error: '', busy: false })
+          }
+          const nickname = bili.user?.name ?? bili.user?.nickname ?? ''
+          const avatar = bili.user?.avatarUrl ?? bili.user?.face ?? ''
+          const field = (key, placeholder) => h('input', {
+            className: 'dm-bili-input',
+            type: 'password',
+            autoComplete: 'off',
+            value: biliPwd[key],
+            placeholder,
+            onChange: (event) => setBiliPwd((current) => ({ ...current, [key]: event.target.value }))
+          })
+          return h(React.Fragment, null,
+            h('div', { className: 'dm-bili-mask', onClick: close }),
+            h('div', {
+              className: 'dm-bili-dialog',
+              role: 'dialog',
+              'aria-modal': 'true',
+              'aria-label': t('biliLogin')
+            },
+              h('div', { className: 'dm-suite-head' },
+                h('div', null,
+                  h('span', { className: 'dm-suite-eyebrow' }, 'BILIBILI'),
+                  h('h2', null, t('biliLogin'))),
+                h('button', { className: 'dm-close', type: 'button', 'aria-label': t('close'), onClick: close }, '×')),
+              h('div', { className: 'dm-bili-body' },
+                h('div', { className: 'dm-bili-main' },
+                  h('div', { className: 'dm-bili-pill' },
+                    h('span', { className: 'dm-conn-dot' }), step.phase === '' ? biliPhaseText('idle') : step.phase),
+                  bili.phase === 'ready'
+                    ? h(React.Fragment, null,
+                      h('p', { className: 'dm-bili-lead' }, t('biliReadyHint')),
+                      h('p', { className: 'dm-bili-note' }, nickname === '' ? t('biliDone') : nickname))
+                    : null,
+                  bili.phase === 'idle' ? h(React.Fragment, null,
+                    h('p', { className: 'dm-bili-lead' }, t('biliIntro')),
+                    h('button', {
+                      className: 'dm-btn dm-btn--primary', type: 'button', onClick: () => void biliStart()
+                    }, t('biliScanNow'))) : null,
+                  bili.phase === 'loading' ? h('p', { className: 'dm-bili-lead' }, biliPhaseText('loading')) : null,
+                  bili.phase === 'missing' ? h(React.Fragment, null,
+                    h('p', { className: 'dm-bili-lead' }, t('biliMissingHint')),
+                    h('button', {
+                      className: 'dm-btn', type: 'button', onClick: () => void biliProbe()
+                    }, t('connRefresh'))) : null,
+                  bili.phase === 'error' || bili.phase === 'expired'
+                    ? h(React.Fragment, null,
+                      h('p', { className: 'dm-bili-lead' }, bili.phase === 'expired' ? t('biliExpiredHint') : t('biliErrorHint')),
+                      h('button', {
+                        className: 'dm-btn dm-btn--primary', type: 'button', onClick: () => void biliStart()
+                      }, t('biliRefreshCode')))
+                    : null,
+                  bili.phase === 'scan' ? h(React.Fragment, null,
+                    h('p', { className: 'dm-bili-lead' }, t('biliScanTip')),
+                    h('ol', { className: 'dm-bili-steps' },
+                      h('li', null, pick({ zh: '手机打开 B站 App', en: 'Open the Bilibili app' }, '')),
+                      h('li', null, pick({ zh: '右上角「扫一扫」', en: 'Tap “Scan” at the top right' }, '')),
+                      h('li', null, pick({ zh: '确认登录，回来这里等进度', en: 'Confirm, then watch this panel' }, ''))),
+                    h('p', { className: 'dm-bili-note' }, pick({
+                      zh: '扫完会让你设一个本地密码，登录凭证加密存在这台机器上。',
+                      en: 'Then you set a local password — the credential is stored encrypted on this machine.'
+                    }, '')),
+                    bili.scanned === true ? h('div', { className: 'dm-bili-note' }, biliPhaseText('scanned')) : null) : null,
+                  bili.phase === 'password' ? h('form', {
+                    className: 'dm-bili-form',
+                    onSubmit: (event) => void biliSubmitPassword(event)
+                  },
+                    h('strong', { className: 'dm-bili-form-title' }, t('biliPwdTitle')),
+                    h('p', { className: 'dm-bili-lead' }, t('biliPwdHint')),
+                    field('one', t('biliPwdOne')),
+                    field('two', t('biliPwdTwo')),
+                    biliPwd.error === '' ? null : h('div', { className: 'dm-bili-error' }, biliPwd.error),
+                    h('button', {
+                      className: 'dm-btn dm-btn--primary', type: 'submit', disabled: biliPwd.busy
+                    }, biliPwd.busy ? t('working') : t('biliSave'))) : null,
+                  bili.phase === 'locked' ? h('form', {
+                    className: 'dm-bili-form',
+                    onSubmit: (event) => void biliSubmitUnlock(event)
+                  },
+                    h('strong', { className: 'dm-bili-form-title' }, biliPhaseText('locked')),
+                    h('p', { className: 'dm-bili-lead' }, t('biliLockedHint')),
+                    field('one', t('biliPwdOne')),
+                    biliPwd.error === '' ? null : h('div', { className: 'dm-bili-error' }, biliPwd.error),
+                    h('button', {
+                      className: 'dm-btn dm-btn--primary', type: 'submit', disabled: biliPwd.busy
+                    }, biliPwd.busy ? t('working') : t('biliUnlock'))) : null),
+                h('div', { className: 'dm-bili-side' },
+                  bili.phase === 'ready' || bili.phase === 'password'
+                    ? h('div', { className: 'dm-bili-qr is-on' },
+                      h('strong', null, '✓'),
+                      h('span', null, nickname === '' ? biliPhaseText(bili.phase) : nickname))
+                    : bili.phase === 'locked'
+                      ? h('div', { className: 'dm-bili-qr is-idle' },
+                        h('strong', { className: 'dm-bili-lock' }, '🔒'),
+                        h('span', null, biliPhaseText('locked')))
+                      : bili.phase === 'scan'
+                      ? h('div', { className: 'dm-bili-qr' },
+                        h('img', { src: bili.img, alt: t('biliScanTip') }),
+                        h('button', {
+                          className: 'dm-btn', type: 'button', onClick: () => void biliStart()
+                        }, t('biliRefreshCode')))
+                      : h('div', { className: 'dm-bili-qr is-idle' }, h('span', null, t('biliScanNow')))))))
         })() : null,
         paletteOpen ? h(React.Fragment, null,
           h('div', { className: 'dm-palette-mask', onClick: () => setPaletteOpen(false) }),

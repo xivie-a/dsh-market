@@ -75,6 +75,22 @@ const HARNESS = String.raw`
   if (previewParams.has('layout')) {
     try { window.localStorage.setItem('dsh-market-xivie:layout', previewParams.get('layout')) } catch {}
   }
+  // 预览里没有真的二维码，用一张画的假码顶上，方便看版式（NapCat 和 B站共用）
+  window.__DM_QR_MOCK__ = (() => {
+      const cells = []
+      for (let y = 0; y < 21; y += 1) {
+        for (let x = 0; x < 21; x += 1) {
+          const corner = (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13)
+          const filled = corner
+            ? (x % 6 === 0 || y % 6 === 0 || (x < 7 && y < 7 && x > 1 && y > 1 && x < 5 && y < 5) || (x > 13 && y < 7 && x > 15 && x < 19 && y > 1 && y < 5))
+            : (x * 7 + y * 13 + x * y) % 3 === 0
+          if (filled) cells.push('<rect x="' + x + '" y="' + y + '" width="1" height="1"/>')
+        }
+      }
+      const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/><g fill="#153f32">' + cells.join('') + '</g></svg>'
+      return 'data:image/svg+xml;base64,' + btoa(svg)
+    })()
+
   // 连接助手：?loginState=scan|online|blocked|none 模拟 NapCat 桥的 /qr-state
   const loginState = previewParams.get('loginState')
     ?? (previewParams.has('login') ? 'scan' : '')
@@ -102,21 +118,34 @@ const HARNESS = String.raw`
       }
       return before(input, init)
     }
-    // 预览里没有真的二维码文件，用一张画的假码顶上，方便看版式
-    window.__DM_QR_MOCK__ = (() => {
-      const cells = []
-      for (let y = 0; y < 21; y += 1) {
-        for (let x = 0; x < 21; x += 1) {
-          const corner = (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13)
-          const filled = corner
-            ? (x % 6 === 0 || y % 6 === 0 || (x < 7 && y < 7 && x > 1 && y > 1 && x < 5 && y < 5) || (x > 13 && y < 7 && x > 15 && x < 19 && y > 1 && y < 5))
-            : (x * 7 + y * 13 + x * y) % 3 === 0
-          if (filled) cells.push('<rect x="' + x + '" y="' + y + '" width="1" height="1"/>')
-        }
+    window.__DM_QR_MOCK__ = window.__DM_QR_MOCK__
+  }
+
+  // B站登录：?biliState=idle|scan|password|ready|missing 模拟 /api/bilibili/*
+  const biliState = previewParams.get('biliState')
+  if (biliState !== null) {
+    const fakeUser = { name: '大肥鱼', avatarUrl: '' }
+    const before = window.fetch
+    window.fetch = (input, init) => {
+      const url = String(input)
+      if (!url.includes('/api/bilibili/')) return before(input, init)
+      const json = (body) => Promise.resolve(new Response(JSON.stringify(body), {
+        status: 200, headers: { 'content-type': 'application/json' }
+      }))
+      if (url.includes('/auth/status')) {
+        if (biliState === 'missing') return Promise.resolve(new Response('{}', { status: 404 }))
+        const ready = biliState === 'ready'
+        return json({ hasVault: ready, isUnlocked: ready, user: ready ? fakeUser : null, accountSummary: null })
       }
-      const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="#fff"/><g fill="#153f32">' + cells.join('') + '</g></svg>'
-      return 'data:image/svg+xml;base64,' + btoa(svg)
-    })()
+      if (url.includes('/auth/qrcode/generate')) {
+        return json({ qrcodeKey: 'preview-key', url: 'https://b23.tv/x', qrcodeDataUrl: window.__DM_QR_MOCK__ })
+      }
+      if (url.includes('/auth/qrcode/poll')) {
+        return json({ code: 0, message: 'ok', status: biliState === 'password' ? 'success' : 'waiting', tempToken: biliState === 'password' ? 'temp-token' : undefined })
+      }
+      if (url.includes('/vault/setup-pwd')) return json({ ok: true, user: fakeUser })
+      return json({ ok: true })
+    }
   }
 
   // 把索引数据补成市场服务会返回的形状
@@ -166,6 +195,11 @@ const HARNESS = String.raw`
           .map((entry) => ({ name: entry.name, installed: true, version: entry.defaultVersion }))
         // 连接助手要看「装没装 NapCat 桥」，预览里按参数伪造一条
         if (loginState !== '') list.push({ name: 'dsh-napcat-keeper', installed: true, version: '2.9.4' })
+    if (biliState !== null) {
+      list.push({ name: '@seiuna/dsh-bilibili-plugin', installed: true, version: '1.0.4' })
+      // 「连接」按钮只在装了 NapCat 桥时出现，预览里补一条
+      if (!list.some((item) => item.name === 'dsh-napcat-keeper')) list.push({ name: 'dsh-napcat-keeper', installed: true, version: '2.9.4' })
+    }
         return { ok: true, value: list }
       },
       inspect: async () => ({ ok: true, value: { status: 'ok' } }),
@@ -251,6 +285,18 @@ const HARNESS = String.raw`
     setTimeout(() => {
       document.querySelector('.dm-suite-actions .dm-btn--primary')?.click()
     }, 1400)
+  }
+  // ?bili=1 先开连接助手，再点卡片里的「B站登录」
+  if (params.has('bili')) {
+    setTimeout(() => {
+      document.querySelector('.dm-conn-btn')?.click()
+    }, 700)
+    setTimeout(() => {
+      document.querySelector('.dm-conn-bili .dm-btn')?.click()
+    }, 1500)
+    setTimeout(() => {
+      document.querySelector('.dm-bili-dialog .dm-btn--primary')?.click()
+    }, 2300)
   }
   // ?login=1 打开连接助手（配合 ?loginState=scan|online|blocked）
   if (params.has('login')) {
