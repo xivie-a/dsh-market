@@ -148,11 +148,11 @@ window.__ModuleLoader__.load({
       connOpenPage: '打开扫码页',
       connRefresh: '刷新状态',
       connStepsTitle: '还差这三步',
-      connStep1: '装 NapCat.Shell，放到纯英文路径',
-      connStep2: 'DSH 设置 → napcat 桥，填「路径前缀」',
+      connStep1: '装 QQ 9.9.36 和 NapCat.Shell（管理员运行 launcher.bat）',
+      connStep2: 'DSH 设置 → napcat 桥，填 NapCat 目录',
       connStep3: '回来点「重新拉起」，出码就扫',
       connBlocked: '看门狗发现重复进程，但没填路径前缀，杀不掉。填上路径就会自己恢复。',
-      connGetNapcat: '下载 NapCat 一键包',
+      connGetNapcat: '下载 NapCat.Shell',
       connBiliTitle: 'B站工具包',
       connBiliHint: '扫一次码就行。市场里直接能扫，不用去找插件自己的入口。',
       connOnlyBili: '这台机器没装 NapCat 桥，QQ 通道那套用不上。下面是能在这里直接做的事。',
@@ -326,11 +326,11 @@ window.__ModuleLoader__.load({
       connOpenPage: 'Open QR page',
       connRefresh: 'Refresh',
       connStepsTitle: 'Three steps left',
-      connStep1: 'Install NapCat.Shell in an ASCII-only path',
-      connStep2: 'DSH Settings → napcat bridge → set the path prefix',
+      connStep1: 'Install QQ 9.9.36 plus NapCat.Shell (run launcher.bat as admin)',
+      connStep2: 'DSH Settings → napcat bridge → set the NapCat folder',
       connStep3: 'Come back, hit Restart, then scan',
       connBlocked: 'The watchdog found duplicate processes but has no path prefix, so it cannot kill them. Fill the path in and it recovers itself.',
-      connGetNapcat: 'Get the NapCat one-click zip',
+      connGetNapcat: 'Get NapCat.Shell',
       connBiliTitle: 'Bilibili toolkit',
       connBiliHint: 'One scan is enough — you can do it right here in the market.',
       connOnlyBili: 'No NapCat bridge on this machine, so the QQ side does not apply. Here is what you can do right here.',
@@ -2038,15 +2038,28 @@ window.__ModuleLoader__.load({
       "needs": [
         {
           "kind": "app",
-          "name": "NapCat.Shell 一键包（971 KB）",
-          "why": "点「下载」直接拿 OneKey 那个包，解压后双击，它自己会把本体下完。要挑版本再去发布页。",
-          "download": "https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.Windows.OneKey.zip",
+          "name": "Windows QQ 9.9.36（不能是 9.9.37）",
+          "why": {
+            "zh": "NapCat 现在只适配到 9.9.36，9.9.37 一注入 QQ 就弹「文件已损坏」并退出——不是包坏了，是 QQ 检测到了。装完先登录一次，确认能正常用。注意 QQ 会自己升回 9.9.37，升上去就得再装回 9.9.36。",
+            "en": "NapCat supports up to QQ 9.9.36. On 9.9.37 QQ refuses the injection with a \"file is corrupted\" dialog. QQ auto-updates itself back to 9.9.37 later, so this is a moving target."
+          },
+          "download": "https://github.com/a1515333102/QQ-Releases/releases/download/9.9.36%2B3.2.34/QQ_9.9.36_260924_x64_01.exe",
+          "url": "https://github.com/a1515333102/QQ-Releases/releases/tag/9.9.36%2B3.2.34"
+        },
+        {
+          "kind": "app",
+          "name": "NapCat.Shell 包（约 35 MB）",
+          "why": {
+            "zh": "解压后以管理员身份运行 launcher.bat，它会把 NapCat 注入到上面那个 QQ 里。别用 OneKey 包里的旧启动器，那个会报 error code v2:-8。",
+            "en": "Unzip and run launcher.bat as administrator; it injects NapCat into the QQ above. Do not use the older OneKey boot loader — it fails with error code v2:-8."
+          },
+          "download": "https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.zip",
           "url": "https://github.com/NapNeko/NapCatQQ/releases"
         },
         {
           "kind": "account",
           "name": "一个 QQ 号",
-          "why": "扫码登录到 NapCat 之后，这个号的消息才会转到 DSH。"
+          "why": "NapCat 起来后打开 http://127.0.0.1:6099 扫码，这个号的消息才会转到 DSH。"
         },
         {
           "kind": "config",
@@ -2080,9 +2093,19 @@ window.__ModuleLoader__.load({
       "needs": [
         {
           "kind": "app",
-          "name": "NapCat.Shell 一键包（971 KB）",
-          "why": "这个插件只负责「掉线了把它拉回来」，它自己不带 QQ 协议实现，NapCat 得你这边装。",
-          "download": "https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.Windows.OneKey.zip",
+          "name": "Windows QQ 9.9.36（不能是 9.9.37）",
+          "why": {
+            "zh": "这个插件只负责「掉线了把它拉回来」，协议实现全在 NapCat 里。而 NapCat 只适配到 9.9.36，9.9.37 注入会弹「文件已损坏」。QQ 之后可能自己升级，升级了就得装回来。",
+            "en": "This plugin only restarts NapCat when it drops; the protocol lives in NapCat, which supports QQ up to 9.9.36."
+          },
+          "download": "https://github.com/a1515333102/QQ-Releases/releases/download/9.9.36%2B3.2.34/QQ_9.9.36_260924_x64_01.exe",
+          "url": "https://github.com/a1515333102/QQ-Releases/releases/tag/9.9.36%2B3.2.34"
+        },
+        {
+          "kind": "app",
+          "name": "NapCat.Shell 包（约 35 MB）",
+          "why": "解压后管理员运行 launcher.bat 注入；装完在「设置 → NapCat 桥」把目录填进去，看门狗才认得出。",
+          "download": "https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.zip",
           "url": "https://github.com/NapNeko/NapCatQQ/releases"
         },
         {
@@ -4286,8 +4309,9 @@ window.__ModuleLoader__.load({
               ? (phase === undefined ? t('connWaiting') : pick({ zh: phase[0], en: phase[1] }, ''))
               : t('connNotRunning')
           const qrSrc = window.__DM_QR_MOCK__ ?? `${CONNECT_QR}?t=${connectStamp}`
-          const napcatHref = (needs.get(CONNECT_BUNDLE)?.needs ?? [])
-            .find((need) => (need.kind ?? 'app') === 'app' && need.download !== undefined)?.download
+          const appNeeds = (needs.get(CONNECT_BUNDLE)?.needs ?? [])
+            .filter((need) => (need.kind ?? 'app') === 'app' && need.download !== undefined)
+          const napcatHref = (appNeeds.find((need) => /napcat/i.test(String(pick(need.name, '')))) ?? appNeeds[0])?.download
           const refresh = async () => {
             const next = await readConnectState()
             setConnectState(next)
