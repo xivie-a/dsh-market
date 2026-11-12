@@ -22,6 +22,8 @@ import { homedir } from 'node:os'
 import { basename, dirname, isAbsolute, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+import * as napcat from './napcat.js'
+
 export const name = 'dsh-market-xivie'
 
 export const INDEX_URL = 'https://xivie-a.github.io/dsh-market/index.json'
@@ -339,6 +341,166 @@ export async function guardBoot(root) {
   return rows
 }
 
+/* ---------- /dsh-market/napcat/*：市场里「一键接通」的后端 ---------- */
+
+const NAPCAT_ROUTE = '/dsh-market/napcat'
+
+function sendJson(res, status, payload) {
+  res.statusCode = status
+  res.setHeader('content-type', 'application/json; charset=utf-8')
+  res.setHeader('cache-control', 'no-store')
+  res.end(JSON.stringify(payload))
+}
+
+async function readBody(req) {
+  const chunks = []
+  for await (const chunk of req) chunks.push(chunk)
+  if (chunks.length === 0) return {}
+  try {
+    const parsed = JSON.parse(Buffer.concat(chunks).toString('utf8'))
+    return parsed !== null && typeof parsed === 'object' ? parsed : {}
+  } catch {
+    return {}
+  }
+}
+
+/**
+ * 「一键接通」：探测 → 补齐 → 写三份配置 → 拉起。
+ * 每一步都可重复执行，已经就绪的东西一律跳过（不重复下载、不覆盖用户改过的值）。
+ */
+export async function prepareNapcat({
+  profileRoot,
+  napcatDir,
+  adminUser,
+  botQQ,
+  token = 'dsh-local-8643',
+  launch = true,
+  onProgress,
+} = {}) {
+  const steps = []
+  const step = (status, text) => {
+    steps.push({ status, text })
+    onProgress?.(text)
+  }
+
+  const resolved = await napcat.resolveNapcatDir(napcatDir)
+  const dir = resolved.dir
+  const state = await napcat.detect({ napcatDir: dir })
+  if (resolved.source === 'keeper') step('ok', `沿用你已经在用的 NapCat：${dir}`)
+
+  if (!state.qq.ok) {
+    step('fail', '没找到已安装的 QQ。先装 Windows QQ 9.9.36——新的 9.9.37 一注入就会被 QQ 拦下来。')
+    return { ok: false, steps, state }
+  }
+  if (!state.qq.supported) {
+    step('fail', `这台机器上是 QQ ${state.qq.version}，高过 NapCat 支持的上限 ${napcat.QQ_MAJOR}。装回 9.9.36 再来。`)
+    return { ok: false, steps, state }
+  }
+  step('ok', `找到 QQ ${state.qq.version}（${state.qq.dir}）`)
+
+  try {
+    const got = await napcat.ensureNapcat(dir, { onProgress: (text) => step('run', text) })
+    step('ok', got.status === 'present' ? `NapCat 已经装好：${dir}` : `NapCat 装好了：${dir}`)
+  } catch (error) {
+    step('fail', `NapCat 下载/解压失败：${error?.message ?? error}`)
+    return { ok: false, steps, state }
+  }
+
+  await napcat.writeQqnt(dir, state.qq.version)
+  step('ok', 'qqnt.json 的版本已和实际 QQ 对齐（不对齐时注入会被静默跳过）')
+
+  await napcat.writeLauncher(dir)
+  step('ok', `启动脚本 ${napcat.LAUNCHER}：开了单进程，多进程只会卡在 preload`)
+
+  if (typeof botQQ === 'string' && botQQ !== '') {
+    await napcat.writeOnebotConfig(dir, botQQ, { token })
+    step('ok', `OneBot 配置：HTTP ${napcat.HTTP_PORT} + 反向 WS ${napcat.WS_PORT}（token 已写）`)
+  } else {
+    step('run', '机器人号还不知道：等扫码登录后会自动补齐 OneBot 配置')
+  }
+
+  if (profileRoot !== undefined) {
+    await napcat.writeDshOnebot(profileRoot, {
+      token,
+      botQQ: typeof botQQ === 'string' ? botQQ : '',
+      adminUsers: typeof adminUser === 'string' && adminUser !== '' ? [adminUser] : [],
+    })
+    step('ok', 'DSH 侧插件配置已写：accessToken / botQQ / adminUsers / dmPolicy')
+  } else {
+    step('run', '没定位到当前 profile，跳过 DSH 侧配置')
+  }
+
+  await napcat.writeKeeperConfig({ dir, token })
+  step('ok', '看门狗配置已写：目录、启动脚本、token，并打开了开关')
+
+  if (launch) {
+    try {
+      const started = await napcat.launch(dir)
+      step('ok', '已拉起 NapCat（pid ' + String(started.pid ?? '?') + '），等它连上网关')
+    } catch (error) {
+      step('fail', `拉起失败：${error?.message ?? error}`)
+      return { ok: false, steps, state }
+    }
+  }
+
+  return { ok: true, steps, state }
+}
+
+/** 把四个入口挂到 DSH 自己的 webServer 上（和看门狗用同一块地方，不用另开端口）。 */
+export function registerNapcatRoutes(ctx) {
+  const profileRoot = async () => {
+    const root = await findProfileNodeModules(ctx)
+    return root === undefined ? undefined : dirname(root)
+  }
+
+  const route = (suffix, handler) => {
+    ctx.effect?.(() =>
+      ctx.webServer.register({
+        kind: 'exact',
+        path: `${NAPCAT_ROUTE}${suffix}`,
+        handler: async (req, res) => {
+          try {
+            await handler(req, res)
+          } catch (error) {
+            sendJson(res, 500, { ok: false, error: String(error?.message ?? error) })
+          }
+        },
+      }),
+    )
+  }
+
+  route('/state', async (req, res) => {
+    const url = String(req.url ?? '')
+    const dir = /napcatDir=([^&]+)/.exec(url)?.[1]
+    const state = await napcat.detect({ napcatDir: dir === undefined ? undefined : decodeURIComponent(dir) })
+    const [online, qr] = await Promise.all([napcat.online(), napcat.qrOf(state.napcat.dir)])
+    sendJson(res, 200, { ok: true, state, online, qr })
+  })
+
+  route('/prepare', async (req, res) => {
+    const body = await readBody(req)
+    const result = await prepareNapcat({
+      profileRoot: await profileRoot(),
+      napcatDir: typeof body.napcatDir === 'string' ? body.napcatDir : undefined,
+      adminUser: typeof body.adminUser === 'string' ? body.adminUser.replace(/\D/gu, '') : undefined,
+      botQQ: typeof body.botQQ === 'string' ? body.botQQ.replace(/\D/gu, '') : undefined,
+      token: typeof body.token === 'string' && body.token !== '' ? body.token : undefined,
+      launch: body.launch !== false,
+    })
+    sendJson(res, 200, { ...result, online: await napcat.online() })
+  })
+
+  route('/launch', async (req, res) => {
+    const body = await readBody(req)
+    const dir = typeof body.napcatDir === 'string' && body.napcatDir !== '' ? body.napcatDir : napcat.defaultNapcatDir()
+    try {
+      sendJson(res, 200, { ok: true, ...(await napcat.launch(dir)) })
+    } catch (error) {
+      sendJson(res, 200, { ok: false, error: String(error?.message ?? error) })
+    }
+  })
+}
+
 export function apply(ctx, config = {}) {
   const url = typeof config?.indexUrl === 'string' && config.indexUrl !== '' ? config.indexUrl : INDEX_URL
   const logger = ctx.logger?.('dsh-market-xivie') ?? ctx.logger
@@ -385,6 +547,15 @@ export function apply(ctx, config = {}) {
         },
         warn('加入索引源失败'),
       )
+  })
+
+  // 市场里的「一键接通」需要一个后端：拿得到 webServer 才挂，挂不上也不影响别的功能。
+  ctx.inject(['webServer'], (scope) => {
+    try {
+      registerNapcatRoutes(scope)
+    } catch (error) {
+      warn('挂 NapCat 接口失败')(error)
+    }
   })
 
   // 用户把源删掉后，可以随时用命令加回来。

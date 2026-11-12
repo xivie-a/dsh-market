@@ -12,6 +12,7 @@
   },
   "files": [
     "index.js",
+    "napcat.js",
     "client.js",
     "cordis.patch.yml",
     "heal-allowlist.json",

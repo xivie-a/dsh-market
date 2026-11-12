@@ -121,6 +121,53 @@ const HARNESS = String.raw`
     window.__DM_QR_MOCK__ = window.__DM_QR_MOCK__
   }
 
+  // 一键接通：?setup=run|fail|restart 模拟 /dsh-market/napcat/*（宿主侧那几个接口）
+  const setupState2 = previewParams.get('setup')
+  if (setupState2 !== null) {
+    const before = window.fetch
+    const json = (body) => Promise.resolve(new Response(JSON.stringify(body), {
+      status: 200, headers: { 'content-type': 'application/json' }
+    }))
+    const stepRows = setupState2 === 'fail'
+      ? [
+          { status: 'ok', text: '找到 QQ 9.9.36-53644（D:\\网站下载）' },
+          { status: 'fail', text: '这台机器上是 QQ 9.9.37-54395，高过 NapCat 支持的上限 9.9.36。装回 9.9.36 再来。' }
+        ]
+      : setupState2 === 'restart'
+        ? [
+            { status: 'ok', text: '找到 QQ 9.9.36-53644（D:\\网站下载）' },
+            { status: 'ok', text: 'NapCat 装好了：C:\\Users\\you\\AppData\\Local\\dsh-napcat' },
+            { status: 'ok', text: 'qqnt.json 的版本已和实际 QQ 对齐（不对齐时注入会被静默跳过）' },
+            { status: 'ok', text: '启动脚本 launcher-dsh.bat：开了单进程，多进程只会卡在 preload' },
+            { status: 'run', text: '机器人号还不知道：等扫码登录后会自动补齐 OneBot 配置' },
+            { status: 'ok', text: 'DSH 侧插件配置已写：accessToken / botQQ / adminUsers / dmPolicy' },
+            { status: 'ok', text: '看门狗配置已写：目录、启动脚本、token，并打开了开关' },
+            { status: 'ok', text: '已拉起 NapCat（pid 4120），等它连上网关' }
+          ]
+        : [
+            { status: 'ok', text: '找到 QQ 9.9.36-53644（D:\\网站下载）' },
+            { status: 'ok', text: 'NapCat 已经装好：C:\\Users\\you\\AppData\\Local\\dsh-napcat' },
+            { status: 'ok', text: 'qqnt.json 的版本已和实际 QQ 对齐（不对齐时注入会被静默跳过）' },
+            { status: 'ok', text: '启动脚本 launcher-dsh.bat：开了单进程，多进程只会卡在 preload' },
+            { status: 'ok', text: 'OneBot 配置：HTTP 3000 + 反向 WS 8643（token 已写）' }
+          ]
+    window.fetch = (input, init) => {
+      const url = String(input)
+      if (!url.includes('/dsh-market/napcat/')) return before(input, init)
+      if (url.includes('/prepare')) return json({ ok: setupState2 !== 'fail', steps: stepRows })
+      return json({
+        ok: true,
+        state: {
+          qq: { dir: 'D:\\网站下载', version: '9.9.36-53644', major: '9.9.36', supported: true, ok: true },
+          napcat: { dir: 'C:\\Users\\you\\AppData\\Local\\dsh-napcat', present: true, launcher: true },
+          onebot: { dir: 'C:\\Users\\you\\AppData\\Local\\dsh-napcat\\config', present: true }
+        },
+        online: setupState2 === 'online' ? { online: true, qq: '10001', nickname: '大肥鱼' } : { online: false },
+        qr: { path: 'cache/qrcode.png', at: new Date().toISOString(), dataUrl: window.__DM_QR_MOCK__ }
+      })
+    }
+  }
+
   // B站登录：?biliState=idle|scan|password|ready|missing 模拟 /api/bilibili/*
   const biliState = previewParams.get('biliState')
   if (biliState !== null) {
@@ -303,6 +350,31 @@ const HARNESS = String.raw`
     setTimeout(() => {
       document.querySelector('.dm-conn-btn')?.click()
     }, 800)
+  }
+  // ?setup=run|fail|online 进连接弹窗后点「一键接通」，把向导展开
+  if (params.has('setup')) {
+    setTimeout(() => {
+      for (const button of document.querySelectorAll('.dm-conn-dialog button')) {
+        if (/一键接通|Set up in one click/.test(button.textContent || '')) { button.click(); return }
+      }
+    }, 1600)
+    // ?setupQq=10001 顺手把号填进去并点「开始接通」，好截到进度和二维码
+    if (params.has('setupQq')) {
+      setTimeout(() => {
+        const input = document.querySelector('.dm-setup-input')
+        if (input === null) return
+        const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
+        setter?.call(input, params.get('setupQq'))
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+        setTimeout(() => {
+          for (const button of document.querySelectorAll('.dm-setup button')) {
+            if (button.disabled) continue
+            button.click()
+            return
+          }
+        }, 300)
+      }, 2200)
+    }
   }
   if (params.has('select')) {
     const index = Number(params.get('select') ?? 2)

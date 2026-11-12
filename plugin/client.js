@@ -147,6 +147,12 @@ window.__ModuleLoader__.load({
       connRepull: '重新拉起',
       connOpenPage: '打开扫码页',
       connRefresh: '刷新状态',
+      setupOpenOne: '一键接通',
+      setupQqPlaceholder: '你自己的 QQ 号',
+      setupStart: '开始接通',
+      setupHint: '市场会自己下载 NapCat、对齐版本、写好两侧配置，然后把二维码贴出来。你只需要扫码。',
+      setupScanTip: '用手机 QQ 扫码；扫完这里会变成已上线',
+      setupDetecting: '正在检查这台机器…',
       connStepsTitle: '还差这三步',
       connStep1: '装 QQ 9.9.36 和 NapCat.Shell（管理员运行 launcher.bat）',
       connStep2: 'DSH 设置 → napcat 桥，填 NapCat 目录',
@@ -325,6 +331,12 @@ window.__ModuleLoader__.load({
       connRepull: 'Restart',
       connOpenPage: 'Open QR page',
       connRefresh: 'Refresh',
+      setupOpenOne: 'Set up in one click',
+      setupQqPlaceholder: 'Your own QQ number',
+      setupStart: 'Start',
+      setupHint: 'The market downloads NapCat, matches the QQ version, writes both configs, then shows the QR here. You only scan.',
+      setupScanTip: 'Scan with mobile QQ; this panel flips to online when you are in',
+      setupDetecting: 'Checking this machine…',
       connStepsTitle: 'Three steps left',
       connStep1: 'Install QQ 9.9.36 plus NapCat.Shell (run launcher.bat as admin)',
       connStep2: 'DSH Settings → napcat bridge → set the NapCat folder',
@@ -1509,6 +1521,41 @@ window.__ModuleLoader__.load({
   background: rgba(208, 154, 60, .12);
   color: #8a6420; font-size: 11.5px; line-height: 1.65;
 }
+/* 一键接通：一个输入框 + 一串进度 + 一张码，全在连接弹窗里完成 */
+.dm-setup { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.dm-setup-row { display: flex; align-items: center; gap: 8px; }
+.dm-setup-input {
+  flex: 1; min-width: 0; height: 34px; padding: 0 10px;
+  border: 1px solid var(--line, #dcdcd6); border-radius: 9px;
+  background: var(--surface, #fff); color: inherit; font-size: 13px;
+}
+.dm-setup-input::placeholder { color: #9a9a94; }
+.dm-setup-hint { margin: 0; font-size: 11.5px; line-height: 1.65; color: #6f6f69; }
+.dm-setup-steps {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 6px;
+  max-height: 176px; overflow: auto;
+}
+.dm-setup-steps li {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 11.5px; line-height: 1.55; color: #4a4a45;
+}
+.dm-setup-mark { flex: none; width: 14px; text-align: center; color: #9a9a94; }
+.dm-setup-steps li[data-state="ok"] .dm-setup-mark { color: #2f7d4f; }
+.dm-setup-steps li[data-state="fail"] { color: #a33a34; }
+.dm-setup-steps li[data-state="fail"] .dm-setup-mark { color: #a33a34; }
+.dm-setup-qr { display: flex; align-items: center; gap: 12px; }
+.dm-setup-qr img {
+  width: 128px; height: 128px; border-radius: 10px;
+  background: #fff; border: 1px solid #e4e4de;
+}
+.dm-setup-qr span { font-size: 11.5px; line-height: 1.6; color: #6f6f69; }
+.dm-setup-done { font-size: 12px; font-weight: 700; color: #2f7d4f; }
+.dm-root[data-theme="dark"] .dm-setup-input { background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .16); }
+.dm-root[data-theme="dark"] .dm-setup-hint,
+.dm-root[data-theme="dark"] .dm-setup-steps li,
+.dm-root[data-theme="dark"] .dm-setup-qr span { color: #b6b6ae; }
+
 /* 「下载 NapCat 一键包」：比正文重一点，但不抢主按钮 */
 .dm-conn-dl {
   display: inline-flex; align-items: center; gap: 4px;
@@ -2704,6 +2751,43 @@ window.__ModuleLoader__.load({
       }
     }
 
+    /* ── 一键接通 ──────────────────────────────────────────────────
+       市场的宿主侧有 /dsh-market/napcat/*：探测 → 下载解压 → 对齐版本 → 写三份配置 → 拉起。
+       前端只负责一件事：把用户填的号发过去，然后把返回的步骤和二维码画出来。 */
+    const SETUP_API = '/dsh-market/napcat'
+
+    async function setupState() {
+      try {
+        const response = await fetch(`${SETUP_API}/state?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { accept: 'application/json' },
+          signal: AbortSignal.timeout(15_000)
+        })
+        if (!response.ok) return undefined
+        const value = await response.json()
+        return value?.ok === true ? value : undefined
+      } catch {
+        return undefined
+      }
+    }
+
+    async function setupPrepare(body) {
+      try {
+        const response = await fetch(`${SETUP_API}/prepare`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(600_000)
+        })
+        if (!response.ok) return { ok: false, steps: [{ status: 'fail', text: `市场接口返回 ${response.status}` }] }
+        return await response.json()
+      } catch (error) {
+        return { ok: false, steps: [{ status: 'fail', text: `连不上市场自己的接口：${error?.message ?? error}` }] }
+      }
+    }
+
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
     /* ── B站登录 ──────────────────────────────────────────────────
        @seiuna/dsh-bilibili-plugin 把登录入口放在会话标题栏，有的版本挂不上。
        它自己的 HTTP API 就挂在同源 /api/bilibili 下，所以在市场里也能直接走完扫码。 */
@@ -2884,6 +2968,13 @@ window.__ModuleLoader__.load({
       const [connectState, setConnectState] = React.useState({ status: 'idle' })
       const [connectStamp, setConnectStamp] = React.useState(0)
       const [connectBusy, setConnectBusy] = React.useState(false)
+      // 「一键接通」：市场自己把 NapCat 装好、配置写对、拉起来，用户只填自己的 QQ 号再扫码
+      const [setupOpen, setSetupOpen] = React.useState(false)
+      const [setupQq, setSetupQq] = React.useState('')
+      const [setupBusy, setSetupBusy] = React.useState(false)
+      const [setupSteps, setSetupSteps] = React.useState([])
+      const [setupQr, setSetupQr] = React.useState(undefined)
+      const [setupDone, setSetupDone] = React.useState(undefined)
       const [selected, setSelected] = React.useState(undefined)
       const [theme, setTheme] = React.useState(readTheme)
       const [slide, setSlide] = React.useState(0)
@@ -4317,6 +4408,34 @@ window.__ModuleLoader__.load({
             setConnectState(next)
             setConnectStamp(Date.now())
           }
+          // 一键接通：发请求 → 等它拉起 → 二维码一出来就贴上去 → 登录后再补齐 OneBot 配置
+          const runSetup = async () => {
+            const mine = setupQq.replace(/\D/gu, '')
+            setSetupBusy(true)
+            setSetupDone(undefined)
+            setSetupQr(undefined)
+            setSetupSteps([{ status: 'run', text: t('setupDetecting') }])
+            const first = await setupPrepare({ adminUser: mine })
+            setSetupSteps(Array.isArray(first.steps) ? first.steps : [])
+            if (first.ok !== true) {
+              setSetupBusy(false)
+              return
+            }
+            for (let tick = 0; tick < 40; tick += 1) {
+              await sleep(3000)
+              const state = await setupState()
+              if (typeof state?.qr?.dataUrl === 'string') setSetupQr(state.qr.dataUrl)
+              if (state?.online?.online === true) {
+                const qq = String(state.online.qq ?? '')
+                const second = await setupPrepare({ adminUser: mine, botQQ: qq, launch: false })
+                setSetupSteps((rows) => [...rows, ...(Array.isArray(second.steps) ? second.steps : [])])
+                setSetupDone({ qq, nickname: String(state.online.nickname ?? '') })
+                break
+              }
+            }
+            setSetupBusy(false)
+            await refresh()
+          }
           return h(React.Fragment, null,
             h('div', { className: 'dm-suite-mask', onClick: () => setConnectOpen(false) }),
             h('div', {
@@ -4340,12 +4459,50 @@ window.__ModuleLoader__.load({
                   h('p', { className: 'dm-conn-lead' }, t('connectIntro')),
                   online
                     ? h('p', { className: 'dm-conn-ok' }, t('connQrTip'))
-                    : h(React.Fragment, null,
-                      h('strong', { className: 'dm-conn-step-title' }, t('connStepsTitle')),
-                      h('ol', { className: 'dm-conn-steps' },
-                        h('li', null, t('connStep1')),
-                        h('li', null, t('connStep2')),
-                        h('li', null, t('connStep3')))),
+                    : setupOpen
+                      ? h('div', { className: 'dm-setup' },
+                        h('div', { className: 'dm-setup-row' },
+                          h('input', {
+                            className: 'dm-setup-input',
+                            type: 'text',
+                            inputMode: 'numeric',
+                            placeholder: t('setupQqPlaceholder'),
+                            value: setupQq,
+                            disabled: setupBusy,
+                            onChange: (event) => setSetupQq(event.target.value)
+                          }),
+                          h('button', {
+                            className: 'dm-btn dm-btn--primary',
+                            type: 'button',
+                            disabled: setupBusy || setupQq.replace(/\D/gu, '').length < 5,
+                            onClick: () => void runSetup()
+                          }, setupBusy ? t('working') : t('setupStart'))),
+                        setupSteps.length === 0
+                          ? h('p', { className: 'dm-setup-hint' }, t('setupHint'))
+                          : h('ul', { className: 'dm-setup-steps' },
+                            ...setupSteps.map((row, index) => h('li', {
+                              key: `${index}-${String(row.text ?? '')}`,
+                              'data-state': row.status ?? 'run'
+                            },
+                            h('span', { className: 'dm-setup-mark' },
+                              row.status === 'ok' ? '✓' : row.status === 'fail' ? '!' : '◌'),
+                            h('span', null, String(row.text ?? ''))))),
+                        setupDone === undefined ? null : h('div', { className: 'dm-setup-done' },
+                          '✓ ', [t('connOnline'), setupDone.nickname || setupDone.qq].filter(Boolean).join(' · ')),
+                        setupQr === undefined ? null : h('div', { className: 'dm-setup-qr' },
+                          h('img', { src: setupQr, alt: t('connQrWait') }),
+                          h('span', null, t('setupScanTip'))))
+                      : h(React.Fragment, null,
+                        h('strong', { className: 'dm-conn-step-title' }, t('connStepsTitle')),
+                        h('ol', { className: 'dm-conn-steps' },
+                          h('li', null, t('connStep1')),
+                          h('li', null, t('connStep2')),
+                          h('li', null, t('connStep3'))),
+                        h('button', {
+                          className: 'dm-btn dm-btn--primary',
+                          type: 'button',
+                          onClick: () => setSetupOpen(true)
+                        }, t('setupOpenOne'))),
                   blocked ? h('div', { className: 'dm-conn-warn' }, t('connBlocked')) : null,
                   online || napcatHref === undefined ? null : h('a', {
                     className: 'dm-conn-dl',
@@ -4374,7 +4531,8 @@ window.__ModuleLoader__.load({
                     h('button', { className: 'dm-btn', type: 'button', onClick: () => void refresh() }, t('connRefresh'))))
                     : h('p', { className: 'dm-conn-lead' }, t('connOnlyBili'))),
                 h('div', { className: 'dm-conn-side' },
-                  hasNapcat ? h('div', { className: `dm-conn-qr${online ? ' is-on' : ''}` },
+                  // 向导自己会贴二维码，这时候右侧就别再放一张，免得用户以为扫哪个都行
+                  hasNapcat && !setupOpen ? h('div', { className: `dm-conn-qr${online ? ' is-on' : ''}` },
                     online
                       ? h('div', { className: 'dm-conn-qr-done' },
                         h('strong', null, '✓'),
