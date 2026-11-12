@@ -159,7 +159,7 @@ const HARNESS = String.raw`
         ok: true,
         state: {
           qq: { dir: 'D:\\网站下载', version: '9.9.36-53644', major: '9.9.36', supported: true, ok: true },
-          napcat: { dir: 'C:\\Users\\you\\AppData\\Local\\dsh-napcat', present: true, launcher: true },
+          napcat: { dir: 'C:\\Users\\you\\AppData\\Local\\dsh-napcat', present: true, source: 'default', launcher: true },
           onebot: { dir: 'C:\\Users\\you\\AppData\\Local\\dsh-napcat\\config', present: true }
         },
         online: setupState2 === 'online' ? { online: true, qq: '10001', nickname: '大肥鱼' } : { online: false },

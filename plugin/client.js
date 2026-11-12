@@ -149,6 +149,10 @@ window.__ModuleLoader__.load({
       connRefresh: '刷新状态',
       setupOpenOne: '一键接通',
       setupQqPlaceholder: '你自己的 QQ 号',
+      setupPathLabel: '装到',
+      setupPathPlaceholder: '留空 = 用户目录下的 dsh-napcat',
+      setupPathHint: '就是上面这个文件夹，默认在用户目录下。想换盘就改它——装完的真实路径也会写进下面的进度里。',
+      setupReuseHint: '这个目录是你已经在用的那份，市场不会另装一份。',
       setupStart: '开始接通',
       setupHint: '市场会自己下载 NapCat、对齐版本、写好两侧配置，然后把二维码贴出来。你只需要扫码。',
       setupScanTip: '用手机 QQ 扫码；扫完这里会变成已上线',
@@ -333,6 +337,10 @@ window.__ModuleLoader__.load({
       connRefresh: 'Refresh',
       setupOpenOne: 'Set up in one click',
       setupQqPlaceholder: 'Your own QQ number',
+      setupPathLabel: 'Install to',
+      setupPathPlaceholder: 'Empty = dsh-napcat under your user folder',
+      setupPathHint: 'That folder above. It goes under your user folder by default; change it if you want another drive.',
+      setupReuseHint: 'That is the copy you already use — the market will not install a second one.',
       setupStart: 'Start',
       setupHint: 'The market downloads NapCat, matches the QQ version, writes both configs, then shows the QR here. You only scan.',
       setupScanTip: 'Scan with mobile QQ; this panel flips to online when you are in',
@@ -1530,6 +1538,12 @@ window.__ModuleLoader__.load({
   background: var(--surface, #fff); color: inherit; font-size: 13px;
 }
 .dm-setup-input::placeholder { color: #9a9a94; }
+/* 装到哪：路径要能让用户看见，也能改 */
+.dm-setup-path { display: flex; align-items: center; gap: 8px; }
+.dm-setup-path > span {
+  flex: none; width: 34px; font-size: 11.5px; font-weight: 700; color: #6f6f69;
+}
+.dm-setup-input--path { font-size: 11.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .dm-setup-hint { margin: 0; font-size: 11.5px; line-height: 1.65; color: #6f6f69; }
 .dm-setup-steps {
   list-style: none; margin: 0; padding: 0;
@@ -1553,6 +1567,7 @@ window.__ModuleLoader__.load({
 .dm-setup-done { font-size: 12px; font-weight: 700; color: #2f7d4f; }
 .dm-root[data-theme="dark"] .dm-setup-input { background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .16); }
 .dm-root[data-theme="dark"] .dm-setup-hint,
+.dm-root[data-theme="dark"] .dm-setup-path > span,
 .dm-root[data-theme="dark"] .dm-setup-steps li,
 .dm-root[data-theme="dark"] .dm-setup-qr span { color: #b6b6ae; }
 
@@ -2971,6 +2986,8 @@ window.__ModuleLoader__.load({
       // 「一键接通」：市场自己把 NapCat 装好、配置写对、拉起来，用户只填自己的 QQ 号再扫码
       const [setupOpen, setSetupOpen] = React.useState(false)
       const [setupQq, setSetupQq] = React.useState('')
+      const [setupDir, setSetupDir] = React.useState('')
+      const [setupSource, setSetupSource] = React.useState('')
       const [setupBusy, setSetupBusy] = React.useState(false)
       const [setupSteps, setSetupSteps] = React.useState([])
       const [setupQr, setSetupQr] = React.useState(undefined)
@@ -4415,7 +4432,7 @@ window.__ModuleLoader__.load({
             setSetupDone(undefined)
             setSetupQr(undefined)
             setSetupSteps([{ status: 'run', text: t('setupDetecting') }])
-            const first = await setupPrepare({ adminUser: mine })
+            const first = await setupPrepare({ adminUser: mine, napcatDir: setupDir.trim() })
             setSetupSteps(Array.isArray(first.steps) ? first.steps : [])
             if (first.ok !== true) {
               setSetupBusy(false)
@@ -4427,7 +4444,7 @@ window.__ModuleLoader__.load({
               if (typeof state?.qr?.dataUrl === 'string') setSetupQr(state.qr.dataUrl)
               if (state?.online?.online === true) {
                 const qq = String(state.online.qq ?? '')
-                const second = await setupPrepare({ adminUser: mine, botQQ: qq, launch: false })
+                const second = await setupPrepare({ adminUser: mine, botQQ: qq, napcatDir: setupDir.trim(), launch: false })
                 setSetupSteps((rows) => [...rows, ...(Array.isArray(second.steps) ? second.steps : [])])
                 setSetupDone({ qq, nickname: String(state.online.nickname ?? '') })
                 break
@@ -4477,6 +4494,21 @@ window.__ModuleLoader__.load({
                             disabled: setupBusy || setupQq.replace(/\D/gu, '').length < 5,
                             onClick: () => void runSetup()
                           }, setupBusy ? t('working') : t('setupStart'))),
+                        h('label', { className: 'dm-setup-path' },
+                          h('span', null, t('setupPathLabel')),
+                          h('input', {
+                            className: 'dm-setup-input dm-setup-input--path',
+                            type: 'text',
+                            spellCheck: false,
+                            placeholder: t('setupPathPlaceholder'),
+                            value: setupDir,
+                            disabled: setupBusy,
+                            onChange: (event) => setSetupDir(event.target.value)
+                          })),
+                        setupDir === ''
+                          ? null
+                          : h('p', { className: 'dm-setup-hint' },
+                            setupSource === 'keeper' ? t('setupReuseHint') : t('setupPathHint')),
                         setupSteps.length === 0
                           ? h('p', { className: 'dm-setup-hint' }, t('setupHint'))
                           : h('ul', { className: 'dm-setup-steps' },
@@ -4501,7 +4533,15 @@ window.__ModuleLoader__.load({
                         h('button', {
                           className: 'dm-btn dm-btn--primary',
                           type: 'button',
-                          onClick: () => setSetupOpen(true)
+                          onClick: () => {
+                            setSetupOpen(true)
+                            // 把「装到哪」先问出来：宁可多一行路径，也别让用户不知道文件去了哪
+                            void setupState().then((row) => {
+                              const dir = row?.state?.napcat?.dir
+                              if (typeof dir === 'string') setSetupDir(dir)
+                              setSetupSource(String(row?.state?.napcat?.source ?? ''))
+                            })
+                          }
                         }, t('setupOpenOne'))),
                   blocked ? h('div', { className: 'dm-conn-warn' }, t('connBlocked')) : null,
                   online || napcatHref === undefined ? null : h('a', {

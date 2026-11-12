@@ -1142,6 +1142,12 @@
   background: var(--surface, #fff); color: inherit; font-size: 13px;
 }
 .dm-setup-input::placeholder { color: #9a9a94; }
+/* 装到哪：路径要能让用户看见，也能改 */
+.dm-setup-path { display: flex; align-items: center; gap: 8px; }
+.dm-setup-path > span {
+  flex: none; width: 34px; font-size: 11.5px; font-weight: 700; color: #6f6f69;
+}
+.dm-setup-input--path { font-size: 11.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .dm-setup-hint { margin: 0; font-size: 11.5px; line-height: 1.65; color: #6f6f69; }
 .dm-setup-steps {
   list-style: none; margin: 0; padding: 0;
@@ -1165,6 +1171,7 @@
 .dm-setup-done { font-size: 12px; font-weight: 700; color: #2f7d4f; }
 .dm-root[data-theme="dark"] .dm-setup-input { background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .16); }
 .dm-root[data-theme="dark"] .dm-setup-hint,
+.dm-root[data-theme="dark"] .dm-setup-path > span,
 .dm-root[data-theme="dark"] .dm-setup-steps li,
 .dm-root[data-theme="dark"] .dm-setup-qr span { color: #b6b6ae; }
 
