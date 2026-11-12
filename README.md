@@ -143,6 +143,7 @@ node scripts/selftest-host.mjs      # 市场自己的两条保命逻辑
 | [`docs/review-policy.md`](docs/review-policy.md) | 收录标准与下架规则 |
 | [`docs/review-log.md`](docs/review-log.md) | 每条收录的审核记录 |
 | [`docs/build-guide.md`](docs/build-guide.md) | 索引是怎么生成的（技术说明） |
+| [`docs/qq-napcat-runbook.md`](docs/qq-napcat-runbook.md) | 从零把 QQ 接进 DSH 的完整步骤与坑 |
 | [`scripts/`](scripts) | 生成器与校验器，零依赖 Node 脚本 |
 | [`.github/workflows/`](.github/workflows) | 每 6 小时重建并发布 |
 
