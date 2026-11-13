@@ -153,6 +153,7 @@ window.__ModuleLoader__.load({
       setupPathPlaceholder: '留空 = 用户目录下的 dsh-napcat',
       setupPathHint: '就是上面这个文件夹，默认在用户目录下。想换盘就改它——装完的真实路径也会写进下面的进度里。',
       setupReuseHint: '这个目录是你已经在用的那份，市场不会另装一份。',
+      setupManual: '下载不通？手动拿 NapCat.Shell',
       setupStart: '开始接通',
       setupHint: '市场会自己下载 NapCat、对齐版本、写好两侧配置，然后把二维码贴出来。你只需要扫码。',
       setupScanTip: '用手机 QQ 扫码；扫完这里会变成已上线',
@@ -341,6 +342,7 @@ window.__ModuleLoader__.load({
       setupPathPlaceholder: 'Empty = dsh-napcat under your user folder',
       setupPathHint: 'That folder above. It goes under your user folder by default; change it if you want another drive.',
       setupReuseHint: 'That is the copy you already use — the market will not install a second one.',
+      setupManual: 'Download blocked? Get NapCat.Shell by hand',
       setupStart: 'Start',
       setupHint: 'The market downloads NapCat, matches the QQ version, writes both configs, then shows the QR here. You only scan.',
       setupScanTip: 'Scan with mobile QQ; this panel flips to online when you are in',
@@ -4521,6 +4523,14 @@ window.__ModuleLoader__.load({
                             h('span', null, String(row.text ?? ''))))),
                         setupDone === undefined ? null : h('div', { className: 'dm-setup-done' },
                           '✓ ', [t('connOnline'), setupDone.nickname || setupDone.qq].filter(Boolean).join(' · ')),
+                        setupSteps.some((row) => row.status === 'fail') && napcatHref !== undefined
+                          ? h('a', {
+                            className: 'dm-conn-dl',
+                            href: napcatHref,
+                            target: '_blank',
+                            rel: 'noreferrer noopener'
+                          }, `${t('setupManual')} ↗`)
+                          : null,
                         setupQr === undefined ? null : h('div', { className: 'dm-setup-qr' },
                           h('img', { src: setupQr, alt: t('connQrWait') }),
                           h('span', null, t('setupScanTip'))))
@@ -4544,7 +4554,9 @@ window.__ModuleLoader__.load({
                           }
                         }, t('setupOpenOne'))),
                   blocked ? h('div', { className: 'dm-conn-warn' }, t('connBlocked')) : null,
-                  online || napcatHref === undefined ? null : h('a', {
+                  // 向导开着的时候别放「下载 NapCat.Shell」——那会让人以为还得自己去下，
+                  // 真下载不通时向导里会单独给这条链接。
+                  online || setupOpen || napcatHref === undefined ? null : h('a', {
                     className: 'dm-conn-dl',
                     href: napcatHref,
                     target: '_blank',
