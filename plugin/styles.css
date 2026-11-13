@@ -1432,3 +1432,11 @@
 .dm-conn-body.is-slim { grid-template-columns: minmax(0, 1fr); }
 .dm-conn-body.is-slim .dm-conn-side { flex-direction: row; }
 .dm-conn-body.is-slim .dm-conn-bili { flex: 1 1 auto; }
+.dm-need-manual {
+  margin: 4px 0 2px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+  font-size: 11px; line-height: 1.65;
+  color: var(--muted);
+}

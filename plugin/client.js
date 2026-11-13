@@ -59,6 +59,8 @@ window.__ModuleLoader__.load({
       suiteConnectHint: '勾了：重启一次之后市场自己下载 NapCat、写好配置，二维码直接放这，你只扫码。',
       suiteAutoNote: '这两个下载不用点。勾了「装完顺便接通」之后，重启回来市场自己下、自己对版本。',
       suiteConnectOff: '不勾也能装，只是装完你得自己去右上角「连接」里点一键接通。勾了才会自动下 NapCat。',
+      iInstallItMyself: '我自己装',
+      needsManualHint: '这两个勾选框是「我自己装」：勾上只会帮你打开下载页，不勾就交给市场——一会儿在「连接」里点一键接通，它自己下、自己对版本。',
       suitePending: '插件装好了。重启一次 DSH，回来自动接通 QQ——你只要扫码。',
       suitePendingFail: '插件装好了，但没记下「顺便接通」——回市场点「连接 → 一键接通」也一样。',
       pending: '待获取',
@@ -258,6 +260,8 @@ window.__ModuleLoader__.load({
       suiteConnectHint: 'Ticked means: after one restart the market downloads NapCat, writes the config and puts the QR right here — you only scan.',
       suiteAutoNote: 'Do not click those downloads. With the box ticked the market fetches it and matches the version itself after the restart.',
       suiteConnectOff: 'Installing works without it — you would then use Connect in the top-right to set QQ up by hand. Only ticking it makes the market download NapCat for you.',
+      iInstallItMyself: 'I install it myself',
+      needsManualHint: 'Those two tick boxes mean "I install it myself": ticking only opens the download page. Leave them empty and the market does it — use Connect → one-click setup and it downloads and matches the version itself.',
       suitePending: 'Plugins installed. Restart DSH once — QQ gets connected automatically, you only scan.',
       suitePendingFail: 'Plugins installed, but the auto-connect could not be queued — use Connect → one-click setup instead.',
       pending: 'Pending',
@@ -1850,6 +1854,14 @@ window.__ModuleLoader__.load({
 .dm-conn-body.is-slim { grid-template-columns: minmax(0, 1fr); }
 .dm-conn-body.is-slim .dm-conn-side { flex-direction: row; }
 .dm-conn-body.is-slim .dm-conn-bili { flex: 1 1 auto; }
+.dm-need-manual {
+  margin: 4px 0 2px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+  font-size: 11px; line-height: 1.65;
+  color: var(--muted);
+}
 `
 
     /** 本地化文本 → 字符串；优先中文，其次英文，其次第一个。 */
@@ -3548,13 +3560,13 @@ window.__ModuleLoader__.load({
       const gateRowsFor = (list) => list
         .map((entry) => ({ entry, needs: needsOf(entry), tag: needsTag(entry) }))
         .filter((row) => row.needs.length > 0 && !ackedApps.current.has(row.entry.name))
-      /** 需要下载的软件默认勾上；取消勾选就只提示、不代开页面。 */
-      const prepOn = (name, index) => prepApps[`${name}#${String(index)}`] !== false
+      /** 需要下载的软件默认不勾：勾上＝「我自己装，帮我开下载页」；不勾＝交给市场在「连接」里下。 */
+      const prepOn = (name, index) => prepApps[`${name}#${String(index)}`] === true
       const togglePrep = (name, index) => {
         const key = `${name}#${String(index)}`
-        setPrepApps((prev) => ({ ...prev, [key]: prev[key] === false }))
+        setPrepApps((prev) => ({ ...prev, [key]: prev[key] !== true }))
       }
-      /** 勾着的一并打开下载页，同一个网址只开一次。 */
+      /** 只有勾了「我自己装」的才代开下载页，避免一装就弹一堆标签页。 */
       const queueDownloads = (list) => {
         const urls = new Set()
         for (const entry of list) {
@@ -3587,7 +3599,7 @@ window.__ModuleLoader__.load({
           className: 'dm-need-check',
           checked: prepOn(entry.name, index),
           onChange: () => togglePrep(entry.name, index),
-          'aria-label': `${need.name} · ${t('downloadHint')}`
+          'aria-label': `${need.name} · ${t('iInstallItMyself')}`
         }),
         h('span', { className: `dm-gate-kind dm-gate-kind--${need.kind ?? 'app'}` },
           need.kind === 'account' ? t('needsKindAccount') : need.kind === 'config' ? t('needsKindConfig') : t('needsKindApp')),
@@ -4392,10 +4404,12 @@ window.__ModuleLoader__.load({
           const needsOfItem = (item) => {
             const list = needsOf(item.entry)
             if (list.length === 0) return null
+            const needsManual = list.some((row) => (row.kind ?? 'app') === 'app')
             return h('div', { className: 'dm-suite-needs' },
               h('div', { className: 'dm-suite-needs-head' },
                 h('span', null, t('needsInline')),
                 h('em', null, needsTag(item.entry))),
+              needsManual ? h('p', { className: 'dm-need-manual' }, t('needsManualHint')) : null,
               ...list.map((need, index) => needRow(item.entry, need, index, String(index))))
           }
           /** 卡片 + 选中时展开的补充说明，绑在一起免得错位。 */
