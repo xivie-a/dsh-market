@@ -12,12 +12,37 @@
  */
 
 import { spawn } from 'node:child_process'
-import { access, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
+import { access, copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { homedir, tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
-/** NapCat 官方发布包（latest → 4.18.x）。 */
-export const NAPCAT_ZIP = 'https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.zip'
+/**
+ * NapCat 的发布包。
+ *
+ * 2026-11 上游（NapNeko/NapCatQQ）把 release 全删了，README 只剩一句「## Ending / 到这里告一段落」，
+ * 所以 `releases/latest/download/...` 现在必然 404。这里改指社区归档仓 XingYunStar/NapCatQQ 的
+ * v4.18.42 产物——和上游最后那一版是同一份（35,967,555 字节），并且不会再变。
+ */
+export const NAPCAT_VERSION = 'v4.18.42'
+export const NAPCAT_ASSET = `https://github.com/XingYunStar/NapCatQQ/releases/download/${NAPCAT_VERSION}/NapCat.Shell.zip`
+
+/** GitHub 在国内经常不通；这几个前缀是能直连的加速入口，按「先官方、后加速」的顺序试。 */
+export const NAPCAT_MIRRORS = [
+  { name: 'GitHub 直连', prefix: '' },
+  { name: 'gh-proxy 加速', prefix: 'https://gh-proxy.com/' },
+  { name: 'ghfast 加速', prefix: 'https://ghfast.top/' },
+  { name: 'ghproxy 加速', prefix: 'https://ghproxy.net/' },
+]
+
+/**
+ * 这次要试的下载地址。
+ * 设了 `DSH_NAPCAT_ZIP` 就只试它（可以指一个本地路径，也可以是自己的镜像地址）。
+ */
+export function napcatSources() {
+  const custom = (process.env.DSH_NAPCAT_ZIP ?? '').trim()
+  if (custom !== '') return [{ name: '你指定的地址', url: custom }]
+  return NAPCAT_MIRRORS.map((row) => ({ name: row.name, url: row.prefix + NAPCAT_ASSET }))
+}
 
 /** 唯一被 NapCat 4.18.42 支持的 QQ 版本线。 */
 export const QQ_MAJOR = '9.9.36'
@@ -210,28 +235,30 @@ export async function detect({ napcatDir } = {}) {
   }
 }
 
-/** 下载并解压 NapCat.Shell.zip；已经装好就什么也不做。 */
+/**
+ * 下载并解压 NapCat.Shell.zip；已经装好就什么也不做。
+ *
+ * 网络不通时不必卡死：市场会在几个下载源之间自动换，用户也可以自己把
+ * `NapCat.Shell.zip` 放到目标目录旁边（或设 `DSH_NAPCAT_ZIP` 指过去），
+ * 这里会优先用本地那份，不联网。
+ */
 export async function ensureNapcat(dir, { onProgress } = {}) {
   if (await napcatPresent(dir)) return { status: 'present', dir }
 
   const say = (text) => onProgress?.(text)
-  say('正在下载 NapCat（约 35 MB）…')
   await mkdir(dir, { recursive: true })
 
   const zip = join(tmpdir(), `dsh-napcat-${Date.now()}.zip`)
-  const response = await fetch(NAPCAT_ZIP, { redirect: 'follow' })
-  if (!response.ok || response.body === null) {
-    throw new Error(`下载失败：HTTP ${response.status}`)
+  const local = await findLocalZip(dir)
+  let source
+  if (local !== undefined) {
+    say(`用本地这份包，不联网：${local}`)
+    await copyFile(local, zip)
+    source = 'local'
+  } else {
+    source = await downloadNapcat(zip, say)
   }
-  const total = Number(response.headers.get('content-length') ?? 0)
-  const chunks = []
-  let got = 0
-  for await (const chunk of response.body) {
-    chunks.push(chunk)
-    got += chunk.length
-    if (total > 0) say(`正在下载 NapCat… ${Math.round((got / total) * 100)}%`)
-  }
-  await writeFile(zip, Buffer.concat(chunks))
+
   say('正在解压…')
   // 用系统自带的 Expand-Archive：不引依赖，Windows 上一定有。
   const unzip = await run('powershell.exe', [
@@ -244,7 +271,74 @@ export async function ensureNapcat(dir, { onProgress } = {}) {
   if (!(await napcatPresent(dir))) {
     throw new Error(`解压后没找到 napcat.mjs（${unzip.stderr.trim().slice(0, 200)}）`)
   }
-  return { status: 'installed', dir }
+  return { status: 'installed', dir, source }
+}
+
+/** 用户自己放好的包：环境变量指过去、或者放在目标目录 / 它的上一级。 */
+async function findLocalZip(dir) {
+  const custom = (process.env.DSH_NAPCAT_ZIP ?? '').trim()
+  const candidates = [
+    custom,
+    join(dir, 'NapCat.Shell.zip'),
+    join(dirname(dir), 'NapCat.Shell.zip'),
+  ].filter((row) => row !== '')
+  for (const file of candidates) {
+    if (await exists(file)) return file
+  }
+  return undefined
+}
+
+/**
+ * 依次试几个源，谁先给数据就用谁。
+ * 官方地址一直 404（上游删了 release）时也能自己报出原因，不会只留一个「下载失败」。
+ */
+async function downloadNapcat(zip, say) {
+  const reasons = []
+  for (const source of napcatSources()) {
+    if (!/^https?:/iu.test(source.url)) {
+      reasons.push(`${source.name}: 不是 http(s) 地址`)
+      continue
+    }
+    say(`正在下载 NapCat（约 35 MB）… 走 ${source.name}`)
+    try {
+      // 30 秒连不上就换下一个源，别让用户干等。
+      const response = await fetch(source.url, { redirect: 'follow', signal: AbortSignal.timeout(30_000) })
+      if (!response.ok || response.body === null) {
+        reasons.push(`${source.name}: HTTP ${response.status}`)
+        continue
+      }
+      const total = Number(response.headers.get('content-length') ?? 0)
+      const chunks = []
+      let got = 0
+      for await (const chunk of response.body) {
+        chunks.push(chunk)
+        got += chunk.length
+        if (total > 0) say(`正在下载 NapCat… ${Math.round((got / total) * 100)}%（${source.name}）`)
+      }
+      if (got < 5 * 1024 * 1024) {
+        reasons.push(`${source.name}: 只下到 ${Math.round(got / 1024)} KB，不完整`)
+        continue
+      }
+      await writeFile(zip, Buffer.concat(chunks))
+      return source.name
+    } catch (error) {
+      reasons.push(`${source.name}: ${short(error)}`)
+    }
+  }
+  const where = join(dirname(zip), 'NapCat.Shell.zip')
+  throw new Error([
+    '下载 NapCat 失败，几个源都没通（这台机器可能连不上 GitHub）：',
+    `- ${reasons.join('\n- ')}`,
+    '两条路，随便走一条再点一次「开始接通」：',
+    `1) 用浏览器下 ${NAPCAT_ASSET}`,
+    `2) 把 NapCat.Shell.zip 放到 NapCat 目录旁边，或者任意位置并用环境变量 DSH_NAPCAT_ZIP 指过去`,
+    `（临时目录：${where}）`,
+  ].join('\n'))
+}
+
+function short(error) {
+  const text = error instanceof Error ? error.message : String(error)
+  return text.split('\n')[0].slice(0, 120)
 }
 
 /** qqnt.json 里的版本必须和实际 QQ 一致，否则注入器静默跳过。 */

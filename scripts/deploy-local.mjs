@@ -59,7 +59,7 @@ async function main() {
   }
 
   // 2. 只同步运行时会用到的文件（styles.css 已内联，不必复制）
-  const files = ['client.js', 'index.js', 'package.json', 'cordis.patch.yml', 'README.md']
+  const files = ['client.js', 'index.js', 'napcat.js', 'package.json', 'cordis.patch.yml', 'README.md']
   let copied = 0
   let same = 0
   const mismatched = []

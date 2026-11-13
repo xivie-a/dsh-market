@@ -46,6 +46,7 @@ QQ 号，剩下的事市场自己做：
 
 1. 探测本机的 Windows QQ，版本高于 9.9.36 就直接说不支持（而不是装一半再失败）
 2. 找 NapCat：看门狗配过的目录优先，没有才下载 `NapCat.Shell.zip` 解压到 `%LOCALAPPDATA%\dsh-napcat`
+   - 上游 2026-11 已删掉全部 release（README 只剩「到这里告一段落」），所以指社区归档仓的 v4.18.42；下载时按「GitHub 直连 → gh-proxy → ghfast → ghproxy」依次重试，全都不通就提示手动下载，用户把 zip 放到目录里也能直接用（`DSH_NAPCAT_ZIP` 可以指定任意地址或本地路径）
 3. 把 `qqnt.json` 的版本对齐到实际 QQ —— 不对齐时注入会被静默跳过，这是最隐蔽的一个坑
 4. 写一个带 `NAPCAT_DISABLE_MULTI_PROCESS=1` 的 `launcher-dsh.bat`（多进程模式只会卡在 preload）
 5. 写 OneBot 配置（HTTP 3000 + 反向 WS 8643 + token）和 DSH 侧插件配置（token / botQQ / adminUsers）

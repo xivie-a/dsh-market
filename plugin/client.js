@@ -2112,11 +2112,11 @@ window.__ModuleLoader__.load({
           "kind": "app",
           "name": "NapCat.Shell 包（约 35 MB）",
           "why": {
-            "zh": "解压后以管理员身份运行 launcher.bat，它会把 NapCat 注入到上面那个 QQ 里。别用 OneKey 包里的旧启动器，那个会报 error code v2:-8。",
-            "en": "Unzip and run launcher.bat as administrator; it injects NapCat into the QQ above. Do not use the older OneKey boot loader — it fails with error code v2:-8."
+            "zh": "解压后以管理员身份运行 launcher.bat，它会把 NapCat 注入到上面那个 QQ 里。别用 OneKey 包里的旧启动器，那个会报 error code v2:-8。上游 NapCat 已经把 release 删了（README 只剩「到这里告一段落」），所以这里给的是社区归档的那一份；GitHub 直连慢的话，市场自己会在几个加速源之间换，也可以手动下好放到目录里。",
+            "en": "Unzip and run launcher.bat as administrator; it injects NapCat into the QQ above. Do not use the older OneKey boot loader — it fails with error code v2:-8. Upstream NapCat has deleted its releases, so this points at the community archive; the market retries through several mirrors when GitHub is slow, and you can also drop the zip in by hand."
           },
-          "download": "https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.zip",
-          "url": "https://github.com/NapNeko/NapCatQQ/releases"
+          "download": "https://github.com/XingYunStar/NapCatQQ/releases/download/v4.18.42/NapCat.Shell.zip",
+          "url": "https://github.com/XingYunStar/NapCatQQ/releases/tag/v4.18.42"
         },
         {
           "kind": "account",
@@ -2167,8 +2167,8 @@ window.__ModuleLoader__.load({
           "kind": "app",
           "name": "NapCat.Shell 包（约 35 MB）",
           "why": "解压后管理员运行 launcher.bat 注入；装完在「设置 → NapCat 桥」把目录填进去，看门狗才认得出。",
-          "download": "https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.zip",
-          "url": "https://github.com/NapNeko/NapCatQQ/releases"
+          "download": "https://github.com/XingYunStar/NapCatQQ/releases/download/v4.18.42/NapCat.Shell.zip",
+          "url": "https://github.com/XingYunStar/NapCatQQ/releases/tag/v4.18.42"
         },
         {
           "kind": "account",

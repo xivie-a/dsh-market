@@ -50,7 +50,9 @@ NapCat 4.18.42 的 QQ 版本适配表最高到 `9.9.36-53644`。**9.9.37 一定�
 
 ## 阶段 2：装 NapCat.Shell
 
-1. 下载 `https://github.com/NapNeko/NapCatQQ/releases/latest/download/NapCat.Shell.zip`（约 35 MB），解压到 `D:\NapCat`
+1. 下载 `https://github.com/XingYunStar/NapCatQQ/releases/download/v4.18.42/NapCat.Shell.zip`（约 35 MB），解压到 `D:\NapCat`
+   - 上游 `NapNeko/NapCatQQ` 在 2026-11 把 release 全删了（README 只剩「## Ending / 到这里告一段落」），原来的 `releases/latest/download/NapCat.Shell.zip` 现在必然 404，所以这里指社区归档仓的 v4.18.42 产物（和上游最后一版是同一份，35,967,555 字节）
+   - 国内直连 GitHub 不稳时，地址前面加 `https://gh-proxy.com/` 之类的加速前缀；市场里的「一键接通」会自动在几个源之间重试，也可以手动把 zip 放到目录里让它跳过下载
 2. 顶层应该有：`launcher.bat`、`qqnt.json`、`loadNapCat.js`、`napcat.mjs`、`NapCatWinBootMain.exe`、`NapCatWinBootHook.dll`
 3. **改 `qqnt.json`，把版本对齐到实际 QQ**：
 
