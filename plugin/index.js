@@ -17,7 +17,7 @@
  *   3. 全程留痕到 <profile>/.dsh-market/heal-report.json，出问题能查。
  */
 
-import { access, mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { access, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
 import { basename, dirname, isAbsolute, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -446,6 +446,77 @@ export async function prepareNapcat({
   return { ok: true, steps, state }
 }
 
+const PENDING_FILE = 'pending-setup.json'
+const PENDING_RESULT = 'pending-setup.result.json'
+
+function pendingPath(profileRoot, file) {
+  return join(profileRoot, '.dsh-market', file)
+}
+
+function digitsOf(value) {
+  return typeof value === 'string' ? value.replace(/\D/gu, '') : undefined
+}
+
+/**
+ * 记下「插件装完还要把 QQ 接通」这件事。
+ *
+ * 为什么要有这个文件：装插件必须重启 DSH，而市场这个弹窗会被重启吞掉。
+ * 把要做的事写在这里，重启后 host 自己续上，用户就不用回来再点一次。
+ */
+export async function writePendingSetup(profileRoot, payload) {
+  if (profileRoot === undefined) throw new Error('找不到 DSH 的 profile 目录')
+  const file = pendingPath(profileRoot, PENDING_FILE)
+  await mkdir(dirname(file), { recursive: true })
+  await writeFile(file, `${JSON.stringify({ at: new Date().toISOString(), ...payload }, null, 2)}\n`)
+  return file
+}
+
+export async function readPendingSetup(profileRoot) {
+  if (profileRoot === undefined) return undefined
+  const value = await readJson(pendingPath(profileRoot, PENDING_FILE))
+  return value === undefined ? undefined : value
+}
+
+export async function readPendingResult(profileRoot) {
+  if (profileRoot === undefined) return undefined
+  return readJson(pendingPath(profileRoot, PENDING_RESULT))
+}
+
+export async function clearPendingSetup(profileRoot) {
+  if (profileRoot === undefined) return
+  await rm(pendingPath(profileRoot, PENDING_FILE), { force: true })
+}
+
+/**
+ * 开机时把上次没做完的「顺便接通」续上：读标记 → 跑一遍 prepare → 结果落盘 → 删标记。
+ * 失败也落盘，用户下次打开连接弹窗能直接看到原因，而不是「上次好像什么都没发生」。
+ */
+export async function consumePendingSetup({ profileRoot, onProgress }) {
+  const pending = await readPendingSetup(profileRoot)
+  if (pending === undefined) return undefined
+  const finish = async (result) => {
+    const file = pendingPath(profileRoot, PENDING_RESULT)
+    await mkdir(dirname(file), { recursive: true })
+    await writeFile(file, `${JSON.stringify({ at: new Date().toISOString(), ...result }, null, 2)}\n`)
+    await clearPendingSetup(profileRoot)
+  }
+  try {
+    const result = await prepareNapcat({
+      profileRoot,
+      napcatDir: pending.napcatDir,
+      adminUser: digitsOf(pending.adminUser),
+      botQQ: digitsOf(pending.botQQ),
+      launch: pending.launch !== false,
+      onProgress,
+    })
+    await finish({ ok: result.ok, steps: result.steps, state: result.state })
+    return result
+  } catch (error) {
+    await finish({ ok: false, error: String(error?.message ?? error) })
+    throw error
+  }
+}
+
 /** 把四个入口挂到 DSH 自己的 webServer 上（和看门狗用同一块地方，不用另开端口）。 */
 export function registerNapcatRoutes(ctx) {
   const profileRoot = async () => {
@@ -499,6 +570,31 @@ export function registerNapcatRoutes(ctx) {
       sendJson(res, 200, { ok: false, error: String(error?.message ?? error) })
     }
   })
+
+  // 「装完顺便接通」：POST 记下来（重启后自动跑），GET 看上次跑成什么样。
+  route('/pending', async (req, res) => {
+    const root = await profileRoot()
+    if (req.method === 'POST' || req.method === 'DELETE') {
+      const body = req.method === 'POST' ? await readBody(req) : {}
+      if (req.method === 'DELETE' || body.clear === true) {
+        await clearPendingSetup(root)
+        sendJson(res, 200, { ok: true })
+        return
+      }
+      const file = await writePendingSetup(root, {
+        botQQ: digitsOf(body.botQQ),
+        adminUser: digitsOf(body.adminUser),
+        napcatDir: typeof body.napcatDir === 'string' && body.napcatDir !== '' ? body.napcatDir : undefined,
+      })
+      sendJson(res, 200, { ok: true, file })
+      return
+    }
+    sendJson(res, 200, {
+      ok: true,
+      pending: (await readPendingSetup(root)) ?? null,
+      result: (await readPendingResult(root)) ?? null,
+    })
+  })
 }
 
 export function apply(ctx, config = {}) {
@@ -536,6 +632,22 @@ export function apply(ctx, config = {}) {
   // 白名单是空的就等于什么都不做，所以这个巡检默认不花钱；审核过新条目才真正动起来。
   const timer = setInterval(() => void healSafely(), 30_000)
   ctx.on?.('dispose', () => clearInterval(timer))
+
+  // 「套装里勾了顺便接通」留下的标记：开机后自己续上，用户不用回来再点一次。
+  // 延后几秒再跑，别和开机抢资源（可能要下 35 MB、还要拉起 QQ）。
+  const resumeSetup = () => Promise.resolve()
+    .then(async () => {
+      const root = await findProfileNodeModules(ctx)
+      if (root === undefined) return undefined
+      const result = await consumePendingSetup({ profileRoot: dirname(root) })
+      if (result !== undefined) {
+        logger?.info?.(`dsh-market-xivie: 上次留的「顺便接通」已自动跑完（${result.ok ? '成功' : '有失败步骤'}）`)
+      }
+      return result
+    })
+    .catch(warn('续上「顺便接通」失败'))
+  const resumeTimer = setTimeout(() => void resumeSetup(), 5_000)
+  ctx.on?.('dispose', () => clearTimeout(resumeTimer))
 
   // 市场服务由实验性的「自定义插件市场」组合包提供，可能还没就绪，所以用 inject 等它。
   ctx.inject(['pluginMarket'], (scope) => {

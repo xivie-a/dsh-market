@@ -168,6 +168,35 @@ const HARNESS = String.raw`
     }
   }
 
+  // 装完顺便接通：?pending=ok|fail 让「连接」弹窗显示上次自动跑完的结果
+  const pendingState = previewParams.get('pending')
+  if (pendingState !== null) {
+    const before3 = window.fetch
+    const json3 = (body) => Promise.resolve(new Response(JSON.stringify(body), {
+      status: 200, headers: { 'content-type': 'application/json' }
+    }))
+    window.fetch = (input, init) => {
+      const url = String(input)
+      if (!url.includes('/dsh-market/napcat/pending')) return before3(input, init)
+      if (String(init?.method ?? 'GET').toUpperCase() !== 'GET') return json3({ ok: true })
+      return json3({
+        ok: true,
+        pending: null,
+        result: pendingState === 'fail'
+          ? {
+              ok: false,
+              error: '下载 NapCat 失败，几个源都没通（这台机器可能连不上 GitHub）',
+              steps: [{ status: 'fail', text: '下载 NapCat 失败，几个源都没通' }]
+            }
+          : {
+              ok: true,
+              steps: [{ status: 'ok', text: '找到 QQ 9.9.36-53644（D:\\网站下载）' }],
+              state: { qq: { version: '9.9.36-53644' } }
+            }
+      })
+    }
+  }
+
   // B站登录：?biliState=idle|scan|password|ready|missing 模拟 /api/bilibili/*
   const biliState = previewParams.get('biliState')
   if (biliState !== null) {

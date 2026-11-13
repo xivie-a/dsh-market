@@ -18,6 +18,7 @@ const expect = [
   'exact /dsh-market/napcat/state',
   'exact /dsh-market/napcat/prepare',
   'exact /dsh-market/napcat/launch',
+  'exact /dsh-market/napcat/pending',
 ]
 for (const want of expect) {
   if (!paths.includes(want)) throw new Error(`少了路由: ${want}`)

@@ -53,6 +53,12 @@ window.__ModuleLoader__.load({
       installAll: '全部获取',
       suiteInstalling: '正在获取…',
       suiteDone: '套装已处理完，重启 DSH 生效',
+      suiteConnect: '装完顺便接通 QQ',
+      suiteBotQQPlaceholder: '机器人 QQ 号',
+      suiteAdminPlaceholder: '你自己的 QQ 号（管理员）',
+      suiteConnectHint: '装好后重启一次 DSH，回来自动下载配置 NapCat 并把二维码放在这，你只要扫码。',
+      suitePending: '插件装好了。重启一次 DSH，回来自动接通 QQ——你只要扫码。',
+      suitePendingFail: '插件装好了，但没记下「顺便接通」——回市场点「连接 → 一键接通」也一样。',
       pending: '待获取',
       failed: '失败',
       working: '处理中…',
@@ -144,6 +150,8 @@ window.__ModuleLoader__.load({
       connOffline: '没连上',
       connNotRunning: 'NapCat 桥没在跑',
       connQrWait: '二维码还没出来',
+      connResumeOk: '上次留的「顺便接通」已经自动跑完了',
+      connResumeFail: '上次的「顺便接通」没跑通',
       connRepull: '重新拉起',
       connOpenPage: '打开扫码页',
       connRefresh: '刷新状态',
@@ -242,6 +250,12 @@ window.__ModuleLoader__.load({
       installAll: 'Get all',
       suiteInstalling: 'Getting…',
       suiteDone: 'Bundle finished. Restart DSH to apply.',
+      suiteConnect: 'Also connect QQ after installing',
+      suiteBotQQPlaceholder: 'Bot QQ number',
+      suiteAdminPlaceholder: 'Your QQ number (admin)',
+      suiteConnectHint: 'Restart DSH once; it then sets up NapCat by itself and leaves the QR here — you only scan.',
+      suitePending: 'Plugins installed. Restart DSH once — QQ gets connected automatically, you only scan.',
+      suitePendingFail: 'Plugins installed, but the auto-connect could not be queued — use Connect → one-click setup instead.',
       pending: 'Pending',
       failed: 'Failed',
       working: 'Working…',
@@ -333,6 +347,8 @@ window.__ModuleLoader__.load({
       connOffline: 'Not connected',
       connNotRunning: 'NapCat bridge is not running',
       connQrWait: 'No QR code yet',
+      connResumeOk: 'The auto-connect you queued last time already ran',
+      connResumeFail: 'The auto-connect you queued last time did not finish',
       connRepull: 'Restart',
       connOpenPage: 'Open QR page',
       connRefresh: 'Refresh',
@@ -1560,6 +1576,28 @@ window.__ModuleLoader__.load({
 .dm-setup-steps li[data-state="ok"] .dm-setup-mark { color: #2f7d4f; }
 .dm-setup-steps li[data-state="fail"] { color: #a33a34; }
 .dm-setup-steps li[data-state="fail"] .dm-setup-mark { color: #a33a34; }
+/* 套装里勾「顺便接通」：两个号 + 一句说明，装完重启就能自动跑 */
+.dm-suite-connect {
+  margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--line, #dcdcd6); background: rgba(255, 255, 255, .55);
+}
+.dm-suite-connect-head {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; font-weight: 700; color: inherit; cursor: pointer;
+}
+.dm-suite-connect-head input { width: 15px; height: 15px; accent-color: #2c6e49; }
+.dm-suite-connect-fields { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.dm-suite-connect-fields .dm-setup-input { flex: 1 1 150px; }
+.dm-suite-connect-hint {
+  flex: 1 1 100%; margin: 0; font-size: 11.5px; line-height: 1.7; color: #6f6f69;
+}
+/* 上次留的「顺便接通」，重启后 host 自己跑完了，结果摆在这里 */
+.dm-conn-resume {
+  margin: 10px 0 0; padding: 10px 12px; border-radius: 10px;
+  font-size: 11.5px; line-height: 1.65;
+}
+.dm-conn-resume.is-ok { background: rgba(47, 125, 79, .12); color: #2f6b46; }
+.dm-conn-resume.is-bad { background: rgba(163, 58, 52, .12); color: #8a3a34; }
 .dm-setup-qr { display: flex; align-items: center; gap: 12px; }
 .dm-setup-qr img {
   width: 128px; height: 128px; border-radius: 10px;
@@ -2805,6 +2843,35 @@ window.__ModuleLoader__.load({
 
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
+    /** 「装完顺便接通」：把要做的事写进 profile，重启后 host 自己续上。 */
+    async function queueSetup(body) {
+      try {
+        const response = await fetch(`${SETUP_API}/pending`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body ?? {}),
+          signal: AbortSignal.timeout(15_000)
+        })
+        return response.ok
+      } catch {
+        return false
+      }
+    }
+
+    async function readPending() {
+      try {
+        const response = await fetch(`${SETUP_API}/pending?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { accept: 'application/json' },
+          signal: AbortSignal.timeout(10_000)
+        })
+        if (!response.ok) return undefined
+        return await response.json()
+      } catch {
+        return undefined
+      }
+    }
+
     /* ── B站登录 ──────────────────────────────────────────────────
        @seiuna/dsh-bilibili-plugin 把登录入口放在会话标题栏，有的版本挂不上。
        它自己的 HTTP API 就挂在同源 /api/bilibili 下，所以在市场里也能直接走完扫码。 */
@@ -3021,6 +3088,10 @@ window.__ModuleLoader__.load({
       const [suiteJobs, setSuiteJobs] = React.useState({})
       const [suiteRunning, setSuiteRunning] = React.useState(false)
       const [suitePicked, setSuitePicked] = React.useState(new Set())
+      // 套装里勾「装完顺便接通」：装完插件写一个标记，重启后 host 自己把 NapCat 那套续上
+      const [suiteConnect, setSuiteConnect] = React.useState(true)
+      const [suiteBotQQ, setSuiteBotQQ] = React.useState('')
+      const [suiteAdmin, setSuiteAdmin] = React.useState('')
       const [favs, setFavs] = React.useState(readFavs)
       const [favOnly, setFavOnly] = React.useState(false)
       // 安装前要准备的东西（NapCat / QQ / B站账号…），远端优先，内置兜底
@@ -3277,6 +3348,19 @@ window.__ModuleLoader__.load({
 
       const hasNapcat = bundles.has(CONNECT_BUNDLE)
       const hasConnector = hasNapcat || biliInstalled
+
+      // 「装完顺便接通」的结果：重启后 host 自己跑完了，回来第一次打开连接弹窗时告诉用户
+      const [resume, setResume] = React.useState(undefined)
+      React.useEffect(() => {
+        if (!connectOpen || resume !== undefined) return undefined
+        let alive = true
+        void readPending().then((value) => {
+          if (alive && value?.result !== undefined && value?.result !== null) setResume(value.result)
+        })
+        return () => {
+          alive = false
+        }
+      }, [connectOpen])
 
       // NapCat 桥的状态：面板开着时 3 秒一刷，平时 15 秒；页面在后台就跳过
       React.useEffect(() => {
@@ -3895,7 +3979,15 @@ window.__ModuleLoader__.load({
         }
         setSuiteRunning(false)
         await load()
-        setNotice({ kind: 'ok', text: t('suiteDone') })
+        // 勾了「顺便接通」就留个标记：重启后 host 自己把 NapCat 那套跑完，
+        // 用户回来只要扫码，不用再从头点一遍。
+        const wantsQq = suiteConnect && list.some((item) => item.name === 'dsh-onebot-qq')
+        if (wantsQq) {
+          const queued = await queueSetup({ botQQ: suiteBotQQ.trim(), adminUser: suiteAdmin.trim() })
+          setNotice({ kind: queued ? 'ok' : 'error', text: queued ? t('suitePending') : t('suitePendingFail') })
+        } else {
+          setNotice({ kind: 'ok', text: t('suiteDone') })
+        }
       }
 
       const suiteSection = suites.length === 0 ? null : h('section', { className: 'dm-section dm-suites' },
@@ -4321,6 +4413,39 @@ window.__ModuleLoader__.load({
                     h('span', null, `${items.length} ${t('plugins')}`),
                     h('span', null, `${items.filter((item) => item.required).length} ${t('required')}`),
                     h('span', null, `${doneCount} ${t('added')}`)),
+                  items.some((item) => item.name === 'dsh-onebot-qq')
+                    ? h('div', { className: 'dm-suite-connect' },
+                      h('label', { className: 'dm-suite-connect-head' },
+                        h('input', {
+                          type: 'checkbox',
+                          checked: suiteConnect,
+                          disabled: suiteRunning,
+                          onChange: () => setSuiteConnect((value) => !value)
+                        }),
+                        h('span', null, t('suiteConnect'))),
+                      suiteConnect
+                        ? h('div', { className: 'dm-suite-connect-fields' },
+                          h('input', {
+                            className: 'dm-setup-input',
+                            type: 'text',
+                            inputMode: 'numeric',
+                            placeholder: t('suiteBotQQPlaceholder'),
+                            value: suiteBotQQ,
+                            disabled: suiteRunning,
+                            onChange: (event) => setSuiteBotQQ(event.target.value)
+                          }),
+                          h('input', {
+                            className: 'dm-setup-input',
+                            type: 'text',
+                            inputMode: 'numeric',
+                            placeholder: t('suiteAdminPlaceholder'),
+                            value: suiteAdmin,
+                            disabled: suiteRunning,
+                            onChange: (event) => setSuiteAdmin(event.target.value)
+                          }),
+                          h('p', { className: 'dm-suite-connect-hint' }, t('suiteConnectHint')))
+                        : null)
+                    : null,
                   h('div', { className: 'dm-suite-actions' },
                     h('button', {
                       className: 'dm-btn dm-btn--primary',
@@ -4476,6 +4601,13 @@ window.__ModuleLoader__.load({
                   h('div', { className: `dm-conn-pill${online ? ' is-on' : ready ? ' is-warn' : ' is-off'}` },
                     h('span', { className: 'dm-conn-dot' }), label),
                   h('p', { className: 'dm-conn-lead' }, t('connectIntro')),
+                  // 重启后 host 已经自动跑过一遍「顺便接通」，结果直接摆在这里
+                  resume === undefined ? null : h('div', {
+                    className: `dm-conn-resume${resume.ok === true ? ' is-ok' : ' is-bad'}`
+                  },
+                  resume.ok === true
+                    ? `✓ ${t('connResumeOk')}`
+                    : `! ${t('connResumeFail')}：${String(resume.error ?? (resume.steps ?? []).find((row) => row.status === 'fail')?.text ?? '')}`),
                   online
                     ? h('p', { className: 'dm-conn-ok' }, t('connQrTip'))
                     : setupOpen

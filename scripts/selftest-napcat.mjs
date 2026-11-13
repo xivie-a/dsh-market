@@ -129,6 +129,21 @@ await check('cordis.patch.yml：空文件也能写出合法数组', async () => 
   assert.match(after, /adminUsers: \[\]/)
 })
 
+await check('「装完顺便接通」的标记：写入 / 读回 / 清掉', async () => {
+  const profileRoot = await mkdtemp(join(tmpdir(), 'dsh-profile-'))
+  const { writePendingSetup, readPendingSetup, readPendingResult, clearPendingSetup } = await import('../plugin/index.js')
+  const file = await writePendingSetup(profileRoot, { botQQ: '10001', adminUser: '10002', napcatDir: 'D:\\NapCat' })
+  assert.match(file, /pending-setup\.json$/u)
+  const back = await readPendingSetup(profileRoot)
+  assert.equal(back.botQQ, '10001')
+  assert.equal(back.adminUser, '10002')
+  assert.equal(back.napcatDir, 'D:\\NapCat')
+  assert.equal(await readPendingResult(profileRoot), undefined)
+  await clearPendingSetup(profileRoot)
+  assert.equal(await readPendingSetup(profileRoot), undefined)
+  await rm(profileRoot, { recursive: true, force: true })
+})
+
 await check('prepare 演练：用临时 profile 跑一遍，不下载、不拉起', async () => {
   const { existsSync } = await import('node:fs')
   const napcatDir = 'D:\\NapCat'

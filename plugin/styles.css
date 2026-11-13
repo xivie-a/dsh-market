@@ -1162,6 +1162,28 @@
 .dm-setup-steps li[data-state="ok"] .dm-setup-mark { color: #2f7d4f; }
 .dm-setup-steps li[data-state="fail"] { color: #a33a34; }
 .dm-setup-steps li[data-state="fail"] .dm-setup-mark { color: #a33a34; }
+/* 套装里勾「顺便接通」：两个号 + 一句说明，装完重启就能自动跑 */
+.dm-suite-connect {
+  margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--line, #dcdcd6); background: rgba(255, 255, 255, .55);
+}
+.dm-suite-connect-head {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; font-weight: 700; color: inherit; cursor: pointer;
+}
+.dm-suite-connect-head input { width: 15px; height: 15px; accent-color: #2c6e49; }
+.dm-suite-connect-fields { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.dm-suite-connect-fields .dm-setup-input { flex: 1 1 150px; }
+.dm-suite-connect-hint {
+  flex: 1 1 100%; margin: 0; font-size: 11.5px; line-height: 1.7; color: #6f6f69;
+}
+/* 上次留的「顺便接通」，重启后 host 自己跑完了，结果摆在这里 */
+.dm-conn-resume {
+  margin: 10px 0 0; padding: 10px 12px; border-radius: 10px;
+  font-size: 11.5px; line-height: 1.65;
+}
+.dm-conn-resume.is-ok { background: rgba(47, 125, 79, .12); color: #2f6b46; }
+.dm-conn-resume.is-bad { background: rgba(163, 58, 52, .12); color: #8a3a34; }
 .dm-setup-qr { display: flex; align-items: center; gap: 12px; }
 .dm-setup-qr img {
   width: 128px; height: 128px; border-radius: 10px;
