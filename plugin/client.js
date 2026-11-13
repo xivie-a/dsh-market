@@ -2855,7 +2855,19 @@ window.__ModuleLoader__.load({
           body: JSON.stringify(body),
           signal: AbortSignal.timeout(600_000)
         })
-        if (!response.ok) return { ok: false, steps: [{ status: 'fail', text: `市场接口返回 ${response.status}` }] }
+        if (!response.ok) {
+          let hint = ''
+          try {
+            const payload = await response.json()
+            hint = String(payload?.error ?? payload?.steps?.[0]?.text ?? '')
+          } catch {
+            // 不是 JSON 就算了
+          }
+          return {
+            ok: false,
+            steps: [{ status: 'fail', text: hint === '' ? `市场接口返回 ${response.status}` : hint }]
+          }
+        }
         return await response.json()
       } catch (error) {
         return { ok: false, steps: [{ status: 'fail', text: `连不上市场自己的接口：${error?.message ?? error}` }] }

@@ -420,18 +420,26 @@ export async function prepareNapcat({
   }
 
   if (profileRoot !== undefined) {
-    await napcat.writeDshOnebot(profileRoot, {
-      token,
-      botQQ: typeof botQQ === 'string' ? botQQ : '',
-      adminUsers: typeof adminUser === 'string' && adminUser !== '' ? [adminUser] : [],
-    })
-    step('ok', 'DSH 侧插件配置已写：accessToken / botQQ / adminUsers / dmPolicy')
+    try {
+      await napcat.writeDshOnebot(profileRoot, {
+        token,
+        botQQ: typeof botQQ === 'string' ? botQQ : '',
+        adminUsers: typeof adminUser === 'string' && adminUser !== '' ? [adminUser] : [],
+      })
+      step('ok', 'DSH 侧插件配置已写：accessToken / botQQ / adminUsers / dmPolicy')
+    } catch (error) {
+      step('fail', `写 DSH 侧插件配置失败：${error?.message ?? error}`)
+    }
   } else {
     step('run', '没定位到当前 profile，跳过 DSH 侧配置')
   }
 
-  await napcat.writeKeeperConfig({ dir, token })
-  step('ok', '看门狗配置已写：目录、启动脚本、token，并打开了开关')
+  try {
+    await napcat.writeKeeperConfig({ dir, token })
+    step('ok', '看门狗配置已写：目录、启动脚本、token，并打开了开关')
+  } catch (error) {
+    step('fail', `写看门狗配置失败：${error?.message ?? error}`)
+  }
 
   if (launch) {
     try {
@@ -533,7 +541,20 @@ export function registerNapcatRoutes(ctx) {
           try {
             await handler(req, res)
           } catch (error) {
-            sendJson(res, 500, { ok: false, error: String(error?.message ?? error) })
+            // 别只回一个 500——用户看不懂，我们也查不到。落一份栈，回一份人话。
+            const text = String(error?.message ?? error)
+            try {
+              const { appendFile } = await import('node:fs/promises')
+              const { join } = await import('node:path')
+              const { tmpdir } = await import('node:os')
+              const file = join(tmpdir(), 'dsh-market-napcat-error.log')
+              await appendFile(file, `\n[${new Date().toISOString()}] ${suffix}\n${String(error?.stack ?? text)}\n`, 'utf8')
+            } catch {
+              // 记日志失败不掩盖原始错误
+            }
+            if (!res.headersSent) {
+              sendJson(res, 200, { ok: false, error: text, steps: [{ status: 'fail', text: `市场内部出错：${text}` }] })
+            }
           }
         },
       }),
