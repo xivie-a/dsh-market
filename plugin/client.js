@@ -56,7 +56,9 @@ window.__ModuleLoader__.load({
       suiteConnect: '装完顺便接通 QQ',
       suiteBotQQPlaceholder: '机器人 QQ 号',
       suiteAdminPlaceholder: '你自己的 QQ 号（管理员）',
-      suiteConnectHint: '装好后重启一次 DSH，回来自动下载配置 NapCat 并把二维码放在这，你只要扫码。',
+      suiteConnectHint: '勾了：重启一次之后市场自己下载 NapCat、写好配置，二维码直接放这，你只扫码。',
+      suiteAutoNote: '这两个下载不用点。勾了「装完顺便接通」之后，重启回来市场自己下、自己对版本。',
+      suiteConnectOff: '不勾也能装，只是装完你得自己去右上角「连接」里点一键接通。勾了才会自动下 NapCat。',
       suitePending: '插件装好了。重启一次 DSH，回来自动接通 QQ——你只要扫码。',
       suitePendingFail: '插件装好了，但没记下「顺便接通」——回市场点「连接 → 一键接通」也一样。',
       pending: '待获取',
@@ -253,7 +255,9 @@ window.__ModuleLoader__.load({
       suiteConnect: 'Also connect QQ after installing',
       suiteBotQQPlaceholder: 'Bot QQ number',
       suiteAdminPlaceholder: 'Your QQ number (admin)',
-      suiteConnectHint: 'Restart DSH once; it then sets up NapCat by itself and leaves the QR here — you only scan.',
+      suiteConnectHint: 'Ticked means: after one restart the market downloads NapCat, writes the config and puts the QR right here — you only scan.',
+      suiteAutoNote: 'Do not click those downloads. With the box ticked the market fetches it and matches the version itself after the restart.',
+      suiteConnectOff: 'Installing works without it — you would then use Connect in the top-right to set QQ up by hand. Only ticking it makes the market download NapCat for you.',
       suitePending: 'Plugins installed. Restart DSH once — QQ gets connected automatically, you only scan.',
       suitePendingFail: 'Plugins installed, but the auto-connect could not be queued — use Connect → one-click setup instead.',
       pending: 'Pending',
@@ -1414,6 +1418,11 @@ window.__ModuleLoader__.load({
   text-decoration: underline; text-underline-offset: 2px;
 }
 .dm-need-alt:hover { color: var(--accent) !important; }
+.dm-need-auto {
+  margin: 3px 0 0;
+  font-size: 11px; line-height: 1.6;
+  color: color-mix(in srgb, var(--accent) 78%, var(--muted));
+}
 .dm-suite-warn {
   margin-top: 2px; padding: 8px 10px;
   border-radius: 9px;
@@ -3089,7 +3098,8 @@ window.__ModuleLoader__.load({
       const [suiteRunning, setSuiteRunning] = React.useState(false)
       const [suitePicked, setSuitePicked] = React.useState(new Set())
       // 套装里勾「装完顺便接通」：装完插件写一个标记，重启后 host 自己把 NapCat 那套续上
-      const [suiteConnect, setSuiteConnect] = React.useState(true)
+      // 默认不勾——自动下载 35MB 并在后台改配置，得是用户自己按下去的
+      const [suiteConnect, setSuiteConnect] = React.useState(false)
       const [suiteBotQQ, setSuiteBotQQ] = React.useState('')
       const [suiteAdmin, setSuiteAdmin] = React.useState('')
       const [favs, setFavs] = React.useState(readFavs)
@@ -3565,7 +3575,13 @@ window.__ModuleLoader__.load({
         }
       }
       /** 一条「还缺什么」：软件类带勾选框和下载按钮。 */
-      const needRow = (entry, need, index, key) => h('div', { className: 'dm-suite-need', key }, 
+      const needRow = (entry, need, index, key) => {
+        // 勾了「装完顺便接通」之后，这几条下载链接就没用了——市场会自己下，
+        // 留着反而让人以为要手动点，还会把浏览器弹开。
+        const autoHandled = suiteConnect && entry.name === 'dsh-onebot-qq' && need.download !== undefined
+        // 提示只写一次，挂在 NapCat 那条上
+        const autoNote = autoHandled && /napcat/i.test(String(need.name ?? ''))
+        return h('div', { className: 'dm-suite-need', key }, 
         (need.kind ?? 'app') !== 'app' ? null : h('input', {
           type: 'checkbox',
           className: 'dm-need-check',
@@ -3578,18 +3594,20 @@ window.__ModuleLoader__.load({
         h('div', { className: 'dm-suite-need-body' },
           h('strong', null, need.name),
           need.why === undefined ? null : h('p', null, need.why),
-          need.download === undefined || need.url === undefined ? null : h('a', {
+          autoNote ? h('p', { className: 'dm-need-auto' }, t('suiteAutoNote')) : null,
+          autoHandled ? null : need.download === undefined || need.url === undefined ? null : h('a', {
             className: 'dm-gate-link dm-need-alt',
             href: need.url,
             target: '_blank',
             rel: 'noreferrer noopener'
           }, `${t('releasePage')} ↗`)),
-        need.url === undefined && need.download === undefined ? null : h('a', {
+        autoHandled ? null : need.url === undefined && need.download === undefined ? null : h('a', {
           className: 'dm-gate-link dm-need-dl',
           href: need.download ?? need.url,
           target: '_blank',
           rel: 'noreferrer noopener'
         }, `${need.download === undefined ? t('needsOpen') : t('download')} ↗`))
+      }
 
       async function install(entry, versionOverride) {
         if (askFirst(gateRowsFor([entry]), () => void install(entry, versionOverride))) return
@@ -4444,7 +4462,7 @@ window.__ModuleLoader__.load({
                             onChange: (event) => setSuiteAdmin(event.target.value)
                           }),
                           h('p', { className: 'dm-suite-connect-hint' }, t('suiteConnectHint')))
-                        : null)
+                        : h('p', { className: 'dm-suite-connect-hint' }, t('suiteConnectOff')))
                     : null,
                   h('div', { className: 'dm-suite-actions' },
                     h('button', {

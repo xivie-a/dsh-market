@@ -356,6 +356,12 @@ const HARNESS = String.raw`
       document.querySelectorAll('.dm-suite-card')[Number(params.get('suite')) || 0]?.click()
     }, 600)
   }
+  // ?suite=0&connect=1 打开套装后再勾上「装完顺便接通」，截带勾选态的样子
+  if (params.has('connect')) {
+    setTimeout(() => {
+      document.querySelector('.dm-suite-connect-head input')?.click()
+    }, 1200)
+  }
   // ?suite=0&apply=1 打开套装后再点「安装所选」，用来看队列状态
   if (params.has('apply')) {
     setTimeout(() => {

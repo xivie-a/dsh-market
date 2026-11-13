@@ -1000,6 +1000,11 @@
   text-decoration: underline; text-underline-offset: 2px;
 }
 .dm-need-alt:hover { color: var(--accent) !important; }
+.dm-need-auto {
+  margin: 3px 0 0;
+  font-size: 11px; line-height: 1.6;
+  color: color-mix(in srgb, var(--accent) 78%, var(--muted));
+}
 .dm-suite-warn {
   margin-top: 2px; padding: 8px 10px;
   border-radius: 9px;
