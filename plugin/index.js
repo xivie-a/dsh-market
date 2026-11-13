@@ -353,11 +353,22 @@ function sendJson(res, status, payload) {
 }
 
 async function readBody(req) {
+  // 有的宿主会先把 body 解析好挂在 req.body 上，流就空了；两种都认。
+  if (req.body !== undefined && req.body !== null && typeof req.body === 'object') return req.body
   const chunks = []
-  for await (const chunk of req) chunks.push(chunk)
-  if (chunks.length === 0) return {}
   try {
-    const parsed = JSON.parse(Buffer.concat(chunks).toString('utf8'))
+    for await (const chunk of req) chunks.push(chunk)
+  } catch {
+    // 流已经被别人读走了，按空 body 处理，别把 500 抛给用户
+    return typeof req.body === 'string' ? parseJson(req.body) : {}
+  }
+  if (chunks.length === 0) return typeof req.body === 'string' ? parseJson(req.body) : {}
+  return parseJson(Buffer.concat(chunks).toString('utf8'))
+}
+
+function parseJson(text) {
+  try {
+    const parsed = JSON.parse(text)
     return parsed !== null && typeof parsed === 'object' ? parsed : {}
   } catch {
     return {}
@@ -571,12 +582,15 @@ export function registerNapcatRoutes(ctx) {
 
   route('/prepare', async (req, res) => {
     const body = await readBody(req)
+    // body 读不到时用 ?napcatDir= 兜一下，别让用户白等一轮
+    const query = new URL(String(req.url ?? ''), 'http://localhost').searchParams
+    const pick = (key) => (typeof body[key] === 'string' && body[key] !== '' ? body[key] : query.get(key) ?? undefined)
     const result = await prepareNapcat({
       profileRoot: await profileRoot(),
-      napcatDir: typeof body.napcatDir === 'string' ? body.napcatDir : undefined,
-      adminUser: typeof body.adminUser === 'string' ? body.adminUser.replace(/\D/gu, '') : undefined,
-      botQQ: typeof body.botQQ === 'string' ? body.botQQ.replace(/\D/gu, '') : undefined,
-      token: typeof body.token === 'string' && body.token !== '' ? body.token : undefined,
+      napcatDir: pick('napcatDir'),
+      adminUser: digitsOf(pick('adminUser')),
+      botQQ: digitsOf(pick('botQQ')),
+      token: typeof body.token === 'string' && body.token !== '' ? body.token : query.get('token') ?? undefined,
       launch: body.launch !== false,
     })
     sendJson(res, 200, { ...result, online: await napcat.online() })
