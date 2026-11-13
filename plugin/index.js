@@ -79,12 +79,28 @@ function besideNodeModules() {
 }
 
 /**
+ * 小心地读 `ctx.baseDir`：它是注入型属性，没声明 inject 时读一下就会抛
+ * 「cannot get property "baseDir" without inject」。读不到就当没有。
+ */
+function readBaseDir(ctx) {
+  try {
+    const value = ctx?.baseDir
+    return typeof value === 'string' && value !== '' ? value : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
  * `file:` 依赖装进来是软链，import.meta.url 会指回仓库目录，上面那招就失效了。
  * 这时去 ~/.dsh/profiles 里找真正装着自己的那份 node_modules。
  */
 async function findProfileNodeModules(ctx) {
   const roots = []
-  if (typeof ctx?.baseDir === 'string' && ctx.baseDir !== '') roots.push(join(ctx.baseDir, 'node_modules'))
+  // ctx.baseDir 是注入型属性：没在 inject 列表里就取会直接抛
+  // 「cannot get property "baseDir" without inject」，所以只能探一下。
+  const baseDir = readBaseDir(ctx)
+  if (baseDir !== undefined) roots.push(join(baseDir, 'node_modules'))
   const direct = besideNodeModules()
   if (direct !== undefined) roots.push(direct)
 

@@ -43,4 +43,28 @@ console.log('state:', JSON.stringify({
   hasQr: Boolean(body.qr?.dataUrl),
 }))
 if (body.ok !== true) throw new Error('state 返回不 ok')
+
+// ctx.baseDir 在没 inject 的时候读一下就会抛，这条就是当初 500 的真凶。
+// 换成会抛的 ctx 再跑一次 pending，必须还是 200 + ok:false 而不是炸掉。
+const strict = []
+const strictCtx = {
+  webServer: { register(route) { strict.push(route); return () => {} } },
+  effect(fn) { fn() },
+  logger: () => ({ info() {}, warn() {}, error() {} }),
+  get baseDir() { throw new Error('cannot get property "baseDir" without inject') },
+}
+registerNapcatRoutes(strictCtx)
+const pending = strict.find((route) => route.path === '/dsh-market/napcat/pending')
+const strictCaptured = { statusCode: 0, body: '' }
+const strictRes = {
+  set statusCode(value) { strictCaptured.statusCode = value },
+  get statusCode() { return strictCaptured.statusCode },
+  setHeader() {},
+  end(chunk) { strictCaptured.body += String(chunk ?? '') },
+}
+await pending.handler({ method: 'GET', url: '/dsh-market/napcat/pending', headers: {} }, strictRes)
+const pendingBody = JSON.parse(strictCaptured.body || '{}')
+console.log('baseDir 会抛时的 pending:', strictCaptured.statusCode, JSON.stringify({ ok: pendingBody.ok, error: pendingBody.error }))
+if (strictCaptured.statusCode !== 200) throw new Error('baseDir 抛异常时接口不该失败')
+
 console.log('路由冒烟通过。')
